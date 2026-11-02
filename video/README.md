@@ -47,7 +47,10 @@ npm run render                                       # 渲染成片 → out/EP01
 2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），然后重跑 `python tools/tts.py`；
 3. **QA 铁律：先 still 后 render，出片后必自查**——改动先渲单帧检查；全片渲染前有联系表记录；**出片 ≠ 完成**：每镜抽首/中/尾 3 帧拼联系表 + 头中尾抽听（有声/同步），发现即修即重渲复验，问题清零才勾脚本附录 D（SOP §8）；
 4. **音频槽位**：时长永远由音频驱动；禁止在组件里写死场景秒数；
-5. `out/`、`public/audio/` 不进 git（已 ignore）；本目录源码即全部制作资产。
+5. **动画锚点按台词字位计算，禁止等间隔拍脑袋**——台词里找关键词的字符位置除以总字数得进度锚点：
+   `python -c "s=json.load(open('public/episodes/EP01.json',encoding='utf-8'))[i]['subtitle']; print(s.find('关键词')/len(s))"`
+   （教训：3.2 决策树、5.1 警告卡均因拍脑袋锚点音画错位最高 9 秒，2026-11-02 修）；
+6. `out/`、`public/audio/` 不进 git（已 ignore）；本目录源码即全部制作资产。
 
 ## 现状与全量化待办（PoC → 正片引擎）
 

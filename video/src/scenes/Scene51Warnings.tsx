@@ -8,6 +8,7 @@ import { useAnchors, type SceneProps } from "../scene-kit";
  * 三张警告卡逐张点亮（全局变量 / 状态炸弹 / 难测试）→ 正解：依赖注入 → 工具类小卡；
  * 尾段画面渐暗蓄力，为片尾金句让位
  */
+/** 锚点 = 台词字位（5.1 台词共 324 字）：第一 0.077 / 第二 0.327 / 第三 0.593 / 正解 0.719 / 工具类 0.917 */
 const WARNINGS = [
   {
     icon: "🌍",
@@ -17,8 +18,8 @@ const WARNINGS = [
       "依赖不体现在方法签名里，藏进代码暗处",
       "今天爽，三个月后重构时给你一刀",
     ],
-    p: 0.07,
-    active: [0.07, 0.24],
+    p: 0.077,
+    active: [0.077, 0.327],
   },
   {
     icon: "💣",
@@ -28,23 +29,23 @@ const WARNINGS = [
       "可变字段（缓存的 Map、随手 set）并发读写照样出事",
       "创建安全 ≠ 使用安全",
     ],
-    p: 0.25,
-    active: [0.25, 0.44],
+    p: 0.327,
+    active: [0.327, 0.593],
   },
   {
     icon: "🧪",
     title: "难测试",
     lines: ["getInstance 写死在调用处", "单测想塞个假实现进去？插不进", "依赖藏得越深，mock 越痛"],
-    p: 0.45,
-    active: [0.45, 0.6],
+    p: 0.593,
+    active: [0.593, 0.719],
   },
 ];
 
 export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, seen } = useAnchors(leadFrames, audioFrames);
 
-  // 尾段渐暗：0.86 起整体降低，只留正解条（为片尾金句蓄力）
-  const dim = fade(0.86, 20) * 0.55;
+  // 尾段渐暗：台词最后一个字（≈0.99）后压暗，只留正解条（为片尾金句蓄力）
+  const dim = fade(0.99, 20) * 0.55;
 
   return (
     <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
@@ -98,7 +99,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
           display: "flex",
           alignItems: "center",
           gap: 26,
-          opacity: Math.max(fade(0.62), dim > 0 ? 1 : 0) ,
+          opacity: Math.max(fade(0.719), dim > 0 ? 1 : 0) ,
         }}
       >
         <span style={{ fontSize: 30 }}>✅ 正解</span>
@@ -119,7 +120,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
           border: `1px dashed ${theme.surfaceBorder}`,
           borderRadius: 12,
           padding: "14px 26px",
-          opacity: fade(0.76),
+          opacity: fade(0.917),
         }}
       >
         <span style={{ fontSize: 24 }}>🧰 常见过度设计</span>
@@ -147,7 +148,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          opacity: fade(0.94),
+          opacity: fade(1.0, 12),
           pointerEvents: "none",
         }}
       >
