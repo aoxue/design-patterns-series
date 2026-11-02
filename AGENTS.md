@@ -43,7 +43,7 @@
 ```
 ① 写脚本    episodes 详案 → scripts/EPxx 分镜脚本（内容唯一事实源）
 ② 进入制作  台词同步 → video/public/lines.json（制作副本）
-③ 音频槽位  python tools/tts.py 占位配音 / 真声同名覆盖（时长自动重算，禁手写秒数）
+③ 音频槽位  TTS 样片配音（tools/tts.py）→ 样片定稿后真声同名覆盖（时长自动重算，禁手写秒数）
 ④ 画面组件  video/src/scenes/ 新镜新组件，颜色只从 theme.ts 取
 ⑤ QA 铁律   先 still 单帧检查 → 过关才全片 render（SOP §7 检查项）
 ⑥ 质量门    SOP §7 全过 + 脚本附录 D 全勾 → README §4 流转「已存稿」
@@ -70,7 +70,7 @@
 
 ```
 分镜脚本台词列 → video/public/lines.json
-  → python tools/tts.py 生成占位配音（跨平台；真声录音同名覆盖即可，无需改码）
+  → python tools/tts.py 生成 TTS 样片配音（跨平台；样片确认后真声同名覆盖重渲终版，无需改码）
   → src/scenes/ 场景组件（新镜 = 新组件；颜色只从 theme.ts 取）
   → 单帧 still QA（重叠 / 溢出 / 对齐）→ 过关才全片 render
 ```

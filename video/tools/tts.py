@@ -1,4 +1,4 @@
-"""跨平台占位配音生成器（edge-tts · 微软神经语音，Windows/macOS/Linux 通用）。
+"""跨平台 TTS 样片配音生成器（edge-tts · 微软神经语音，Windows/macOS/Linux 通用）。
 
 用法：
     pip install edge-tts

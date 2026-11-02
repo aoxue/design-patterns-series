@@ -7,7 +7,7 @@
 
 ```
 public/lines.json      台词单一事实源：tts 文本 + 字幕文本 + leadSec/tailSec 节奏参数
-public/audio/*.mp3     音频槽位：占位 TTS（tools/tts.py 生成，edge-tts 跨平台）→ 真声同名覆盖，时长自动重算
+public/audio/*.mp3     音频槽位：TTS 样片配音（tools/tts.py，edge-tts 跨平台）→ 样片定稿后真声同名覆盖，时长自动重算
 src/data.ts            读 lines.json → SHOTS 数组 + 字幕切分（按句读断句、字数权重分摊）
 src/PocEpisode.tsx     调度器：calculateMetadata 实测音频时长 → 自动铺全片时间轴 + 全局字幕条
 src/scenes/*.tsx       每镜一个场景组件（useCurrentFrame 帧驱动动画）
@@ -25,7 +25,7 @@ npm install              # Node ≥ 18
 pip install edge-tts     # Python 3，占位配音依赖
 
 # 日常
-python tools/tts.py                                  # （重）生成占位配音（--voice 可换音色）
+python tools/tts.py                                  # （重）生成 TTS 样片配音（--voice 可换音色）
 npm run dev                                          # Remotion Studio 预览，可拖时间轴
 npx remotion still src/index.ts EP01PoC out/帧名.png --frame=1200  # 单帧（QA 用）
 npm run render:poc                                     # 渲染成片 → out/EP01-PoC.mp4
@@ -55,4 +55,4 @@ npm run render:poc                                     # 渲染成片 → out/EP
 - [ ] 补齐组件：diff 删红增绿、UML 类图动效、线程时序/指令重排时间轴（EP01 视觉亮点）、终端实录（接 Maven 真实输出）、五版本对比卡、金句定格
 - [ ] 竖屏 composition：60 秒切片与正片同源
 - [ ] BGM / 音效轨道混音
-- [ ] 音频路线决策落地：真人配音 vs TTS（决策后更新 operations §2.2 人机分工）
+- [x] 音频路线已定（2026-11）：两阶段——TTS 出样片供确认修改，定稿后真人录音重渲终版（operations §2.2）
