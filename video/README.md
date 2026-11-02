@@ -22,7 +22,7 @@ src/theme.ts           SOP 色系（本期创建型蓝）唯一取色处，全�
 ```bash
 # 首次准备（Windows / macOS 通用）
 npm install              # Node ≥ 18
-pip install edge-tts     # Python 3，占位配音依赖
+pip install edge-tts     # Python 3，样片配音依赖
 
 # 日常
 python tools/tts.py                                  # （重）生成 TTS 样片配音（--voice 可换音色）
@@ -35,7 +35,7 @@ npm run render:poc                                     # 渲染成片 → out/EP
 
 - 仓库**不含**音频与成片（有意设计，见 .gitignore）：新电脑 clone 后跑完上面「首次准备」+ `python tools/tts.py`，即可完整渲染；
 - **真声母带是不可再生资产**：录制后另存 `assets/voice/EPxx/` 并提交入库，再拷入 `public/audio/` 参与渲染；
-- 占位配音全平台统一音色（edge-tts 神经语音），换机器不影响听感一致；
+- 样片配音全平台统一音色（edge-tts 神经语音），换机器不影响听感一致；
 - 历史：`tools/tts.ps1`（Windows 专属语音）已移除，PoC 阶段产物可在 git 历史找回。
 
 ## Agent 工作纪律（在本工程内改东西时）
@@ -49,7 +49,7 @@ npm run render:poc                                     # 渲染成片 → out/EP
 ## 现状与全量化待办（PoC → 正片引擎）
 
 - [x] 管线跑通：JSON→组件→渲染→MP4（含音频、字幕）
-- [x] 音频槽位：占位 TTS → 真声替换机制
+- [x] 音频槽位：TTS 样片 → 真声终版替换机制
 - [x] 4 个场景组件 + 字幕条 + 代码卡
 - [ ] episode JSON 契约（Zod）：六段全字段；分镜脚本 → JSON 转换规则（脚本仍是内容事实源，JSON 是制作副本）
 - [ ] 补齐组件：diff 删红增绿、UML 类图动效、线程时序/指令重排时间轴（EP01 视觉亮点）、终端实录（接 Maven 真实输出）、五版本对比卡、金句定格
