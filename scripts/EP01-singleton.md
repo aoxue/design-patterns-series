@@ -334,6 +334,6 @@ public class OrderService {
 - [x] 可运行示例代码（`mashanggou/src/main/java/com/mashanggou/promo/`：V0 事故版 + V1–V5 五版 + `SingletonEvolutionDemo` 反射攻击 main，编译运行通过）
 - [x] 封面图（`assets/covers/EP01-cover.png` + 三色系模板 `assets/covers/cover-template.html`，visual-judge 验收通过 2026-11-02）
 - [x] 成片 MP4：**全片渲染完成**（`video/` 管线 16 镜全量，1920×1080，10:17，2026-11-02；当前为 **TTS 样片配音版，待样片确认 → 真人录音同名覆盖重渲终版**，见 operations §2.2；QA 联系表见 `video/out/qa/contact-sheet.png`）
-  - ✔ v2 样片已渲染（2026-11-02，10:17，TTS 晓晓）：含 v1 自查修复的 5 处（字幕黑底、全局黑字、DCL 代码笔误+空间超屏、00:01 顶部越界）；48 帧联系表自查通过（`video/out/qa/`），**待用户验收 + 抽听 → 真人录音重渲终版**
+  - ✔ v3 样片已渲染（2026-11-02，10:18，TTS 晓晓）：v2 基础上修复 7 项（镜 1.3 重做、4:07 字幕压字、字幕句末标点、攻击执行重放绑定、徽标版本名+异常中文化、决策树分支动画、5.1 锚点修正）；**全片音画同步审查通过**（16 镜 64 帧逐格核对，`npm run synccheck`，0 处错位）；**待用户验收 + 抽听 → 真人录音重渲终版**
 - [ ] 60 秒切片版（依赖成片发布节奏：主视频上线后 2 天内出，见 operations §2.1 / 附录 C.1）
 - [x] 简介文案（见附录 C.2；合集 / EP02 链接发布时补入占位）
