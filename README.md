@@ -95,3 +95,25 @@ vibe 视觉（lo-fi BGM、统一动效模板）是加分项，不替代以上三
 | [scripts/](scripts/) | 每期分镜脚本 + `.puml` 类图源文件（EP01 为模板，附录 D = 每期任务清单） | 写对应期脚本时 |
 | [video/](video/) | Remotion 成片渲染工程（PoC 已跑通）；台词 JSON + 音频槽位 → MP4 | 该期进入制作（台词定稿后） |
 | [mashanggou/](mashanggou/) | 「码上购」Maven 示例工程：每期代码演示 + 存档（业务线子包） | 写脚本 / 代码验证时 |
+
+## 7. 换新电脑怎么开始
+
+一次性准备：
+
+```bash
+# 1. GitHub 访问：新机器生成 SSH key 添加到账号（或 HTTPS + token），然后
+git clone git@github.com:aoxue/design-patterns-series.git
+
+# 2. 仓库作者配置——仓库级配置不随 git 走，每台机器都要设一次
+cd design-patterns-series
+git config user.name "aoxue"
+git config user.email "gxlyn@live.com"
+
+# 3. 视频工程依赖（只在做视频时需要，详见 video/README.md）
+cd video && npm install && pip install edge-tts
+python tools/tts.py    # 音频不入库，新机器需重建样片配音
+```
+
+然后对 AI 说一句「**继续推进**」即可——agent 按 `AGENTS.md`「会话怎么接上」自动定位当前工作与下一步，不需要你复述任何背景或进度。
+
+**不随仓库走的**（均为有意设计或机器本地）：`video/out/` 成片与 `video/public/audio/` 音频（可重建）；各机器本地的个人全局配置（如 ZCode 的 `~/.zcode/AGENTS.md` 个人准则，换机建议手动同步一份）。
