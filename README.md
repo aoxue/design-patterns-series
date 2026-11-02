@@ -104,11 +104,10 @@ vibe 视觉（lo-fi BGM、统一动效模板）是加分项，不替代以上三
 # 1. GitHub 访问：新机器生成 SSH key 添加到账号（或 HTTPS + token），然后
 git clone git@github.com:aoxue/design-patterns-series.git
 
-# 2. 仓库作者配置——仓库级配置不随 git 走，每台机器都要设一次
-#    公开仓库：用 GitHub 匿名邮箱（Settings → Emails 可查），避免暴露真实邮箱
+# 2. 仅当本机全局 git 身份不是你想用于本项目的身份时（如公司配的机器），才需要仓库级覆盖：
 cd design-patterns-series
-git config user.name "aoxue"
-git config user.email "9880202+aoxue@users.noreply.github.com"
+git config user.name "你的名字"
+git config user.email "你的邮箱"
 
 # 3. 视频工程依赖（只在做视频时需要，详见 video/README.md）
 cd video && npm install && pip install edge-tts
