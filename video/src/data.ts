@@ -1,6 +1,12 @@
-import LINES from "../public/lines.json";
+import EP01_LINES from "../public/episodes/EP01.json";
 
 export const FPS = 30;
+
+/** 当前渲染的期号；全量化后由 content-loader 按期加载 episodes/*.json */
+export const EPISODE = "EP01";
+
+/** 音频槽位路径：每期一个子目录 public/audio/EPxx/ */
+export const audioPath = (file: string) => `audio/${EPISODE}/${file}`;
 
 /** 没有音频文件时的估算语速（字/秒），用于 studio 预览兜底 */
 export const ESTIMATE_CPS = 4.2;
@@ -13,8 +19,8 @@ export interface ShotData {
   subtitle: string;
 }
 
-/** 台词的机器可读来源：public/lines.json（TTS 脚本与字幕共用，单一事实源） */
-export const SHOTS: ShotData[] = LINES.map((l) => ({
+/** 台词的机器可读来源：public/episodes/EPxx.json（TTS 脚本与字幕共用，每期一文件） */
+export const SHOTS: ShotData[] = EP01_LINES.map((l) => ({
   id: l.id,
   audio: l.file,
   leadSec: l.leadSec,

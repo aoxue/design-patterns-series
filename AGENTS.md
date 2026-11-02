@@ -43,7 +43,7 @@
 
 ```
 ① 写脚本    episodes 详案 → scripts/EPxx 分镜脚本（内容唯一事实源）
-② 进入制作  台词同步 → video/public/lines.json（制作副本）
+② 进入制作  台词同步 → video/public/episodes/EPxx.json（制作副本，每期一文件）
 ③ 音频槽位  TTS 样片配音（tools/tts.py）→ 样片定稿后真声同名覆盖（时长自动重算，禁手写秒数）
 ④ 画面组件  video/src/scenes/ 新镜新组件，颜色只从 theme.ts 取
 ⑤ QA 铁律   先 still 单帧检查 → 过关才全片 render（SOP §7 检查项）
@@ -63,14 +63,14 @@
 - 有效代码 ≤ 80 行/期，重构用 diff 呈现（删红增绿）；
 - 改台词或代码后，**同步**受影响的时间码与附录 A 行数统计；
 - 类图 `.puml` 与脚本同目录；色系：创建型蓝 / 结构型绿 / 行为型橙。
-- 台词定稿、该期进入制作时：台词同步至 `video/public/lines.json`——**内容事实源仍是分镜脚本，lines.json 只是制作副本**。
+- 台词定稿、该期进入制作时：台词同步至 `video/public/episodes/EPxx.json`——**内容事实源仍是分镜脚本，episode JSON 只是制作副本**。
 
 ## 成片渲染（video/）
 
 台词定稿后启动，工作流固定：
 
 ```
-分镜脚本台词列 → video/public/lines.json
+分镜脚本台词列 → video/public/episodes/EPxx.json
   → python tools/tts.py 生成 TTS 样片配音（跨平台；样片确认后真声同名覆盖重渲终版，无需改码）
   → src/scenes/ 场景组件（新镜 = 新组件；颜色只从 theme.ts 取）
   → 单帧 still QA（重叠 / 溢出 / 对齐）→ 过关才全片 render

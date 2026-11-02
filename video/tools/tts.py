@@ -27,15 +27,19 @@ def pick_voice() -> str:
 
 
 async def main() -> None:
-    lines = json.loads((ROOT / "public" / "lines.json").read_text(encoding="utf-8"))
-    out_dir = ROOT / "public" / "audio"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    ep_dir = ROOT / "public" / "episodes"
+    audio_dir = ROOT / "public" / "audio"
     voice = pick_voice()
-    for line in lines:
-        out = out_dir / line["file"]
-        await edge_tts.Communicate(line["tts"], voice, rate=RATE).save(str(out))
-        print(f"OK  {line['file']}")
-    print(f"done ({voice}) -> public/audio/")
+    for ep_file in sorted(ep_dir.glob("*.json")):
+        ep = ep_file.stem  # 如 EP01；音频与台词同名子目录一一对应
+        lines = json.loads(ep_file.read_text(encoding="utf-8"))
+        out_dir = audio_dir / ep
+        out_dir.mkdir(parents=True, exist_ok=True)
+        for line in lines:
+            out = out_dir / line["file"]
+            await edge_tts.Communicate(line["tts"], voice, rate=RATE).save(str(out))
+            print(f"OK  {ep}/{line['file']}")
+    print(f"done ({voice}) -> public/audio/<EPxx>/")
 
 
 asyncio.run(main())

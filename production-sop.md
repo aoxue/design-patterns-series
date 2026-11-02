@@ -81,7 +81,7 @@
 ```
 分镜脚本（内容事实源）
    ↓ 台词定稿后同步
-video/public/lines.json（制作副本）→ TTS 样片配音 / 真声终版录音（音频槽位）
+video/public/episodes/EPxx.json（制作副本，每期一文件）→ TTS 样片配音 / 真声终版录音（音频槽位）
    ↓
 场景组件动画（src/scenes，帧驱动）→ 单帧 QA → 全片渲染 → out/*.mp4
 ```

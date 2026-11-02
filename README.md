@@ -103,5 +103,5 @@ vibe 视觉（lo-fi BGM、统一动效模板）是加分项，不替代以上三
 ## 8. 许可证
 
 - **代码**（`video/`、`mashanggou/`、`tools/`、封面模板）：[MIT](LICENSE)
-- **创作内容**（`scripts/` 分镜脚本与台词、`video/public/lines.json`、成图）：[CC BY 4.0](LICENSE-CONTENT.md)——转载与二创须署名
+- **创作内容**（`scripts/` 分镜脚本与台词、`video/public/episodes/` 台词数据、成图）：[CC BY 4.0](LICENSE-CONTENT.md)——转载与二创须署名
 - 渲染工程依赖 [Remotion](https://www.remotion.dev/)：其自身许可对个人与小型团队免费，商用团队请自行购买授权

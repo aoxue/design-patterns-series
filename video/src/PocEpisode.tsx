@@ -8,7 +8,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { getAudioData } from "@remotion/media-utils";
-import { SHOTS, FPS, ESTIMATE_CPS, splitSubtitles, type ShotData } from "./data";
+import { SHOTS, FPS, ESTIMATE_CPS, audioPath, splitSubtitles, type ShotData } from "./data";
 import { theme } from "./theme";
 import { SubtitleBar } from "./components/SubtitleBar";
 import { HookScene } from "./scenes/HookScene";
@@ -40,7 +40,7 @@ export const computeTimeline = async (): Promise<TimelineItem[]> => {
   const durations: number[] = [];
   for (const s of SHOTS) {
     try {
-      const d = await getAudioData(staticFile(`audio/${s.audio}`));
+      const d = await getAudioData(staticFile(audioPath(s.audio)));
       durations.push(d.durationInSeconds);
     } catch {
       durations.push(s.subtitle.length / ESTIMATE_CPS);
@@ -82,7 +82,7 @@ export const PocEpisode: FC<{ timeline: TimelineItem[] | null }> = ({ timeline }
           <Sequence key={it.id} from={it.startFrame} durationInFrames={it.frames} name={it.id}>
             {Scene ? <Scene /> : null}
             <Sequence from={leadFrames} durationInFrames={Math.ceil(it.audioSec * FPS) + 5}>
-              <Audio src={staticFile(`audio/${it.audio}`)} />
+              <Audio src={staticFile(audioPath(it.audio))} />
             </Sequence>
           </Sequence>
         );
