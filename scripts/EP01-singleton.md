@@ -333,5 +333,6 @@ public class OrderService {
 - [x] `.puml` 类图源文件（`EP01-singleton.puml`）
 - [x] 可运行示例代码（`mashanggou/src/main/java/com/mashanggou/promo/`：V0 事故版 + V1–V5 五版 + `SingletonEvolutionDemo` 反射攻击 main，编译运行通过）
 - [x] 封面图（`assets/covers/EP01-cover.png` + 三色系模板 `assets/covers/cover-template.html`，visual-judge 验收通过 2026-11-02）
-- [ ] 60 秒切片版
+- [ ] 成片 MP4：**全片渲染**（`video/` 管线，痛点现场段 PoC 已跑通 2026-11-02；全量化待办见 `video/README.md`；音频路线「真人 vs TTS」待用户决策，见 operations §2.2）
+- [ ] 60 秒切片版（依赖成片；成片后按附录 C.1 半天可出）
 - [x] 简介文案（见附录 C.2；合集 / EP02 链接发布时补入占位）
