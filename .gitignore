@@ -10,3 +10,10 @@ target/
 # 系统
 .DS_Store
 Thumbs.db
+
+# 视频渲染工程（Remotion）
+video/node_modules/
+video/out/
+video/dist/
+# 音频槽位文件不进库：占位音频可用 tools/tts.ps1 重新生成；真声另存
+video/public/audio/
