@@ -28,6 +28,7 @@ pip install edge-tts     # Python 3，样片配音依赖
 # 日常
 python tools/tts.py                                  # （重）生成 TTS 样片配音（--voice 可换音色）
 npm run lint:colors                                  # 颜色纪律检查（提交前必跑，违规即红）
+npm run sheet                                        # 成片自查联系表：每镜首/中/尾 3 帧（SOP §8）
 npm run dev                                          # Remotion Studio 预览，可拖时间轴
 npx remotion still src/index.ts EP01 out/帧名.png --frame=1200  # 单帧（QA 用）
 npm run render                                       # 渲染成片 → out/EP01.mp4
@@ -55,7 +56,7 @@ npm run render                                       # 渲染成片 → out/EP01
 - [x] EP01 全片 16 镜场景组件 + 字幕条 + 代码卡（diff 删红增绿 / kw 高亮）+ 台词进度锚点动画（scene-kit）
 - [x] EP01 视觉亮点组件：A1 线程时序、A2 指令重排时间轴（②③ 积木交换 + volatile 焊死）、UML 类图动效、五版对比卡、反射攻击终端实录（Maven 真实输出）、金句定格
 - [x] EP01 全片渲染（2026-11-02，TTS 样片配音 10:17；真声定稿后同名覆盖重渲即终版）
-- [ ] 联系表自动生成脚本（tools/contact-sheet：每镜首/中/尾 3 帧自动拼表），降低成片自查成本
+- [x] 联系表自动生成脚本（tools/contact-sheet：`npm run sheet`，每镜首/中/尾 3 帧拼表 + 960×540 单帧留档供放大复查；帧区间由 TimelineProbe 合成提供，音频实测驱动）
 - [ ] episode JSON 契约（Zod）：六段全字段；分镜脚本 → JSON 转换规则（脚本仍是内容事实源，JSON 是制作副本）
 - [ ] 竖屏 composition：60 秒切片与正片同源
 - [ ] BGM / 音效轨道混音
