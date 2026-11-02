@@ -11,17 +11,20 @@ export const HookScene: FC = () => {
   const { fps } = useVideoConfig();
 
   const digitIn = spring({ frame, fps, config: { damping: 14 } });
-  // 数字放大进场后，收小上移让位给对撞卡片
-  const digitScale = interpolate(frame, [70, 95], [1, 0.34], {
+  // 数字放大进场后，收小上移让位给对撞卡片。
+  // 几何约定（transformOrigin 顶边中心）：收小后停靠 y=120（200-80），
+  // 字高约 78px，与顶部信息行（40–70px）留 50px 间距，不再越出画面。
+  const digitShrink = interpolate(frame, [70, 95], [1, 0.34], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
-  const digitY = interpolate(frame, [70, 95], [0, -300], {
+  const digitY = interpolate(frame, [70, 95], [0, -80], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
+  const digitScale = (0.8 + digitIn * 0.2) * digitShrink;
 
   const slide = (from: number) =>
     interpolate(frame, [from, from + 28], [-760, 0], {
@@ -47,7 +50,8 @@ export const HookScene: FC = () => {
           fontWeight: 700,
           color: theme.alertRed,
           opacity: digitIn * (0.92 + 0.08 * Math.sin(frame / 2)),
-          transform: `scale(${0.8 + digitIn * 0.2 * digitScale}) translateY(${digitY}px)`,
+          transformOrigin: "top center",
+          transform: `translateY(${digitY}px) scale(${digitScale})`,
           textShadow: "0 0 42px rgba(255, 59, 59, 0.55)",
           top: 200,
         }}
