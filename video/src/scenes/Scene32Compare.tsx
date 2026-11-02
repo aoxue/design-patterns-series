@@ -53,7 +53,7 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         ))}
       </div>
 
-      {/* 决策树：一个问题记住五个 */}
+      {/* 决策树：一个问题记住五个（分支按台词顺序逐段生长，锚点取自台词字位） */}
       <div
         style={{
           flex: 1,
@@ -61,71 +61,133 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           backgroundColor: "rgba(10, 24, 38, 0.6)",
           border: `1px solid ${theme.surfaceBorder}`,
           borderRadius: 16,
-          padding: "24px 40px",
-          opacity: fade(0.5),
+          padding: "22px 40px",
+          opacity: fade(0.78),
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 18 }}>
+        <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 6 }}>
           三秒决策树 —— 一个问题帮你记住五个
         </div>
 
-        {/* 根节点 */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 60 }}>
+        {/* 台词锚点：根 0.80 / 不要→V1 0.86 / 要→V4 0.90 / 追问 0.95 / 枚举 0.97 */}
+        <div style={{ position: "relative", height: 280 }}>
+          <svg viewBox="0 0 1660 280" width="100%" height="280" style={{ position: "absolute", inset: 0 }}>
+            {/* 连线逐段「生长」：strokeDashoffset 1→0 */}
+            {[
+              { d: "M 280 140 H 470 V 72 H 1175", a: 0.862 }, // 不要 → V1
+              { d: "M 280 148 H 1175", a: 0.902 }, // 要 →（穿过追问位）→ V4
+              { d: "M 1040 150 V 236 H 1175", a: 0.962 }, // 追问 → 要 → V5
+            ].map((seg) => (
+              <path
+                key={seg.d}
+                d={seg.d}
+                fill="none"
+                stroke={theme.primaryBright}
+                strokeWidth={3}
+                pathLength={1}
+                strokeDasharray={1}
+                strokeDashoffset={1 - fade(seg.a, 10)}
+                opacity={0.85}
+              />
+            ))}
+          </svg>
+
+          {/* 分支标签 */}
+          {[
+            { t: "不要", x: 495, y: 58, a: 0.87 },
+            { t: "要", x: 405, y: 122, a: 0.91 },
+            { t: "不要", x: 1075, y: 128, a: 0.955 },
+            { t: "要", x: 1062, y: 200, a: 0.968 },
+          ].map((l) => (
+            <span
+              key={l.t + l.x}
+              style={{
+                position: "absolute",
+                left: l.x,
+                top: l.y,
+                fontSize: 22,
+                color: theme.textMuted,
+                opacity: fade(l.a, 8),
+              }}
+            >
+              {l.t}
+            </span>
+          ))}
+
+          {/* 根问题 */}
           <div
             style={{
-              fontSize: 27,
+              position: "absolute",
+              left: 20,
+              top: 108,
+              fontSize: 26,
               fontWeight: 700,
               color: theme.text,
               border: `2px solid ${theme.primaryBright}`,
               borderRadius: 12,
-              padding: "14px 24px",
+              padding: "12px 22px",
               backgroundColor: "rgba(59, 130, 246, 0.12)",
+              opacity: pop(0.8),
+              transform: `scale(${0.85 + pop(0.8) * 0.15})`,
             }}
           >
             要不要懒？
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* 追问节点（后插到「要」分支上） */}
+          <div
+            style={{
+              position: "absolute",
+              left: 560,
+              top: 112,
+              fontSize: 24,
+              fontWeight: 700,
+              color: theme.text,
+              border: `2px solid ${theme.warn}`,
+              borderRadius: 12,
+              padding: "11px 20px",
+              backgroundColor: "rgba(255, 184, 77, 0.10)",
+              opacity: pop(0.947),
+              transform: `scale(${0.85 + pop(0.947) * 0.15})`,
+            }}
+          >
+            还要防反射？
+          </div>
+
+          {/* 叶子结论 */}
+          {[
+            { v: "V1", n: "饿汉式", r: "收工", x: 1175, y: 38, a: 0.872, hot: false },
+            { v: "V4", n: "静态内部类", r: "起步", x: 1175, y: 122, a: 0.913, hot: false },
+            { v: "V5", n: "枚举", r: "封顶", x: 1175, y: 210, a: 0.972, hot: true },
+          ].map((leaf) => (
             <div
+              key={leaf.v}
               style={{
+                position: "absolute",
+                left: leaf.x,
+                top: leaf.y,
                 display: "flex",
-                alignItems: "center",
-                gap: 16,
-                opacity: fade(0.56),
+                alignItems: "baseline",
+                gap: 10,
+                fontSize: 25,
+                color: theme.text,
+                border: `2px solid ${leaf.hot ? theme.ok : theme.surfaceBorder}`,
+                borderRadius: 12,
+                padding: "10px 20px",
+                backgroundColor: leaf.hot ? "rgba(63, 218, 140, 0.10)" : theme.surface,
+                opacity: pop(leaf.a),
+                transform: `translateX(${(1 - pop(leaf.a)) * 22}px)`,
+                boxShadow: leaf.hot && seen(leaf.a + 0.005) ? `0 0 30px rgba(63, 218, 140, 0.30)` : "none",
               }}
             >
-              <span style={{ fontSize: 23, color: theme.textMuted }}>不要 →</span>
-              <span style={{ fontSize: 25, color: theme.text }}>
-                <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V1 饿汉</span> 收工
+              <span style={{ fontFamily: theme.font.mono, color: leaf.hot ? theme.ok : theme.primaryBright, fontSize: 23 }}>
+                {leaf.v}
               </span>
+              {leaf.n}
+              <span style={{ color: leaf.hot ? theme.ok : theme.text, fontWeight: 700 }}>· {leaf.r}</span>
             </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: fade(0.62) }}>
-              <span style={{ fontSize: 23, color: theme.textMuted }}>要 →</span>
-              <span style={{ fontSize: 25, color: theme.text }}>
-                <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V4 内部类</span> 起步
-              </span>
-              <span
-                style={{
-                  fontSize: 23,
-                  color: theme.textMuted,
-                  opacity: seen(0.68) ? 1 : 0.25,
-                }}
-              >
-                ── 还要防反射/序列化？→
-              </span>
-              <span
-                style={{
-                  fontSize: 25,
-                  color: theme.text,
-                  opacity: fade(0.72),
-                }}
-              >
-                <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V5 枚举</span> 封顶
-              </span>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </AbsoluteFill>
