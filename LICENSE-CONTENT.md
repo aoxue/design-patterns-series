@@ -12,7 +12,7 @@
 **适用范围（内容侧）**：
 
 - `scripts/`（分镜脚本、台词、`.puml` 类图源文件）
-- `video/public/lines.json`（台词数据）
+- `video/public/episodes/`（台词数据，每期一个 JSON）
 - `assets/` 下的成图（封面图等）
 - 各期视频成片的文案内容
 

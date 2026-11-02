@@ -6,13 +6,13 @@
 ## 架构（音频槽位，核心机制）
 
 ```
-public/lines.json      台词单一事实源：tts 文本 + 字幕文本 + leadSec/tailSec 节奏参数
-public/audio/*.mp3     音频槽位：TTS 样片配音（tools/tts.py，edge-tts 跨平台）→ 样片定稿后真声同名覆盖，时长自动重算
-src/data.ts            读 lines.json → SHOTS 数组 + 字幕切分（按句读断句、字数权重分摊）
-src/Episode.tsx        调度器：calculateMetadata 实测音频时长 → 自动铺全片时间轴 + 全局字幕条；镜号→场景映射
-src/scene-kit.ts       SceneProps（frames/leadFrames/audioFrames）+ useAnchors：动画锚点按台词进度 0–1 定义，换配音自动适配
-src/scenes/*.tsx       每镜一个场景组件（useCurrentFrame 帧驱动动画；EP01 共 16 个）
-src/components/*       复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
+public/episodes/EPxx.json  台词单一事实源（每期一文件）：tts 文本 + 字幕文本 + leadSec/tailSec 节奏参数
+public/audio/EPxx/*.mp3    音频槽位（每期一目录）：TTS 样片配音（tools/tts.py，edge-tts 跨平台）→ 样片定稿后真声同名覆盖，时长自动重算
+src/data.ts                读 episodes/EPxx.json → SHOTS 数组 + 字幕切分（按句读断句、字数权重分摊）；audioPath() 统一音频槽位路径
+src/Episode.tsx            调度器：calculateMetadata 实测音频时长 → 自动铺全片时间轴 + 全局字幕条；镜号→场景映射
+src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors：动画锚点按台词进度 0–1 定义，换配音自动适配
+src/scenes/*.tsx           每镜一个场景组件（useCurrentFrame 帧驱动动画；EP01 共 16 个）
+src/components/*           复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
 src/theme.ts           SOP 色系（本期创建型蓝）唯一取色处，全系列组件禁止硬编码颜色
 ```
 
@@ -35,14 +35,14 @@ npm run render                                       # 渲染成片 → out/EP01
 ## 多机协作注意
 
 - 仓库**不含**音频与成片（有意设计，见 .gitignore）：新电脑 clone 后跑完上面「首次准备」+ `python tools/tts.py`，即可完整渲染；
-- **真声母带是不可再生资产**：录制后另存 `assets/voice/EPxx/` 并提交入库，再拷入 `public/audio/` 参与渲染；
+- **真声母带是不可再生资产**：录制后另存 `assets/voice/EPxx/` 并提交入库，再拷入 `public/audio/EPxx/` 参与渲染；
 - 样片配音全平台统一音色（edge-tts 神经语音），换机器不影响听感一致；
 - 历史：`tools/tts.ps1`（Windows 专属语音）已移除，PoC 阶段产物可在 git 历史找回。
 
 ## Agent 工作纪律（在本工程内改东西时）
 
 1. **改画面**：只改 `src/scenes/` 对应镜的组件；颜色只从 `theme.ts` 取；
-2. **改台词**：改 `public/lines.json`（`tts` 与 `subtitle` 同步改），然后重跑 `python tools/tts.py`；
+2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），然后重跑 `python tools/tts.py`；
 3. **QA 铁律：先 still 后 render**——任何改动先渲 1–2 个关键帧检查重叠/溢出/对齐，过关才渲全片；全片渲染前必须有联系表（多帧拼查）记录；
 4. **音频槽位**：时长永远由音频驱动；禁止在组件里写死场景秒数；
 5. `out/`、`public/audio/` 不进 git（已 ignore）；本目录源码即全部制作资产。
