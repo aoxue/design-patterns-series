@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 「码上购」示例工程：23 种设计模式系列视频的演示 + 存档两用代码库。
+     每期视频的示例代码按业务线落在 com.mashanggou 对应子包（EP01 → promo）。 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.mashanggou</groupId>
+  <artifactId>mashanggou</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- 全系列锁定 Java 17（record、增强 switch 可用），与本机更高版本 JDK 无关 -->
+    <maven.compiler.release>17</maven.compiler.release>
+  </properties>
+</project>

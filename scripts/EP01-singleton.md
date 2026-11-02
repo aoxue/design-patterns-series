@@ -285,7 +285,7 @@ public class OrderService {
 - [x] 「什么时候别用」存在且有干货（三条警告 + 工具类反例）
 - [x] 结尾有下期预告互链（EP02 工厂方法 teaser）
 - [x] 封面色系匹配创建型 · 蓝（封面未做，色系已定）
-- [ ] 代码实际编译运行过（待建 Maven 工程，见 AGENTS.md「代码工程」）
+- [x] 代码实际编译运行过（`mashanggou/` Maven 工程，`SingletonEvolutionDemo` 三幕输出验证，2026-11-02）
 
 ## 附录 C · 60 秒切片（抖音/小红书）
 
@@ -296,7 +296,7 @@ public class OrderService {
 
 - [x] 分镜脚本（本文件）
 - [x] `.puml` 类图源文件（`EP01-singleton.puml`）
-- [ ] 可运行示例代码（`com.mashanggou.promo`：五个版本 + 反射攻击 main）
+- [x] 可运行示例代码（`mashanggou/src/main/java/com/mashanggou/promo/`：V0 事故版 + V1–V5 五版 + `SingletonEvolutionDemo` 反射攻击 main，编译运行通过）
 - [ ] 封面图（蓝色系：模式名大字 + 钩子副标题 + EP01 徽标）
 - [ ] 60 秒切片版
 - [ ] 简介文案（三支柱要点 + 前后互链：合集 / 下一期 EP02）
