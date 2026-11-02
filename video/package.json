@@ -8,7 +8,8 @@
     "render": "remotion render src/index.ts EP01 out/EP01.mp4",
     "still": "remotion still src/index.ts EP01",
     "lint:colors": "node tools/check-colors.mjs",
-    "sheet": "node tools/contact-sheet.mjs"
+    "sheet": "node tools/contact-sheet.mjs",
+    "synccheck": "node tools/sync-check.mjs"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.540",
