@@ -1,0 +1,161 @@
+import type { FC } from "react";
+import { AbsoluteFill } from "remotion";
+import { theme } from "../theme";
+import { useAnchors, type SceneProps } from "../scene-kit";
+
+/**
+ * 镜 5.1 · 什么时候别用（8:30–9:30）差异化核心段
+ * 三张警告卡逐张点亮（全局变量 / 状态炸弹 / 难测试）→ 正解：依赖注入 → 工具类小卡；
+ * 尾段画面渐暗蓄力，为片尾金句让位
+ */
+const WARNINGS = [
+  {
+    icon: "🌍",
+    title: "单例的本质是全局变量",
+    lines: [
+      "类名一点，哪里都能 getInstance",
+      "依赖不体现在方法签名里，藏进代码暗处",
+      "今天爽，三个月后重构时给你一刀",
+    ],
+    p: 0.07,
+    active: [0.07, 0.24],
+  },
+  {
+    icon: "💣",
+    title: "有状态单例是并发炸弹",
+    lines: [
+      "五版代码防的只是「只创建一次」",
+      "可变字段（缓存的 Map、随手 set）并发读写照样出事",
+      "创建安全 ≠ 使用安全",
+    ],
+    p: 0.25,
+    active: [0.25, 0.44],
+  },
+  {
+    icon: "🧪",
+    title: "难测试",
+    lines: ["getInstance 写死在调用处", "单测想塞个假实现进去？插不进", "依赖藏得越深，mock 越痛"],
+    p: 0.45,
+    active: [0.45, 0.6],
+  },
+];
+
+export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
+  const { frame, at, fade, seen } = useAnchors(leadFrames, audioFrames);
+
+  // 尾段渐暗：0.86 起整体降低，只留正解条（为片尾金句蓄力）
+  const dim = fade(0.86, 20) * 0.55;
+
+  return (
+    <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
+      <div style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 26 }}>
+        什么时候<span style={{ color: theme.danger }}>别用</span>它
+        <span style={{ fontSize: 24, color: theme.textMuted, fontWeight: 400 }}> —— 本期最重要的段落 · 三条警告</span>
+      </div>
+
+      {/* 三张警告卡横排，讲到哪张点亮哪张 */}
+      <div style={{ display: "flex", gap: 26, opacity: 1 - dim }}>
+        {WARNINGS.map((w, i) => {
+          const on = seen(w.p);
+          const isHot = on && !seen(w.active[1]); // 正在讲：高亮
+          return (
+            <div
+              key={w.title}
+              style={{
+                flex: 1,
+                backgroundColor: theme.surface,
+                border: `2px solid ${isHot ? theme.danger : theme.surfaceBorder}`,
+                borderRadius: 16,
+                padding: "24px 26px",
+                opacity: on ? 1 : 0.22,
+                transform: `translateY(${on ? 0 : 14}px) scale(${isHot ? 1.02 : 1})`,
+                transition: "transform 300ms",
+                boxShadow: isHot ? `0 0 36px rgba(255, 82, 82, 0.22)` : "none",
+              }}
+            >
+              <div style={{ fontSize: 44, marginBottom: 12 }}>{w.icon}</div>
+              <div style={{ fontSize: 27, fontWeight: 700, color: isHot ? theme.danger : theme.text, marginBottom: 14 }}>
+                {i + 1}. {w.title}
+              </div>
+              {w.lines.map((l) => (
+                <div key={l} style={{ fontSize: 21, color: theme.textMuted, lineHeight: 1.75 }}>
+                  · {l}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 正解条：依赖注入 */}
+      <div
+        style={{
+          marginTop: 30,
+          borderRadius: 16,
+          padding: "22px 34px",
+          backgroundColor: "rgba(63, 218, 140, 0.08)",
+          border: `2px solid ${theme.ok}`,
+          display: "flex",
+          alignItems: "center",
+          gap: 26,
+          opacity: Math.max(fade(0.62), dim > 0 ? 1 : 0) ,
+        }}
+      >
+        <span style={{ fontSize: 30 }}>✅ 正解</span>
+        <div style={{ fontSize: 26, color: theme.text }}>
+          <span style={{ color: theme.ok, fontWeight: 700 }}>依赖注入</span>：实例从「自己全局去拿」变成「
+          <span style={{ color: theme.ok, fontWeight: 700 }}>外面递进来</span>」—— 这正是刚才 Spring 影子的深意
+        </div>
+      </div>
+
+      {/* 第四张小卡：工具类 ≠ 单例 */}
+      <div
+        style={{
+          marginTop: 18,
+          display: "flex",
+          alignItems: "center",
+          gap: 18,
+          backgroundColor: theme.surface,
+          border: `1px dashed ${theme.surfaceBorder}`,
+          borderRadius: 12,
+          padding: "14px 26px",
+          opacity: fade(0.76),
+        }}
+      >
+        <span style={{ fontSize: 24 }}>🧰 常见过度设计</span>
+        <span style={{ fontSize: 24, color: theme.text }}>
+          无状态的工具类，一堆 <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>static</span> 方法就够，
+          <span style={{ color: theme.warn }}>别硬套单例的壳</span>
+        </span>
+      </div>
+
+      {/* 尾段渐暗罩层：黑幕从四周压下来，中央留待机位 */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "#05070B",
+          opacity: dim,
+          pointerEvents: "none",
+        }}
+      />
+      {/* 待机位：一句承上启下（片尾金句前的静场） */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          opacity: fade(0.94),
+          pointerEvents: "none",
+        }}
+      >
+        <span style={{ fontSize: 34, color: theme.textMuted, letterSpacing: 4 }}>
+          那么，一句话带走这期 ——
+        </span>
+      </div>
+      <span style={{ display: "none" }}>{frame - at(0)}</span>
+    </AbsoluteFill>
+  );
+};

@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Composition } from "remotion";
-import { PocEpisode, computeTimeline, type TimelineItem } from "./PocEpisode";
+import { Episode, computeTimeline, type TimelineItem } from "./Episode";
 
 /**
  * 根组件：注册合成。
@@ -9,9 +9,9 @@ import { PocEpisode, computeTimeline, type TimelineItem } from "./PocEpisode";
  */
 export const RemotionRoot: FC = () => (
   <Composition
-    id="EP01PoC"
-    component={PocEpisode}
-    durationInFrames={3000}
+    id="EP01"
+    component={Episode}
+    durationInFrames={18000}
     fps={30}
     width={1920}
     height={1080}

@@ -5,8 +5,8 @@
   "description": "「码上购」设计模式系列 · Remotion 渲染工程（PoC：EP01 痛点现场）",
   "scripts": {
     "dev": "remotion studio src/index.ts",
-    "render:poc": "remotion render src/index.ts EP01PoC out/EP01-PoC.mp4",
-    "still": "remotion still src/index.ts EP01PoC"
+    "render": "remotion render src/index.ts EP01 out/EP01.mp4",
+    "still": "remotion still src/index.ts EP01"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.540",

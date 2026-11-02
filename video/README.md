@@ -1,7 +1,7 @@
 # video/ · Remotion 渲染工程
 
 > 「码上购」成片生产引擎：台词 JSON + 音频槽位 → React 场景组件 → MP4。全程代码，不打开剪辑软件。
-> 架构决策与验证记录见仓库对话史（2026-11-02 PoC 跑通，EP01 痛点现场 4 镜 100 秒成片）。
+> 2026-11-02 PoC 跑通（EP01 痛点现场 4 镜）；同日 EP01 全片 16 镜渲染成片（10:17，TTS 样片配音）。
 
 ## 架构（音频槽位，核心机制）
 
@@ -9,9 +9,10 @@
 public/lines.json      台词单一事实源：tts 文本 + 字幕文本 + leadSec/tailSec 节奏参数
 public/audio/*.mp3     音频槽位：TTS 样片配音（tools/tts.py，edge-tts 跨平台）→ 样片定稿后真声同名覆盖，时长自动重算
 src/data.ts            读 lines.json → SHOTS 数组 + 字幕切分（按句读断句、字数权重分摊）
-src/PocEpisode.tsx     调度器：calculateMetadata 实测音频时长 → 自动铺全片时间轴 + 全局字幕条
-src/scenes/*.tsx       每镜一个场景组件（useCurrentFrame 帧驱动动画）
-src/components/*       复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡）
+src/Episode.tsx        调度器：calculateMetadata 实测音频时长 → 自动铺全片时间轴 + 全局字幕条；镜号→场景映射
+src/scene-kit.ts       SceneProps（frames/leadFrames/audioFrames）+ useAnchors：动画锚点按台词进度 0–1 定义，换配音自动适配
+src/scenes/*.tsx       每镜一个场景组件（useCurrentFrame 帧驱动动画；EP01 共 16 个）
+src/components/*       复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
 src/theme.ts           SOP 色系（本期创建型蓝）唯一取色处，全系列组件禁止硬编码颜色
 ```
 
@@ -27,8 +28,8 @@ pip install edge-tts     # Python 3，样片配音依赖
 # 日常
 python tools/tts.py                                  # （重）生成 TTS 样片配音（--voice 可换音色）
 npm run dev                                          # Remotion Studio 预览，可拖时间轴
-npx remotion still src/index.ts EP01PoC out/帧名.png --frame=1200  # 单帧（QA 用）
-npm run render:poc                                     # 渲染成片 → out/EP01-PoC.mp4
+npx remotion still src/index.ts EP01 out/帧名.png --frame=1200  # 单帧（QA 用）
+npm run render                                       # 渲染成片 → out/EP01.mp4
 ```
 
 ## 多机协作注意
@@ -50,9 +51,12 @@ npm run render:poc                                     # 渲染成片 → out/EP
 
 - [x] 管线跑通：JSON→组件→渲染→MP4（含音频、字幕）
 - [x] 音频槽位：TTS 样片 → 真声终版替换机制
-- [x] 4 个场景组件 + 字幕条 + 代码卡
+- [x] EP01 全片 16 镜场景组件 + 字幕条 + 代码卡（diff 删红增绿 / kw 高亮）+ 台词进度锚点动画（scene-kit）
+- [x] EP01 视觉亮点组件：A1 线程时序、A2 指令重排时间轴（②③ 积木交换 + volatile 焊死）、UML 类图动效、五版对比卡、反射攻击终端实录（Maven 真实输出）、金句定格
+- [x] EP01 全片渲染（2026-11-02，TTS 样片配音 10:17；真声定稿后同名覆盖重渲即终版）
 - [ ] episode JSON 契约（Zod）：六段全字段；分镜脚本 → JSON 转换规则（脚本仍是内容事实源，JSON 是制作副本）
-- [ ] 补齐组件：diff 删红增绿、UML 类图动效、线程时序/指令重排时间轴（EP01 视觉亮点）、终端实录（接 Maven 真实输出）、五版本对比卡、金句定格
 - [ ] 竖屏 composition：60 秒切片与正片同源
 - [ ] BGM / 音效轨道混音
 - [x] 音频路线已定（2026-11）：两阶段——TTS 出样片供确认修改，定稿后真人录音重渲终版（operations §2.2）
+
+**QA 联系表纪律**：全片 render 前多帧拼查留档（EP01 见 `out/qa/contact-sheet.png`，生成当日本机；`out/` 不进 git）。

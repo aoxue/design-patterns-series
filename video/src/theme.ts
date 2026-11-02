@@ -12,6 +12,9 @@ export const theme = {
   textMuted: "#9FBBD4",
   danger: "#FF5252",
   warn: "#FFB84D",
+  ok: "#3FDA8C", // diff 增行 / 通过标记共用
+  diffDel: "rgba(255, 82, 82, 0.14)", // 删行底色
+  diffAdd: "rgba(63, 218, 140, 0.12)", // 增行底色
   codeBg: "#0B1622",
   font: {
     sans: '"Microsoft YaHei", "PingFang SC", sans-serif',
