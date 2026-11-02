@@ -93,3 +93,4 @@ vibe 视觉（lo-fi BGM、统一动效模板）是加分项，不替代以上三
 | [episodes-tier1.md](episodes-tier1.md) | EP01–EP06 逐期详案 | 写对应期脚本时 |
 | [operations.md](operations.md) | 更新节奏、存稿策略、封面标题体系、数据复盘规则 | 排期与复盘时 |
 | [scripts/](scripts/) | 每期分镜脚本 + `.puml` 类图源文件（EP01 为模板，附录 D = 每期任务清单） | 写对应期脚本时 |
+| [video/](video/) | Remotion 成片渲染工程（PoC 已跑通）；台词 JSON + 音频槽位 → MP4 | 该期进入制作（台词定稿后） |

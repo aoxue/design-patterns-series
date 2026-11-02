@@ -20,6 +20,7 @@
 | `production-sop.md` | 流程 | 单期流水线定义：六段结构 = 内容标准，§6 = DoD（完成标准），§7 = 质量门 |
 | `episodes-tier1.md` 等 | 内容 | 逐期详案（写什么），写脚本前必读对应期 |
 | `scripts/EPxx-*.md` | 执行 | 每期分镜脚本 + 同目录 `.puml`；**附录 D = 该期细粒度任务清单** |
+| `video/` | 执行·渲染 | Remotion 成片引擎：台词 JSON + 音频槽位 → MP4；命令、架构、纪律见 `video/README.md` |
 | `operations.md` | 运营 | **周循环（运行层：节拍 / 人机分工 / WIP / retro，§2）**、发布后数据回填、go/no-go 决策 |
 
 ## 不可动摇的约定（完整版见 README §1–§5，禁止重新讨论）
@@ -47,6 +48,23 @@
 - 有效代码 ≤ 80 行/期，重构用 diff 呈现（删红增绿）；
 - 改台词或代码后，**同步**受影响的时间码与附录 A 行数统计；
 - 类图 `.puml` 与脚本同目录；色系：创建型蓝 / 结构型绿 / 行为型橙。
+- 台词定稿、该期进入制作时：台词同步至 `video/public/lines.json`——**内容事实源仍是分镜脚本，lines.json 只是制作副本**。
+
+## 成片渲染（video/）
+
+台词定稿后启动，工作流固定：
+
+```
+分镜脚本台词列 → video/public/lines.json
+  → tools/tts.ps1 生成占位配音（真声录音同名覆盖即可，无需改码）
+  → src/scenes/ 场景组件（新镜 = 新组件；颜色只从 theme.ts 取）
+  → 单帧 still QA（重叠 / 溢出 / 对齐）→ 过关才全片 render
+```
+
+- **场景时长一律由音频实测时长驱动**（calculateMetadata），禁止手写秒数；
+- **QA 铁律：先 still 后 render**，改动必查帧，全渲前有联系表记录；
+- 渲染产物（`out/`）与音频（`public/audio/`）不进 git；
+- PoC 已跑通（EP01 痛点现场）；全量化待办与组件清单见 `video/README.md`。
 
 ## 代码工程
 
