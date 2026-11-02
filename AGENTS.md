@@ -24,6 +24,7 @@
 | `scripts/EPxx-*.md` | 执行 | 每期分镜脚本 + 同目录 `.puml`；**附录 D = 该期细粒度任务清单** |
 | `video/` | 执行·渲染 | Remotion 成片引擎：台词 JSON + 音频槽位 → MP4；命令、架构、纪律见 `video/README.md` |
 | `mashanggou/` | 代码 | 「码上购」Maven 示例工程：每期代码演示 + 存档，按业务线分子包（现有 `promo`） |
+| `CONTRIBUTING.md` | 协作 | 人类开发者参与指南：环境、本地跑通、任务认领、贡献约定 |
 | `operations.md` | 运营 | **周循环（运行层：节拍 / 人机分工 / WIP / retro，§2）**、发布后数据回填、go/no-go 决策 |
 
 ## 不可动摇的约定（完整版见 README §1–§5，禁止重新讨论）
