@@ -56,7 +56,7 @@
 
 ```
 分镜脚本台词列 → video/public/lines.json
-  → tools/tts.ps1 生成占位配音（真声录音同名覆盖即可，无需改码）
+  → python tools/tts.py 生成占位配音（跨平台；真声录音同名覆盖即可，无需改码）
   → src/scenes/ 场景组件（新镜 = 新组件；颜色只从 theme.ts 取）
   → 单帧 still QA（重叠 / 溢出 / 对齐）→ 过关才全片 render
 ```
