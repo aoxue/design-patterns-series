@@ -91,7 +91,7 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const mottoAt = [0.08, 0.15, 0.21, 0.23];
 
   return (
-    <AbsoluteFill style={{ padding: "96px 90px 118px" }}>
+    <AbsoluteFill style={{ padding: "96px 90px 140px" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 22, marginBottom: 14 }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
           <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V3</span> 双检锁 DCL
@@ -121,7 +121,7 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           title="PromoConfigManager.java · V3 双检锁"
           lines={LINES}
           visible={visible}
-          fontSize={20}
+          fontSize={19}
         />
       </div>
 

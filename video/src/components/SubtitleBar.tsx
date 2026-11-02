@@ -29,6 +29,10 @@ export const SubtitleBar: FC<SubtitleBarProps> = ({ chunks, progress }) => {
   });
 
   if (chunks.length === 0) return null;
+
+  // 展示层去掉句末逗号/句号等停顿标点（换行即停顿，短视频字幕惯例）；
+  // 保留 ？！…（带情绪）。切分与计时仍基于原文本，互不影响。
+  const display = (s: string) => s.replace(/[，。；、：]+$/u, "").trim();
   return (
     <div
       style={{
@@ -53,7 +57,7 @@ export const SubtitleBar: FC<SubtitleBarProps> = ({ chunks, progress }) => {
             "0 2px 6px rgba(0, 0, 0, 0.9), 0 0 24px rgba(0, 0, 0, 0.65)",
         }}
       >
-        {chunks[index]}
+        {display(chunks[index])}
       </div>
     </div>
   );
