@@ -100,7 +100,14 @@ export const Episode: FC<{ timeline: TimelineItem[] | null }> = ({ timeline }) =
   );
 
   return (
-    <AbsoluteFill style={{ backgroundColor: theme.bg, fontFamily: theme.font.sans }}>
+    <AbsoluteFill
+      style={{
+        backgroundColor: theme.bg,
+        fontFamily: theme.font.sans,
+        // 全局基础字色：防止未显式写 color 的文字继承浏览器默认黑色（深底黑字不可读）
+        color: theme.text,
+      }}
+    >
       {tl.map((it) => {
         const Scene = SCENES[it.id];
         const leadFrames = Math.round(it.leadSec * FPS);

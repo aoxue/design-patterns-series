@@ -46,7 +46,7 @@ const LINES: CodeLine[] = [
     segs: [
       { text: "                    instance = " },
       { text: "new PromoConfigManager()", kind: "danger" },
-      { text: "();      // " },
+      { text: ";      // " },
       { text: "创建", kind: "comment" },
     ],
   },
@@ -91,7 +91,7 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const mottoAt = [0.08, 0.15, 0.21, 0.23];
 
   return (
-    <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
+    <AbsoluteFill style={{ padding: "96px 90px 118px" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 22, marginBottom: 14 }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
           <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V3</span> 双检锁 DCL
@@ -115,8 +115,15 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         ))}
       </div>
 
-      {/* 上：C4 代码卡（紧凑行高） */}
-      <CodeCard title="PromoConfigManager.java · V3 双检锁" lines={LINES} visible={visible} />
+      {/* 上：C4 代码卡（小字号防溢出 + 禁止被 flex 压缩裁行） */}
+      <div style={{ flexShrink: 0 }}>
+        <CodeCard
+          title="PromoConfigManager.java · V3 双检锁"
+          lines={LINES}
+          visible={visible}
+          fontSize={20}
+        />
+      </div>
 
       {/* 下：A2 指令重排时间轴（全屏宽，本期截图页） */}
       <div
@@ -223,27 +230,7 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         </div>
       </div>
 
-      {/* 截图提示（最上层浮动） */}
-      {shotTip > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            right: 110,
-            bottom: 170,
-            fontSize: 26,
-            fontWeight: 700,
-            color: theme.primaryBright,
-            backgroundColor: "rgba(10, 24, 38, 0.92)",
-            border: `2px solid ${theme.primaryBright}`,
-            borderRadius: 12,
-            padding: "10px 22px",
-            opacity: shotTip,
-            transform: `translateY(${(1 - shotTip) * 12}px)`,
-          }}
-        >
-          📸 把这张时间轴截下来 —— 本期最值钱的一页
-        </div>
-      )}
+      {/* 截图提示不再单设浮条：与台词字幕重复；由时间轴外框高亮（shotTip 边框）承担「截图页」标记 */}
     </AbsoluteFill>
   );
 };
