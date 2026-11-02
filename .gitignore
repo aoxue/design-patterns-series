@@ -1,0 +1,12 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Java / Maven（为「码上购」示例工程预留）
+target/
+*.class
+
+# 系统
+.DS_Store
+Thumbs.db

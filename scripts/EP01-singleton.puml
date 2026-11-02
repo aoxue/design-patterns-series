@@ -1,0 +1,44 @@
+@startuml EP01-singleton
+' 「码上购」设计模式系列 · EP01 单例模式类图
+' 色系：创建型 = 蓝（与封面同源）
+' 动效顺序（对应视频 5:30–7:00）：
+'   ① PromoConfigManager 浮现，三个成员逐个点亮并打一句话标签
+'   ② 三个调用方类浮现，虚线箭头汇聚到 getInstance()
+'   ③ 五版本对比卡（note）最后浮现
+skinparam backgroundColor #FFFFFF
+skinparam class {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    ArrowColor #1565C0
+}
+skinparam stereotypeBackgroundColor #BBDEFB
+skinparam noteBackgroundColor #E3F2FD
+skinparam noteBorderColor #1565C0
+
+class PromoConfigManager <<Singleton>> {
+    - {static} instance : PromoConfigManager
+    - PromoConfigManager()
+    + {static} getInstance() : PromoConfigManager
+    + getDiscount(amount : int) : int
+    + refresh() : void
+}
+
+class OrderService
+class PaymentService
+class ReportJob
+
+OrderService ..> PromoConfigManager : getInstance()
+PaymentService ..> PromoConfigManager : getInstance()
+ReportJob ..> PromoConfigManager : getInstance()
+
+note as N1
+  <b>五版本速查（本期知识地图）</b>
+  ─────────────────────
+  V1 饿汉式      ：类加载即建，简单但急
+  V2 懒汉式      ：首次使用才建，多线程不安全
+  V3 双检锁 DCL  ：懒 + 安全，volatile 防指令重排
+  V4 静态内部类  ：借 JVM 类加载，懒和安全白送
+  V5 枚举        ：+ 防反射防序列化，Effective Java 首选
+end note
+PromoConfigManager .. N1
+@enduml
