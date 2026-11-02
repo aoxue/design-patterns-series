@@ -19,7 +19,7 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
   return (
     <AbsoluteFill
-      style={{ backgroundColor: "#05070B", justifyContent: "center", alignItems: "center" }}
+      style={{ backgroundColor: theme.deepBg, justifyContent: "center", alignItems: "center" }}
     >
       {/* 扫描光环（conic 渐变模拟：旋转的半透明扇环） */}
       {[300, 380].map((size, i) => (

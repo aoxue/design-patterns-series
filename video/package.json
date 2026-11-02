@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts EP01 out/EP01.mp4",
-    "still": "remotion still src/index.ts EP01"
+    "still": "remotion still src/index.ts EP01",
+    "lint:colors": "node tools/check-colors.mjs"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.540",

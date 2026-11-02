@@ -42,7 +42,7 @@ const GROUP_STARTS = [40, 320, 600];
 const SERVICES = [
   { name: "订单服务", dot: theme.primary, clock: "刷新 5 秒", clockHot: true },
   { name: "支付服务", dot: theme.warn, clock: "刷新 整点", clockHot: false },
-  { name: "报表任务", dot: "#B58CFF", clock: "刷新 整点", clockHot: false },
+  { name: "报表任务", dot: theme.accentPurple, clock: "刷新 整点", clockHot: false },
 ];
 
 export const CrimeScene: FC = () => {

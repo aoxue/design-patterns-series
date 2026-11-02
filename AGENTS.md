@@ -77,6 +77,7 @@
 ```
 
 - **场景时长一律由音频实测时长驱动**（calculateMetadata），禁止手写秒数；
+- 颜色只从 `video/src/theme.ts` 取——`npm run lint:colors` 机制强制，提交前必跑（违规即非零退出）；
 - **QA 铁律：先 still 后 render**，改动必查帧，全渲前有联系表记录；
 - 渲染产物（`out/`）与音频（`public/audio/`）不进 git；
 - PoC 已跑通（EP01 痛点现场）；全量化待办与组件清单见 `video/README.md`。

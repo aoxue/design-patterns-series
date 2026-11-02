@@ -24,10 +24,10 @@ interface CodeCardProps {
 }
 
 const segColor = (kind?: string) => {
-  if (kind === "comment") return "#6B8CA8";
+  if (kind === "comment") return theme.codeComment;
   if (kind === "danger") return theme.danger;
   if (kind === "kw") return theme.primaryBright;
-  return "#DCEBF7";
+  return theme.codePlain;
 };
 
 /** 代码卡：窗口栏 + 逐行显隐。PoC 用手工着色，全量版换 shiki 高亮 */
@@ -51,7 +51,7 @@ export const CodeCard: FC<CodeCardProps> = ({ title, lines, visible, fontSize = 
         backgroundColor: theme.surface,
       }}
     >
-      {["#FF5F57", "#FFBD2E", "#28CA42"].map((c) => (
+      {theme.windowDots.map((c) => (
         <div key={c} style={{ width: 13, height: 13, borderRadius: "50%", backgroundColor: c }} />
       ))}
       <span

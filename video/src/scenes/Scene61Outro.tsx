@@ -33,7 +33,7 @@ export const Scene61Outro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const teaserIn = pop(0.6);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#05070B", justifyContent: "center", alignItems: "center" }}>
+    <AbsoluteFill style={{ backgroundColor: theme.deepBg, justifyContent: "center", alignItems: "center" }}>
       {/* 金句全屏定格（封面备选帧） */}
       <div
         style={{

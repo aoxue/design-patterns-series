@@ -112,7 +112,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         <div
           style={{
             flex: 1,
-            backgroundColor: "#05070B",
+            backgroundColor: theme.deepBg,
             border: `1px solid ${theme.surfaceBorder}`,
             borderRadius: 14,
             padding: "18px 24px",

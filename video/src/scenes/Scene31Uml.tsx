@@ -42,22 +42,22 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             left: 20,
             top: 30,
             width: 700,
-            backgroundColor: "#E3F2FD",
-            border: `3px solid #1565C0`,
+            backgroundColor: theme.umlBg,
+            border: `3px solid ${theme.umlBorder}`,
             borderRadius: 10,
-            color: "#0A1826",
+            color: theme.bg,
             opacity: pop(0.04),
             transform: `translateY(${(1 - pop(0.04)) * 24}px)`,
             overflow: "hidden",
           }}
         >
-          <div style={{ textAlign: "center", padding: "12px 0 4px", fontSize: 22, color: "#1565C0", fontFamily: theme.font.mono }}>
+          <div style={{ textAlign: "center", padding: "12px 0 4px", fontSize: 22, color: theme.umlBorder, fontFamily: theme.font.mono }}>
             «Singleton»
           </div>
           <div style={{ textAlign: "center", fontSize: 34, fontWeight: 700, fontFamily: theme.font.mono, paddingBottom: 14 }}>
             PromoConfigManager
           </div>
-          <div style={{ height: 2, backgroundColor: "#1565C0" }} />
+          <div style={{ height: 2, backgroundColor: theme.umlBorder }} />
           <div style={{ padding: "18px 28px", fontFamily: theme.font.mono, fontSize: 25, lineHeight: 2.1 }}>
             {MEMBERS.map((m) => (
               <div key={m.sig} style={{ opacity: seen(m.p) ? 1 : 0.18 }}>
@@ -66,9 +66,9 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   style={{
                     fontFamily: theme.font.sans,
                     fontSize: 19,
-                    color: "#1565C0",
+                    color: theme.umlBorder,
                     marginLeft: 14,
-                    border: "1px solid #90CAF9",
+                    border: `1px solid ${theme.umlChip}`,
                     borderRadius: 999,
                     padding: "1px 10px",
                     opacity: fade(m.p + 0.01),

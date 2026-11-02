@@ -98,7 +98,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                     border: `2px solid ${theme.ok}`,
                     borderRadius: 8,
                     padding: "4px 12px",
-                    backgroundColor: "#0A1826",
+                    backgroundColor: theme.bg,
                     transform: `scale(${0.7 + pop(0.28) * 0.3}) rotate(-4deg)`,
                     opacity: pop(0.28),
                   }}

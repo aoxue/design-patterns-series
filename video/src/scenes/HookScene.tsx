@@ -37,7 +37,7 @@ export const HookScene: FC = () => {
   const line2 = interpolate(frame, [285, 305], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#05070B", justifyContent: "center", alignItems: "center" }}>
+    <AbsoluteFill style={{ backgroundColor: theme.deepBg, justifyContent: "center", alignItems: "center" }}>
       {/* 00:01 事故时间戳 */}
       <div
         style={{
@@ -45,7 +45,7 @@ export const HookScene: FC = () => {
           fontFamily: theme.font.mono,
           fontSize: 190,
           fontWeight: 700,
-          color: "#FF3B3B",
+          color: theme.alertRed,
           opacity: digitIn * (0.92 + 0.08 * Math.sin(frame / 2)),
           transform: `scale(${0.8 + digitIn * 0.2 * digitScale}) translateY(${digitY}px)`,
           textShadow: "0 0 42px rgba(255, 59, 59, 0.55)",

@@ -134,7 +134,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
         style={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "#05070B",
+          backgroundColor: theme.deepBg,
           opacity: dim,
           pointerEvents: "none",
         }}

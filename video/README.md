@@ -27,6 +27,7 @@ pip install edge-tts     # Python 3，样片配音依赖
 
 # 日常
 python tools/tts.py                                  # （重）生成 TTS 样片配音（--voice 可换音色）
+npm run lint:colors                                  # 颜色纪律检查（提交前必跑，违规即红）
 npm run dev                                          # Remotion Studio 预览，可拖时间轴
 npx remotion still src/index.ts EP01 out/帧名.png --frame=1200  # 单帧（QA 用）
 npm run render                                       # 渲染成片 → out/EP01.mp4
@@ -41,7 +42,7 @@ npm run render                                       # 渲染成片 → out/EP01
 
 ## Agent 工作纪律（在本工程内改东西时）
 
-1. **改画面**：只改 `src/scenes/` 对应镜的组件；颜色只从 `theme.ts` 取；
+1. **改画面**：只改 `src/scenes/` 对应镜的组件；颜色只从 `theme.ts` 取——由 `npm run lint:colors` **机制强制**（src 内出现十六进制字面量即报错），提交前必跑；
 2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），然后重跑 `python tools/tts.py`；
 3. **QA 铁律：先 still 后 render**——任何改动先渲 1–2 个关键帧检查重叠/溢出/对齐，过关才渲全片；全片渲染前必须有联系表（多帧拼查）记录；
 4. **音频槽位**：时长永远由音频驱动；禁止在组件里写死场景秒数；
