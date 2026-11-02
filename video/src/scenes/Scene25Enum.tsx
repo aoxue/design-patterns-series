@@ -166,40 +166,44 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         </div>
       </div>
 
-      {/* 下：五版本徽标墙 —— 攻击箭头射向五版 */}
+        {/* 下：五版本徽标墙 —— 攻击箭头射向五版（每个圆环标注版本名，失守/弹开状态写在名下） */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 26, marginTop: 10 }}>
         <span style={{ fontSize: 30, color: theme.danger, opacity: fade(0.3) }}>🟥 攻击命中 →</span>
         {["V1", "V2", "V3", "V4", "V5"].map((v, i) => {
           const dead = i < 4 && seen(0.38);
           const isShield = i === 4;
+          const name = ["饿汉式", "懒汉式", "双检锁", "静态内部类", "枚举"][i];
           return (
-            <div
-              key={v}
-              style={{
-                width: 130,
-                height: 130,
-                borderRadius: "50%",
-                border: `4px solid ${dead ? theme.danger : isShield ? theme.ok : theme.surfaceBorder}`,
-                backgroundColor: dead
-                  ? "rgba(255, 82, 82, 0.14)"
-                  : isShield
-                    ? "rgba(63, 218, 140, 0.12)"
-                    : "rgba(10, 24, 38, 0.8)",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                fontFamily: theme.font.mono,
-                fontSize: 32,
-                color: dead ? theme.danger : isShield ? theme.ok : theme.textMuted,
-                transform: `translateY(${dead ? smash * 6 : 0}px) rotate(${dead ? smash * 4 : 0}deg) scale(${isShield ? 0.96 + shield * 0.04 : 1})`,
-                boxShadow: isShield && shield > 0.5 ? `0 0 40px rgba(63, 218, 140, 0.35)` : "none",
-                opacity: i === 4 ? (dead ? 1 : 0.55 + shield * 0.45) : 1,
-              }}
-            >
-              {dead ? "💥" : isShield ? "🛡" : v}
-              {dead && <span style={{ fontSize: 18, marginTop: 4 }}>失守</span>}
-              {isShield && shield > 0.5 && <span style={{ fontSize: 18, marginTop: 4 }}>弹开</span>}
+            <div key={v} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              <div
+                style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: "50%",
+                  border: `4px solid ${dead ? theme.danger : isShield ? theme.ok : theme.surfaceBorder}`,
+                  backgroundColor: dead
+                    ? "rgba(255, 82, 82, 0.14)"
+                    : isShield
+                      ? "rgba(63, 218, 140, 0.12)"
+                      : "rgba(10, 24, 38, 0.8)",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontFamily: theme.font.mono,
+                  fontSize: 30,
+                  color: dead ? theme.danger : isShield ? theme.ok : theme.textMuted,
+                  transform: `translateY(${dead ? smash * 6 : 0}px) rotate(${dead ? smash * 4 : 0}deg) scale(${isShield ? 0.96 + shield * 0.04 : 1})`,
+                  boxShadow: isShield && shield > 0.5 ? `0 0 40px rgba(63, 218, 140, 0.35)` : "none",
+                  opacity: i === 4 ? (dead ? 1 : 0.55 + shield * 0.45) : 1,
+                }}
+              >
+                {dead ? "💥" : isShield ? "🛡" : v}
+              </div>
+              <div style={{ fontSize: 21, color: dead ? theme.danger : isShield ? theme.ok : theme.textMuted }}>
+                {name}
+                {dead ? " · 失守" : ""}
+                {isShield && shield > 0.5 ? " · 弹开" : ""}
+              </div>
             </div>
           );
         })}

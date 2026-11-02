@@ -173,7 +173,7 @@ public class PromoConfigManager {
 
 | 镜号 | 台词 | 画面 | 代码切分 |
 |---|---|---|---|
-| 2.5 | 第五版，压轴——单元素枚举，Effective Java 钦定的最佳单例。INSTANCE 一个词加个分号，单例就成了，字段方法照常写。这也是现代 Java 的态度：让模式隐身，一个词解决的事，不写十行。它凭什么压轴？光说不动手不行，我们演一场攻击。反射攻击，专拆 private：getDeclaredConstructor 拿到构造器，setAccessible(true) 强行撬开，newInstance——前面四版全线失守：ghost == getInstance() 印出来是 false，第二个实例诞生，唯一性卒。你可能会说：我们项目谁会闲得写这种代码？攻击不一定来自同事——反序列化、某些框架按 class 反建对象，走的都是同一条暗道。同样的炮弹打向枚举：Constructor.newInstance 直接抛 IllegalArgumentException——Cannot reflectively create enum objects。JVM 在语言层面焊死了这扇门；序列化也一样，枚举反序列化不会产生新实例。防反射、防序列化、代码最短，三项全包，这就是它压轴的理由。 | C7 攻击代码**真实运行实录**：控制台输出 false（红字）→ 打向枚举版时 Exception 轨迹（红）；攻击箭头射向五版本徽标墙，V1–V4 碎裂、V5 盾牌弹开；字幕定格「Cannot reflectively create enum objects」 | **C6** 枚举 ＋ **C7** 反射攻击 |
+| 2.5 | 第五版，压轴——单元素枚举，Effective Java 钦定的最佳单例。INSTANCE 一个词加个分号，单例就成了，字段方法照常写。这也是现代 Java 的态度：让模式隐身，一个词解决的事，不写十行。它凭什么压轴？光说不动手不行，我们演一场攻击。反射攻击，专拆 private：getDeclaredConstructor 拿到构造器，setAccessible(true) 强行撬开，newInstance——前面四版全线失守：ghost == getInstance() 印出来是 false，第二个实例诞生，唯一性卒。你可能会说：我们项目谁会闲得写这种代码？攻击不一定来自同事——反序列化、某些框架按 class 反建对象，走的都是同一条暗道。同样的炮弹打向枚举：Constructor.newInstance 直接抛出非法参数异常（IllegalArgumentException）——Cannot reflectively create enum objects，JVM 在语言层面焊死了这扇门；序列化也一样，枚举反序列化不会产生新实例。防反射、防序列化、代码最短，三项全包，这就是它压轴的理由。 | C7 攻击代码**真实运行实录**：控制台输出 false（红字）→ 打向枚举版时 Exception 轨迹（红）；攻击箭头射向五版本徽标墙，V1–V4 碎裂、V5 盾牌弹开；字幕定格「Cannot reflectively create enum objects」 | **C6** 枚举 ＋ **C7** 反射攻击 |
 
 **C6 · V5 枚举（3 行）**
 
