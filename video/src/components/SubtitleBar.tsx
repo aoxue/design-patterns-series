@@ -34,8 +34,8 @@ export const SubtitleBar: FC<SubtitleBarProps> = ({ chunks, progress }) => {
       style={{
         position: "absolute",
         bottom: 56,
-        left: 0,
-        right: 0,
+        left: 120,
+        right: 120,
         display: "flex",
         justifyContent: "center",
         opacity: fadeIn,
@@ -44,14 +44,13 @@ export const SubtitleBar: FC<SubtitleBarProps> = ({ chunks, progress }) => {
       <div
         style={{
           maxWidth: 1560,
-          padding: "14px 36px",
-          borderRadius: 999,
-          backgroundColor: "rgba(4, 10, 18, 0.78)",
-          border: `1px solid rgba(255, 255, 255, 0.10)`,
           fontSize: 34,
           lineHeight: 1.5,
           color: theme.text,
           textAlign: "center",
+          // 深色底片不垫色块：靠双层阴影保证字幕在任何画面上的可读性
+          textShadow:
+            "0 2px 6px rgba(0, 0, 0, 0.9), 0 0 24px rgba(0, 0, 0, 0.65)",
         }}
       >
         {chunks[index]}
