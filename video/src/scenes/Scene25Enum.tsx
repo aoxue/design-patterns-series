@@ -44,21 +44,43 @@ const C7: CodeLine[] = [
   { segs: [{ text: "// → false —— 失守", kind: "comment" }] },
 ];
 
-/** Maven 真实运行输出（2026-11-02 实测，mashanggou SingletonEvolutionDemo 第三幕） */
-const TERMINAL: { p: number; text: string; kind: "cmd" | "out" | "hot" }[] = [
+/** Maven 真实运行输出（2026-11-02 实测，mashanggou SingletonEvolutionDemo 第三幕）。
+ *  link = 由代码执行直接产生（▸ 前缀与代码卡 ▶ 执行游标配对，同刻出现） */
+const TERMINAL: { p: number; text: string; kind: "cmd" | "out" | "hot"; link?: boolean }[] = [
   { p: 0.23, text: "$ mvn -q compile exec:java -Dexec.mainClass=…SingletonEvolutionDemo", kind: "cmd" },
   { p: 0.24, text: "=== 第三幕 · 反射攻击（C7） ===", kind: "out" },
-  { p: 0.36, text: "攻击 V1 饿汉式（普通类）: ghost == getInstance() → false", kind: "hot" },
-  { p: 0.37, text: "            ← 失守！第二个实例诞生", kind: "hot" },
-  { p: 0.54, text: "攻击 V5 枚举: java.lang.IllegalArgumentException:", kind: "hot" },
-  { p: 0.55, text: "            Cannot reflectively create enum objects", kind: "hot" },
+  { p: 0.355, text: "攻击 V1 饿汉式（普通类）: ghost == getInstance() → false", kind: "hot", link: true },
+  { p: 0.365, text: "            ← 失守！第二个实例诞生", kind: "hot", link: true },
+  { p: 0.545, text: "攻击 V5 枚举: java.lang.IllegalArgumentException:", kind: "hot", link: true },
+  { p: 0.555, text: "            Cannot reflectively create enum objects", kind: "hot", link: true },
   { p: 0.62, text: "← JVM 在语言层面焊死了这扇门", kind: "out" },
 ];
 
-const C7_VIS = [0.23, 0.26, 0.3, 0.33, 0.34, 0.36];
+/** 两波「执行重放」：代码行依次点亮（▶ 游标），输出恰在产生它的行执行时落地。
+ *  第一波打普通类（println 印出 false）；第二波打枚举（newInstance 抛异常） */
+const WAVES = [
+  { start: 0.24, step: 0.035, lines: [1, 2, 3, 4] },
+  { start: 0.5, step: 0.02, lines: [1, 2, 3] },
+];
+
+const execActive = (p: number) => {
+  let active = -1;
+  for (const w of WAVES) {
+    const end = w.start + w.lines.length * w.step + 0.015;
+    if (p >= w.start && p < end) {
+      const k = Math.min(Math.floor((p - w.start) / w.step), w.lines.length - 1);
+      active = w.lines[k];
+    }
+  }
+  return active;
+};
+
+const C7_VIS = [0.23, 0.24, 0.275, 0.31, 0.345, 0.365];
 
 export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  // 台词进度 0–1：驱动两波执行重放的游标
+  const p = Math.max(0, Math.min((frame - leadFrames) / audioFrames, 1));
 
   const showAttack = seen(0.2); // 0.2 起 C6 淡出、C7 进场
   const c6Out = 1 - fade(0.2, 8);
@@ -104,6 +126,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               lines={C7}
               visible={C7_VIS.map(seen)}
               fontSize={21}
+              activeLine={execActive(p)}
             />
           </div>
         </div>
@@ -136,6 +159,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 fontWeight: l.kind === "hot" ? 700 : 400,
               }}
             >
+              {l.link && <span style={{ color: theme.primaryBright, marginRight: 8 }}>▸</span>}
               {l.text}
             </div>
           ))}
