@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { CodeCard, type CodeLine } from "../components/CodeCard";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { CodeCard, type CodeLine } from "../../components/CodeCard";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 2.1 · V1 饿汉式（1:30–2:10）

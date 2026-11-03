@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { CodeCard, type CodeLine } from "../components/CodeCard";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { CodeCard, type CodeLine } from "../../components/CodeCard";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 4.2 · 影子一号 Runtime.getRuntime()（7:08–7:45）

@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 1.4 · 本期路线图（1:15–1:30）

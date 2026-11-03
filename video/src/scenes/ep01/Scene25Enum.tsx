@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { CodeCard, type CodeLine } from "../components/CodeCard";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { CodeCard, type CodeLine } from "../../components/CodeCard";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 2.5 · V5 枚举 + 反射攻击实录（4:20–5:30）

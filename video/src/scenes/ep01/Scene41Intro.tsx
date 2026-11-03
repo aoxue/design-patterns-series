@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 4.1 · 「框架影子」固定片头（7:00–7:08）

@@ -29,7 +29,7 @@ console.log("▷ 打包工程…");
 const serveUrl = await bundle({ entryPoint: path.join(ROOT, "src/index.ts") });
 
 console.log("▷ 读取音频实测时间轴（TimelineProbe）…");
-const probe = await selectComposition({ serveUrl, id: "TimelineProbe" });
+const probe = await selectComposition({ serveUrl, id: `TimelineProbe-${COMP}` });
 const timeline = probe.props && probe.props.timeline;
 if (!Array.isArray(timeline) || timeline.length === 0) {
   console.error("✗ TimelineProbe 未返回 timeline，检查 src/Root.tsx");

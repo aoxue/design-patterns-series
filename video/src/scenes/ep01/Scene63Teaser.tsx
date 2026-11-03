@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill, interpolate } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
-import { QuoteFrame } from "../components/QuoteFrame";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
+import { QuoteFrame } from "../../components/QuoteFrame";
 
 /**
  * 镜 6.3 · EP02 预告 + 金句回屏（结尾三镜压轴）

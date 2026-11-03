@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 6.2 · 决策树速记（结尾三镜之二）

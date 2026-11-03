@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { CodeCard, type CodeLine } from "../components/CodeCard";
-import { theme } from "../theme";
+import { CodeCard, type CodeLine } from "../../components/CodeCard";
+import { theme } from "../../theme";
 
 /**
  * 镜 1.2 · 案发现场（0:15–0:50）

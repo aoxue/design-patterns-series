@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { theme } from "../theme";
+import { theme } from "../../theme";
 
 /**
  * 镜 1.1 · 钩子（0:00–0:15）
