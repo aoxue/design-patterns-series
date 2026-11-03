@@ -39,6 +39,16 @@ def split_subtitles(text: str) -> list[str]:
             continue
         buf = ""
         for part in re.split(r"(?<=[，——：])", s):
+            # 标点切完仍超长的片段（如长串英文/代码，内部无中文标点），
+            # 回退到空格（英文词边界）继续贪心装填，避免出现超长字幕条
+            if len(part) > 26:
+                for word in re.split(r"(?<= )", part):
+                    if len(buf + word) > 26 and buf:
+                        chunks.append(buf.strip())
+                        buf = word
+                    else:
+                        buf += word
+                continue
             if len(buf + part) > 26 and buf:
                 chunks.append(buf.strip())
                 buf = part

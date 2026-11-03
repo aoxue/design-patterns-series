@@ -2,7 +2,7 @@ package com.mashanggou.promo;
 
 /**
  * 事故版促销配置管理器（对应脚本代码卡 C1）。
- * 构造器 public，任何地方都能 new——订单 / 支付 / 报表各自持有一份实例，
+ * 构造器 public，任何地方都能 new 订单 / 支付 / 报表各自持有一份实例，
  * 缓存与刷新节奏互不相同，是「商品页减 80 vs 实付减 50」价格事故的根源。
  */
 public class PromoConfigManagerV0 {

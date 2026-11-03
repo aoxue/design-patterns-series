@@ -46,7 +46,7 @@ npm run render                                       # 渲染成片 → out/EP01
 ## Agent 工作纪律（在本工程内改东西时）
 
 1. **改画面**：只改 `src/scenes/` 对应镜的组件；颜色只从 `theme.ts` 取——由 `npm run lint:colors` **机制强制**（src 内出现十六进制字面量即报错），提交前必跑；
-2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），然后重跑 `python tools/tts.py`；
+2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），跑 `npm run lint:subs`（字幕文本规范，SOP §4.1：禁破折号「——」等），然后重跑 `python tools/tts.py`；
 3. **QA 铁律：先 still 后 render，出片后必自查**——改动先渲单帧检查；全片渲染前有联系表记录；**出片 ≠ 完成**：每镜抽首/中/尾 3 帧拼联系表 + 头中尾抽听（有声/同步），发现即修即重渲复验，问题清零才勾脚本附录 D（SOP §8）；
 4. **音频槽位**：时长与逐句时间戳永远由音频驱动（align.json 是唯一时钟）；禁止在组件里写死场景秒数；换音频后必须重跑 tts.py（或 whisper 对齐）再渲染；
 5. **动画锚点按台词字位计算，禁止等间隔拍脑袋**——台词里找关键词的字符位置除以总字数得进度锚点：

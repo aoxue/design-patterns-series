@@ -3,7 +3,7 @@ package com.mashanggou.promo;
 /**
  * EP01 演示入口（对应脚本代码卡 C1 事故现场 + C7 反射攻击，须真实运行录屏）。
  * 运行输出三幕：① 事故版谁都能 new → 多实例；② 五版演进各自全局唯一；
- * ③ 反射攻击对比——普通类失守（false），枚举被 JVM 拒绝。
+ * ③ 反射攻击对比，普通类失守（false），枚举被 JVM 拒绝。
  */
 public class SingletonEvolutionDemo {
 

@@ -8,6 +8,7 @@
     "render": "remotion render src/index.ts EP01 out/EP01.mp4",
     "still": "remotion still src/index.ts EP01",
     "lint:colors": "node tools/check-colors.mjs",
+    "lint:subs": "node tools/check-subtitles.mjs",
     "sheet": "node tools/contact-sheet.mjs",
     "synccheck": "node tools/sync-check.mjs"
   },

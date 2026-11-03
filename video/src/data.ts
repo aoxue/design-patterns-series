@@ -43,6 +43,19 @@ export function splitSubtitles(text: string): string[] {
     }
     let buf = "";
     for (const part of s.split(/(?<=[，——：])/)) {
+      // 标点切完仍超长的片段（如长串英文/代码，内部无中文标点），
+      // 回退到空格（英文词边界）继续贪心装填，避免出现超长字幕条
+      if (part.length > 26) {
+        for (const word of part.split(/(?<= )/)) {
+          if ((buf + word).length > 26 && buf) {
+            chunks.push(buf.trim());
+            buf = word;
+          } else {
+            buf += word;
+          }
+        }
+        continue;
+      }
       if ((buf + part).length > 26 && buf) {
         chunks.push(buf.trim());
         buf = part;

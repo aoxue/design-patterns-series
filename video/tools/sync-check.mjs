@@ -28,6 +28,18 @@ const splitSubtitles = (text) => {
     }
     let buf = "";
     for (const part of s.split(/(?<=[，——：])/)) {
+      // 标点切完仍超长的片段，回退到空格（英文词边界）继续贪心装填（与 data.ts/tts.py 同步）
+      if (part.length > 26) {
+        for (const word of part.split(/(?<= )/)) {
+          if ((buf + word).length > 26 && buf) {
+            chunks.push(buf.trim());
+            buf = word;
+          } else {
+            buf += word;
+          }
+        }
+        continue;
+      }
       if ((buf + part).length > 26 && buf) {
         chunks.push(buf.trim());
         buf = part;

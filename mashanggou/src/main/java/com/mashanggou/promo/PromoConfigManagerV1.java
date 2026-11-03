@@ -3,7 +3,7 @@ package com.mashanggou.promo;
 /**
  * V1 饿汉式单例（对应脚本代码卡 C2）。
  * 类一加载实例就建好；private 构造器从根上掐灭外部 new。
- * 缺点：太急——无论本次运行是否用到促销配置，实例都随类加载必然创建。
+ * 缺点：太急。无论本次运行是否用到促销配置，实例都随类加载必然创建。
  */
 public class PromoConfigManagerV1 {
 
