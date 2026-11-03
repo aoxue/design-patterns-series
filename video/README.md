@@ -28,6 +28,7 @@ pip install edge-tts     # Python 3，样片配音依赖
 
 # 日常
 python tools/tts.py                                  # （重）生成 TTS 样片配音 + 逐句时间戳 align.json（--voice 可换音色）
+python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
 npm run lint:colors                                  # 颜色纪律检查（提交前必跑，违规即红）
 npm run sheet                                        # 成片自查联系表：每镜首/中/尾 3 帧（SOP §8）
 npm run synccheck                                    # 音画同步对照：每镜 4 帧 + 字幕配对表（SOP §8）
