@@ -64,7 +64,7 @@ npm run render                                       # 渲染成片 → out/EP01
 - [x] 联系表自动生成脚本（tools/contact-sheet：`npm run sheet`，每镜首/中/尾 3 帧拼表 + 960×540 单帧留档供放大复查；帧区间由 TimelineProbe 合成提供，音频实测驱动）
 - [x] 音画对齐治本（2026-11-03）：tts.py 采集词级时间戳 → align.json；字幕按实测时间选句、场景锚点经 AnchorCtx 穿透实测时间轴（场景零改动），实测 vs 旧字位估算普遍差 0.5–2.2s/句
 - [ ] 关键词锚点 API：`atWord("第二，")` 精确落句首（当前字符占比锚点会落在句内按比例处，如 0.917 → 句尾）
-- [ ] 真人原声对齐脚本：faster-whisper 词级时间戳 → 重算 align.json（换声流程：覆盖 mp3 → 对齐 → 重渲）
+- [ ] 真人原声对齐脚本：faster-whisper 词级时间戳 → 重算 align.json（换声流程：覆盖 mp3 → 对齐 → 重渲）。**EP01 真声收官的阻塞项**（2026-11-03 定：先补此工具再录音）
 - [ ] episode JSON 契约（Zod）：六段全字段；分镜脚本 → JSON 转换规则（脚本仍是内容事实源，JSON 是制作副本）
 - [ ] 竖屏 composition：60 秒切片与正片同源
 - [ ] BGM / 音效轨道混音
