@@ -40,7 +40,7 @@ const CONSUMERS = [
 ];
 
 export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const { at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
 
   return (
     <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
@@ -172,7 +172,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
         {/* 右：C9 代码 + 格局对比 + 结论 */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
-          <CodeCard title="Spring 版 · 注解 + 构造器注入" lines={C9} visible={C9_VIS.map((v) => (typeof v === "boolean" ? v : seen(v)))} fontSize={19} />
+          <CodeCard title="Spring 版 · 注解 + 构造器注入" lines={C9} revealAt={C9_VIS.map((v) => (typeof v === "boolean" ? (v ? 0 : Infinity) : at(v)))} fontSize={19} />
 
           <div
             style={{

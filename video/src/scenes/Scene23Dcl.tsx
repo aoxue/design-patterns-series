@@ -71,7 +71,7 @@ const STEPS = [
 export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
 
-  const visible = VIS.map(seen);
+  const revealAt = VIS.map(at);
   const boardIn = fade(0.34);
 
   // ②③ 积木交换度：0.42 讲到「调换顺序」交换 → 0.60 volatile 焊死回位
@@ -120,7 +120,7 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         <CodeCard
           title="PromoConfigManager.java · V3 双检锁"
           lines={LINES}
-          visible={visible}
+          revealAt={revealAt}
           fontSize={19}
         />
       </div>

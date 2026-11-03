@@ -90,7 +90,7 @@ export const Scene42Runtime: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       {/* 两段源码并排 + 同款印章 */}
       <div style={{ display: "flex", gap: 36, alignItems: "stretch", position: "relative" }}>
         <div style={{ flex: 1 }}>
-          <CodeCard title="jdk/src/java.base/java/lang/Runtime.java" lines={JDK_SRC} visible={[true, true, true]} fontSize={19} />
+          <CodeCard title="jdk/src/java.base/java/lang/Runtime.java" lines={JDK_SRC} revealAt={[0, 0, 0]} fontSize={19} />
         </div>
 
         {/* 同款印章（盖在两卡之间的缝隙上，缩小避免压住代码） */}
@@ -115,7 +115,7 @@ export const Scene42Runtime: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         </div>
 
         <div style={{ flex: 1 }}>
-          <CodeCard title="PromoConfigManager.java · V1 饿汉式" lines={V1_SRC} visible={[true, true, true]} fontSize={19} />
+          <CodeCard title="PromoConfigManager.java · V1 饿汉式" lines={V1_SRC} revealAt={[0, 0, 0]} fontSize={19} />
         </div>
       </div>
 

@@ -73,7 +73,7 @@ const RACE: { p: number; col: 0 | 1; text: string; note?: string; bad?: boolean 
 export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
 
-  const visible = VIS.map(seen);
+  const revealAt = VIS.map(at);
   const boardIn = fade(0.19);
   const broken = pop(0.4); // 「单例？只剩个名字」破裂标签
   // 破裂抖动：标签出现后 12 帧内横向震颤
@@ -97,7 +97,7 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       <div style={{ display: "flex", gap: 40, flex: 1 }}>
         {/* 左：C3 diff 卡 */}
         <div style={{ flex: 1.5 }}>
-          <CodeCard title="PromoConfigManager.java · V1 → V2（diff）" lines={LINES} visible={visible} fontSize={19} />
+          <CodeCard title="PromoConfigManager.java · V1 → V2（diff）" lines={LINES} revealAt={revealAt} fontSize={19} />
         </div>
 
         {/* 右：A1 时序板 + synchronized 警告 + 死结 */}

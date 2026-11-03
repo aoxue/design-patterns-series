@@ -51,11 +51,11 @@ export const CrimeScene: FC = () => {
 
   const titleIn = interpolate(frame, [0, 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  const visible = LINES.map((_, i) => {
-    const group = Math.floor((i + 1) / 3); // 每组 3 行（注释/代码/空行）
+  // 每行开始出现的帧号（注释/代码同帧起，组内代码行略迟 26 帧）
+  const revealAt = LINES.map((_, i) => {
+    const group = Math.floor((i + 1) / 3);
     const offsetInGroup = (i + 1) % 3;
-    const start = GROUP_STARTS[group] + (offsetInGroup === 2 ? 26 : 0);
-    return frame >= start;
+    return GROUP_STARTS[group] + (offsetInGroup === 2 ? 26 : 0);
   });
 
   const cardIn = interpolate(frame, [10, 40], [80, 0], {
@@ -75,7 +75,7 @@ export const CrimeScene: FC = () => {
 
       <div style={{ display: "flex", gap: 56, flex: 1 }}>
         <div style={{ flex: 1.15, transform: `translateY(${cardIn}px)` }}>
-          <CodeCard title="mashanggou-promo · 事故代码" lines={LINES} visible={visible} />
+          <CodeCard title="mashanggou-promo · 事故代码" lines={LINES} revealAt={revealAt} />
         </div>
 
         <div style={{ flex: 1 }}>

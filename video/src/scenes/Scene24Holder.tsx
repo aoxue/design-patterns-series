@@ -42,7 +42,7 @@ const LINES: CodeLine[] = [
 const VIS = [0.05, 0.06, 0.13, 0.15, 0.16, 0.09, 0.1];
 
 export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const { at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
 
   return (
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
@@ -54,7 +54,7 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       <div style={{ display: "flex", gap: 40, flex: 1 }}>
         {/* 左：C5 代码卡 */}
         <div style={{ flex: 1.4 }}>
-          <CodeCard title="PromoConfigManager.java · V4 静态内部类" lines={LINES} visible={VIS.map(seen)} fontSize={22} />
+          <CodeCard title="PromoConfigManager.java · V4 静态内部类" lines={LINES} revealAt={VIS.map(at)} fontSize={22} />
         </div>
 
         {/* 右：JVM 牌子 + 白送徽章 + 行数对比 */}

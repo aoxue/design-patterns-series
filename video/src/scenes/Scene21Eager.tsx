@@ -43,12 +43,12 @@ const STEP = [0.1, 0.17, 0.32, 0.5, 0.72];
 export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
 
-  const visible = [
-    seen(STEP[0] - 0.02),
-    seen(STEP[0]),
-    seen(STEP[1]),
-    seen(STEP[2]),
-    seen(STEP[2] + 0.01),
+  const revealAt = [
+    at(STEP[0] - 0.02),
+    at(STEP[0]),
+    at(STEP[1]),
+    at(STEP[2]),
+    at(STEP[2] + 0.01),
   ];
 
   // 「类一加载实例就建好」：类加载进度条在代码卡成形后跑满，实例弹出
@@ -78,7 +78,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       <div style={{ display: "flex", gap: 40, flex: 1 }}>
         {/* 左：C2 代码卡 + 类加载进度条 */}
         <div style={{ flex: 1.25, display: "flex", flexDirection: "column", gap: 20 }}>
-          <CodeCard title="PromoConfigManager.java · V1 饿汉式" lines={LINES} visible={visible} fontSize={21} />
+          <CodeCard title="PromoConfigManager.java · V1 饿汉式" lines={LINES} revealAt={revealAt} fontSize={21} />
           <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: fade(STEP[0]) }}>
             <span style={{ fontSize: 24, color: theme.textMuted, width: 130 }}>类加载</span>
             <div

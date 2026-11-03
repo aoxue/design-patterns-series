@@ -118,13 +118,13 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         {/* 左：C6 → C7 切换 */}
         <div style={{ flex: 1.15, position: "relative" }}>
           <div style={{ position: "absolute", inset: 0, opacity: c6Out }}>
-            <CodeCard title="PromoConfigManager.java · V5 枚举" lines={C6} visible={[true, true, true, true]} fontSize={21} />
+            <CodeCard title="PromoConfigManager.java · V5 枚举" lines={C6} revealAt={[0, 0, 0, 0]} fontSize={21} />
           </div>
           <div style={{ position: "absolute", inset: 0, opacity: fade(0.21), pointerEvents: "none" }}>
             <CodeCard
               title="ReflectionAttack.java · 攻击方"
               lines={C7}
-              visible={C7_VIS.map(seen)}
+              revealAt={C7_VIS.map(at)}
               fontSize={21}
               activeLine={execActive(p)}
             />

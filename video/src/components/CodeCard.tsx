@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { interpolate, useCurrentFrame } from "remotion";
 import { theme } from "../theme";
 
 export interface CodeSeg {
@@ -17,8 +18,10 @@ export interface CodeLine {
 interface CodeCardProps {
   title: string;
   lines: CodeLine[];
-  /** 与 lines 等长：该行当前是否可见（由场景按时序计算） */
-  visible: boolean[];
+  /** 与 lines 等长：每行开始出现的帧号（Infinity = 暂不显示）。
+   *  行在 revealAt 起 9 帧内确定性淡入 + 上浮——帧驱动，禁用 CSS transition
+   *  （Remotion 逐帧截图下 transition 行为不确定，是「出现闪两下」的根源） */
+  revealAt: number[];
   /** 代码字号（默认 25；行数多/行长长的卡用 19–21 防溢出） */
   fontSize?: number;
   /** 执行游标：该行处于「执行中」状态（▶ 前缀 + 高亮），与终端输出同步配对用 */
@@ -33,7 +36,18 @@ const segColor = (kind?: string) => {
 };
 
 /** 代码卡：窗口栏 + 逐行显隐。PoC 用手工着色，全量版换 shiki 高亮 */
-export const CodeCard: FC<CodeCardProps> = ({ title, lines, visible, fontSize = 25, activeLine = -1 }) => (
+export const CodeCard: FC<CodeCardProps> = ({ title, lines, revealAt, fontSize = 25, activeLine = -1 }) => {
+  const frame = useCurrentFrame();
+  /** 行出现进度 0–1：revealAt 起 9 帧淡入（Infinity 恒为 0） */
+  const tOf = (i: number) =>
+    revealAt[i] === Infinity
+      ? 0
+      : interpolate(frame, [revealAt[i], revealAt[i] + 9], [0, 1], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        });
+
+  return (
   <div
     style={{
       backgroundColor: theme.codeBg,
@@ -75,21 +89,20 @@ export const CodeCard: FC<CodeCardProps> = ({ title, lines, visible, fontSize = 
         lineHeight: 1.8,
       }}
     >
-      {lines.map((line, i) =>
-        line.blank ? (
-          <div key={i} style={{ height: 20 }} />
-        ) : (
+      {lines.map((line, i) => {
+        if (line.blank) return <div key={i} style={{ height: 20 }} />;
+        const t = tOf(i); // 帧驱动出现进度：底色/边条随行整体淡入，无跳变
+        return (
           <div
             key={i}
             style={{
-              opacity: visible[i] ? 1 : 0,
-              transform: `translateY(${visible[i] ? 0 : 6}px)`,
-              transition: "opacity 240ms, transform 240ms",
+              opacity: t,
+              transform: `translateY(${(1 - t) * 10}px)`,
               whiteSpace: "pre",
               backgroundColor:
                 i === activeLine
                   ? "rgba(124, 182, 255, 0.12)"
-                  : !visible[i]
+                  : t <= 0
                     ? "transparent"
                     : line.diff === "del"
                       ? theme.diffDel
@@ -101,7 +114,7 @@ export const CodeCard: FC<CodeCardProps> = ({ title, lines, visible, fontSize = 
               borderLeft:
                 i === activeLine
                   ? `3px solid ${theme.primaryBright}`
-                  : !visible[i]
+                  : t <= 0
                     ? "3px solid transparent"
                     : line.diff === "del"
                       ? `3px solid ${theme.danger}`
@@ -123,8 +136,9 @@ export const CodeCard: FC<CodeCardProps> = ({ title, lines, visible, fontSize = 
               </span>
             ))}
           </div>
-        )
-      )}
+        );
+      })}
     </div>
   </div>
-);
+  );
+};
