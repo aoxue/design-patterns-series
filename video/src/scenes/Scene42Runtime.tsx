@@ -150,7 +150,30 @@ export const Scene42Runtime: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         }}
       >
         <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>JDK 1.0</span>
-        <span style={{ color: theme.textMuted }}>——→</span>
+        {/* 图形化箭头线：文字箭头「——→」基线不齐，改真画的线 */}
+        <div
+          style={{
+            width: 150,
+            height: 2,
+            backgroundColor: theme.surfaceBorder,
+            position: "relative",
+            margin: "0 14px",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: -1,
+              top: -4,
+              width: 0,
+              height: 0,
+              borderLeft: `9px solid ${theme.surfaceBorder}`,
+              borderTop: "5px solid transparent",
+              borderBottom: "5px solid transparent",
+            }}
+          />
+        </div>
         <span>今天</span>
         <span style={{ marginLeft: "auto", color: theme.textMuted, fontSize: 23 }}>
           1996 年写好的单例，还在每一台 JVM 里跑

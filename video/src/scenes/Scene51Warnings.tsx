@@ -130,7 +130,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
         </span>
       </div>
 
-      {/* 尾段渐暗罩层：黑幕从四周压下来，中央留待机位 */}
+      {/* 尾段渐暗罩层：黑幕压下来，为片尾金句蓄力（6.1 金句自然衔接） */}
       <div
         style={{
           position: "absolute",
@@ -140,23 +140,6 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
           pointerEvents: "none",
         }}
       />
-      {/* 待机位：一句承上启下（片尾金句前的静场） */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          opacity: fade(1.0, 12),
-          pointerEvents: "none",
-        }}
-      >
-        <span style={{ fontSize: 34, color: theme.textMuted, letterSpacing: 4 }}>
-          那么，一句话带走这期 ——
-        </span>
-      </div>
-      <span style={{ display: "none" }}>{frame - at(0)}</span>
     </AbsoluteFill>
   );
 };
