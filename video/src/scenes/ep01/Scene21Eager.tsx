@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
 import { CodeCard, type CodeLine } from "../../components/CodeCard";
-import { theme } from "../../theme";
-import { useAnchors, type SceneProps } from "../../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 2.1 · V1 饿汉式（1:30–2:10）
@@ -42,6 +42,7 @@ const STEP = [0.1, 0.17, 0.32, 0.5, 0.72];
 
 export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   const revealAt = [
     at(STEP[0] - 0.02),
@@ -71,7 +72,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   return (
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
       <div style={{ fontSize: 38, fontWeight: 700, color: theme.text, marginBottom: 24 }}>
-        <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V1</span> 饿汉式 ·
+        <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>V1</span> 饿汉式 ·
         类一加载，实例就建好 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>· 饿到等不及</span>
       </div>
 
@@ -86,8 +87,8 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 flex: 1,
                 height: 18,
                 borderRadius: 9,
-                backgroundColor: "rgba(10, 24, 38, 0.9)",
-                border: `1px solid ${theme.surfaceBorder}`,
+                backgroundColor: alpha(palette.bg, 0.9),
+                border: `1px solid ${palette.surfaceBorder}`,
                 overflow: "hidden",
               }}
             >
@@ -95,7 +96,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 style={{
                   height: "100%",
                   width: `${loadP * 100}%`,
-                  backgroundColor: theme.primary,
+                  backgroundColor: palette.primary,
                   borderRadius: 9,
                 }}
               />
@@ -117,8 +118,8 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.surfaceBorder}`,
+              backgroundColor: palette.surface,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "20px 26px",
               opacity: fade(STEP[1] - 0.02),
@@ -163,7 +164,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
           <div
             style={{
-              backgroundColor: theme.surface,
+              backgroundColor: palette.surface,
               border: `1px solid ${theme.warn}`,
               borderRadius: 14,
               padding: "20px 26px",
@@ -183,8 +184,8 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 marginTop: 14,
                 height: 14,
                 borderRadius: 7,
-                backgroundColor: "rgba(10, 24, 38, 0.9)",
-                border: `1px solid ${theme.surfaceBorder}`,
+                backgroundColor: alpha(palette.bg, 0.9),
+                border: `1px solid ${palette.surfaceBorder}`,
                 overflow: "hidden",
               }}
             >
@@ -202,8 +203,8 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             style={{
               borderRadius: 14,
               padding: "18px 26px",
-              backgroundColor: "rgba(59, 130, 246, 0.10)",
-              border: `1px solid ${theme.primary}`,
+              backgroundColor: alpha(palette.primary, 0.10),
+              border: `1px solid ${palette.primary}`,
               display: "flex",
               alignItems: "center",
               gap: 18,
@@ -211,13 +212,13 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             }}
           >
             <span style={{ fontSize: 26, color: theme.text }}>
-              团队需求：<span style={{ color: theme.primaryBright }}>第一次用到再建？</span>
+              团队需求：<span style={{ color: palette.primaryBright }}>第一次用到再建？</span>
             </span>
             <span
               style={{
                 marginLeft: "auto",
                 fontSize: 24,
-                color: theme.primaryBright,
+                color: palette.primaryBright,
                 fontFamily: theme.font.mono,
               }}
             >

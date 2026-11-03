@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
 import { CodeCard, type CodeLine } from "../../components/CodeCard";
-import { theme } from "../../theme";
-import { useAnchors, type SceneProps } from "../../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 2.5 · V5 枚举 + 反射攻击实录（4:20–5:30）
@@ -80,6 +80,7 @@ const C7_VIS = [0.23, 0.24, 0.275, 0.31, 0.345, 0.365, 0.56];
 
 export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
   // 台词进度 0–1：驱动两波执行重放的游标
   const p = Math.max(0, Math.min((frame - leadFrames) / audioFrames, 1));
 
@@ -96,7 +97,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 20, marginBottom: 16 }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
-          <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V5</span> 单元素枚举 · 压轴
+          <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>V5</span> 单元素枚举 · 压轴
         </div>
         <span
           style={{
@@ -156,7 +157,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           style={{
             flex: 1,
             backgroundColor: theme.deepBg,
-            border: `1px solid ${theme.surfaceBorder}`,
+            border: `1px solid ${palette.surfaceBorder}`,
             borderRadius: 14,
             padding: "18px 24px",
             fontFamily: theme.font.mono,
@@ -179,7 +180,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 fontWeight: l.kind === "hot" ? 700 : 400,
               }}
             >
-              {l.link && <span style={{ color: theme.primaryBright, marginRight: 8 }}>▸</span>}
+              {l.link && <span style={{ color: palette.primaryBright, marginRight: 8 }}>▸</span>}
               {l.text}
             </div>
           ))}
@@ -200,12 +201,12 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   width: 120,
                   height: 120,
                   borderRadius: "50%",
-                  border: `4px solid ${dead ? theme.danger : isShield ? theme.ok : theme.surfaceBorder}`,
+                  border: `4px solid ${dead ? theme.danger : isShield ? theme.ok : palette.surfaceBorder}`,
                   backgroundColor: dead
                     ? "rgba(255, 82, 82, 0.14)"
                     : isShield
                       ? "rgba(63, 218, 140, 0.12)"
-                      : "rgba(10, 24, 38, 0.8)",
+                      : alpha(palette.bg, 0.8),
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",

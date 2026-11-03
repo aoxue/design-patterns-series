@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
 import { CodeCard, type CodeLine } from "../../components/CodeCard";
-import { theme } from "../../theme";
-import { useAnchors, type SceneProps } from "../../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 2.4 · V4 静态内部类（3:50–4:20）
@@ -43,11 +43,12 @@ const VIS = [0.05, 0.06, 0.13, 0.15, 0.16, 0.09, 0.1];
 
 export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   return (
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
       <div style={{ fontSize: 38, fontWeight: 700, color: theme.text, marginBottom: 24 }}>
-        <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V4</span> 静态内部类 ·
+        <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>V4</span> 静态内部类 ·
         手写首选 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>· JVM 早就把路修好了</span>
       </div>
 
@@ -61,15 +62,15 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.surfaceBorder}`,
+              backgroundColor: palette.surface,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "22px 26px",
               opacity: fade(0.15),
             }}
           >
             <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 14 }}>
-              JVM 对 <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>Holder</span> 的两份承诺
+              JVM 对 <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>Holder</span> 的两份承诺
             </div>
             {[
               { t: "用时才加载", d: "第一次读到 Holder.INSTANCE 才触发类初始化 → 懒加载", p: 0.17 },
@@ -87,7 +88,7 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               >
                 <span style={{ fontSize: 30 }}>🏷️</span>
                 <div>
-                  <div style={{ fontSize: 25, fontWeight: 700, color: theme.primaryBright }}>{b.t}</div>
+                  <div style={{ fontSize: 25, fontWeight: 700, color: palette.primaryBright }}>{b.t}</div>
                   <div style={{ fontSize: 20, color: theme.textMuted }}>{b.d}</div>
                 </div>
               </div>
@@ -121,8 +122,8 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           {/* DCL vs 内部类 行数对比条 */}
           <div
             style={{
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.surfaceBorder}`,
+              backgroundColor: palette.surface,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "20px 26px",
               opacity: fade(0.3),
@@ -135,13 +136,13 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             ].map((r, i) => (
               <div key={r.n} style={{ display: "flex", alignItems: "center", gap: 14, padding: "6px 0" }}>
                 <span style={{ fontSize: 22, color: theme.text, width: 130, whiteSpace: "nowrap" }}>{r.n}</span>
-                <div style={{ flex: 1, height: 22, borderRadius: 6, backgroundColor: "rgba(10, 24, 38, 0.9)" }}>
+                <div style={{ flex: 1, height: 22, borderRadius: 6, backgroundColor: alpha(palette.bg, 0.9) }}>
                   <div
                     style={{
                       width: `${r.w}%`,
                       height: "100%",
                       borderRadius: 6,
-                      backgroundColor: i === 0 ? theme.surfaceBorder : theme.ok,
+                      backgroundColor: i === 0 ? palette.surfaceBorder : theme.ok,
                     }}
                   />
                 </div>
@@ -156,8 +157,8 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             style={{
               borderRadius: 14,
               padding: "16px 22px",
-              backgroundColor: "rgba(59, 130, 246, 0.10)",
-              border: `1px solid ${theme.primary}`,
+              backgroundColor: alpha(palette.primary, 0.10),
+              border: `1px solid ${palette.primary}`,
               fontSize: 23,
               lineHeight: 1.6,
               color: theme.text,
@@ -165,7 +166,7 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               opacity: pop(0.34),
             }}
           >
-            不是我们聪明，是 <span style={{ color: theme.primaryBright }}>JVM 类加载机制</span>
+            不是我们聪明，是 <span style={{ color: palette.primaryBright }}>JVM 类加载机制</span>
             <br />
             替你把路修好了
           </div>

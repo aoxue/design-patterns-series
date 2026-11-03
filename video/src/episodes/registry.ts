@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import type { SceneProps } from "../scene-kit";
 import type { ShotData } from "../data";
+import type { Category } from "../theme";
 import * as EP01 from "./EP01";
 
 /**
@@ -12,8 +13,8 @@ export interface EpisodeModule {
   id: string;
   /** 期标题（顶部 chrome 显示） */
   title: string;
-  /** GoF 分类（EP00/EP24 等非正片期可传其他标识） */
-  category: string;
+  /** GoF 分类，决定本期色板（PALETTES 的键）；EP00/EP24 等非正片期用 special */
+  category: Category;
   /** 台词（来自 public/episodes/EPxx.json），时间轴由它铺出 */
   lines: ShotData[];
   /** 镜号 → 场景组件 */

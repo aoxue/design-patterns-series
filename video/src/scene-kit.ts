@@ -1,5 +1,6 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { createContext, useContext } from "react";
+import type { CategoryPalette } from "./theme";
 
 /**
  * 场景组件统一 props：由调度器按音频实测时长传入。
@@ -23,6 +24,16 @@ export interface TimedChunk {
 
 /** Episode 注入的对齐上下文；at(p) 据此把「字符占比」映射到实测时间 */
 export const AnchorCtx = createContext<TimedChunk[] | null>(null);
+
+/** Episode 按期注入的分类色板（bg/surface/primary 等 8 个 token；中性色仍走 theme） */
+export const PaletteCtx = createContext<CategoryPalette | null>(null);
+
+/** 取本期分类色板；Provider 缺失即渲染树接线错误，抛出而非静默回退（避免整片用错色系） */
+export const usePalette = (): CategoryPalette => {
+  const palette = useContext(PaletteCtx);
+  if (!palette) throw new Error("PaletteCtx 缺失：色板由 Episode 注入，场景必须在 Episode 渲染树内使用");
+  return palette;
+};
 
 /** 台词进度 → 帧号的映射工具（每个新场景组件开头取一份） */
 export const useAnchors = (leadFrames: number, audioFrames: number) => {

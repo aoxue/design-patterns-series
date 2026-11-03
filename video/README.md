@@ -14,7 +14,7 @@ src/Episode.tsx            调度器：calculateMetadata 实测音频时长 → 
 src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors：动画锚点按台词进度 0–1 定义，换配音自动适配
 src/scenes/*.tsx           每镜一个场景组件（useCurrentFrame 帧驱动动画；EP01 共 18 个）
 src/components/*           复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
-src/theme.ts           SOP 色系（本期创建型蓝）唯一取色处，全系列组件禁止硬编码颜色
+src/theme.ts           色彩体系唯一取色处：中性 token（theme，全系列恒定）+ 四套分类色板（PALETTES，创建蓝/结构绿/行为橙/特辑紫，Episode 按期经 PaletteCtx 注入，组件 usePalette() 取），禁止硬编码颜色
 ```
 
 **铁律：场景时长不手写**，由音频实测时长 + 留白自动计算；换配音零改码，重渲即适配。
@@ -35,8 +35,8 @@ npm run lint:colors                                  # 颜色纪律检查（提�
 npm run sheet                                        # 成片自查联系表：每镜首/中/尾 3 帧（SOP §8）
 npm run synccheck                                    # 音画同步对照：每镜 4 帧 + 字幕配对表（SOP §8）
 npm run dev                                          # Remotion Studio 预览，可拖时间轴
-npx remotion still src/index.ts EP01 out/帧名.png --frame=1200  # 单帧（QA 用）
-npm run render                                       # 渲染成片 → out/EP01.mp4
+npx remotion still src/index.ts EP01 out/帧名.png --frame=1200  # 单帧（QA 用；也可 npm run still -- EP01 out/帧名.png --frame=1200）
+npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透传给 remotion，加新期零改码）
 ```
 
 ## 多机协作注意

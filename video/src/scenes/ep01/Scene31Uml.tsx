@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { theme } from "../../theme";
-import { useAnchors, type SceneProps } from "../../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 3.1 · 类图拆解（5:30–6:10）
@@ -27,6 +27,7 @@ const USERS = [
 
 export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   return (
     <AbsoluteFill style={{ padding: "120px 90px 140px" }}>
@@ -42,22 +43,22 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             left: 20,
             top: 30,
             width: 700,
-            backgroundColor: theme.umlBg,
-            border: `3px solid ${theme.umlBorder}`,
+            backgroundColor: palette.umlBg,
+            border: `3px solid ${palette.umlBorder}`,
             borderRadius: 10,
-            color: theme.bg,
+            color: palette.bg,
             opacity: pop(0.04),
             transform: `translateY(${(1 - pop(0.04)) * 24}px)`,
             overflow: "hidden",
           }}
         >
-          <div style={{ textAlign: "center", padding: "12px 0 4px", fontSize: 22, color: theme.umlBorder, fontFamily: theme.font.mono }}>
+          <div style={{ textAlign: "center", padding: "12px 0 4px", fontSize: 22, color: palette.umlBorder, fontFamily: theme.font.mono }}>
             «Singleton»
           </div>
           <div style={{ textAlign: "center", fontSize: 34, fontWeight: 700, fontFamily: theme.font.mono, paddingBottom: 14 }}>
             PromoConfigManager
           </div>
-          <div style={{ height: 2, backgroundColor: theme.umlBorder }} />
+          <div style={{ height: 2, backgroundColor: palette.umlBorder }} />
           <div style={{ padding: "18px 28px", fontFamily: theme.font.mono, fontSize: 25, lineHeight: 2.1 }}>
             {MEMBERS.map((m) => (
               <div key={m.sig} style={{ opacity: seen(m.p) ? 1 : 0.18 }}>
@@ -66,13 +67,13 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   style={{
                     fontFamily: theme.font.sans,
                     fontSize: 19,
-                    color: theme.umlBorder,
+                    color: palette.umlBorder,
                     marginLeft: 14,
-                    border: `1px solid ${theme.umlChip}`,
+                    border: `1px solid ${palette.umlChip}`,
                     borderRadius: 999,
                     padding: "1px 10px",
                     opacity: fade(m.p + 0.01),
-                    backgroundColor: "rgba(21, 101, 192, 0.06)",
+                    backgroundColor: alpha(palette.umlBorder, 0.06),
                   }}
                 >
                   {m.label}
@@ -100,7 +101,7 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   left: -520,
                   top: 44,
                   width: 500,
-                  borderTop: `3px dashed ${theme.primary}`,
+                  borderTop: `3px dashed ${palette.primary}`,
                   opacity: fade(u.p + 0.015),
                 }}
               />
@@ -113,15 +114,15 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   height: 0,
                   borderTop: `11px solid transparent`,
                   borderBottom: `11px solid transparent`,
-                  borderRight: `18px solid ${theme.primary}`,
+                  borderRight: `18px solid ${palette.primary}`,
                   opacity: fade(u.p + 0.015),
                 }}
               />
               <div
                 style={{
                   width: 360,
-                  backgroundColor: theme.surface,
-                  border: `2px solid ${theme.surfaceBorder}`,
+                  backgroundColor: palette.surface,
+                  border: `2px solid ${palette.surfaceBorder}`,
                   borderRadius: 10,
                   padding: "20px 26px",
                   transform: `translateX(${(1 - inn) * 60}px)`,
@@ -149,7 +150,7 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             opacity: fade(0.58),
           }}
         >
-          没有第二个类，它全部的工作，就是<span style={{ color: theme.primaryBright, fontWeight: 700 }}>管好自己这一个实例</span>
+          没有第二个类，它全部的工作，就是<span style={{ color: palette.primaryBright, fontWeight: 700 }}>管好自己这一个实例</span>
         </div>
       </div>
     </AbsoluteFill>

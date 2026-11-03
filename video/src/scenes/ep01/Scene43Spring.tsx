@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
 import { CodeCard, type CodeLine } from "../../components/CodeCard";
-import { theme } from "../../theme";
-import { useAnchors, type SceneProps } from "../../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 4.3 · 影子二号 Spring 容器（7:45–8:30）
@@ -41,6 +41,7 @@ const CONSUMERS = [
 
 export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   return (
     <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
@@ -72,8 +73,8 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   width: 300,
                   height: 120,
                   borderRadius: 12,
-                  border: `2px solid ${seen(0.12) ? theme.ok : theme.surfaceBorder}`,
-                  backgroundColor: "rgba(10, 24, 38, 0.9)",
+                  border: `2px solid ${seen(0.12) ? theme.ok : palette.surfaceBorder}`,
+                  backgroundColor: alpha(palette.bg, 0.9),
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
@@ -98,7 +99,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                     border: `2px solid ${theme.ok}`,
                     borderRadius: 8,
                     padding: "4px 12px",
-                    backgroundColor: theme.bg,
+                    backgroundColor: palette.bg,
                     transform: `scale(${0.7 + pop(0.28) * 0.3}) rotate(-4deg)`,
                     opacity: pop(0.28),
                   }}
@@ -114,7 +115,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                     width: 300,
                     height: 120,
                     borderRadius: 12,
-                    border: `1px dashed ${theme.surfaceBorder}`,
+                    border: `1px dashed ${palette.surfaceBorder}`,
                     opacity: 0.4,
                   }}
                 />
@@ -153,8 +154,8 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 />
                 <div
                   style={{
-                    backgroundColor: theme.surface,
-                    border: `1px solid ${theme.surfaceBorder}`,
+                    backgroundColor: palette.surface,
+                    border: `1px solid ${palette.surfaceBorder}`,
                     borderRadius: 10,
                     padding: "14px 18px",
                     textAlign: "center",
@@ -178,8 +179,8 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             style={{
               fontSize: 22,
               color: theme.text,
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.surfaceBorder}`,
+              backgroundColor: palette.surface,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 12,
               padding: "12px 20px",
               lineHeight: 1.7,

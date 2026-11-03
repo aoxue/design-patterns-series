@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { theme } from "../../theme";
-import { useAnchors, type SceneProps } from "../../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 4.1 · 「框架影子」固定片头（7:00–7:08）
@@ -9,6 +9,7 @@ import { useAnchors, type SceneProps } from "../../scene-kit";
  */
 export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   // 光环扫描：0–100% 转一圈（8 秒片头内转完）
   const sweep = interpolate(frame, [at(0), at(1)], [0, 360], {
@@ -30,10 +31,10 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             width: size,
             height: size,
             borderRadius: "50%",
-            border: `2px solid ${theme.surfaceBorder}`,
+            border: `2px solid ${palette.surfaceBorder}`,
             opacity: 0.5,
             transform: `rotate(${sweep + i * 180}deg)`,
-            borderTopColor: theme.primaryBright,
+            borderTopColor: palette.primaryBright,
           }}
         />
       ))}
@@ -57,10 +58,10 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           color: theme.text,
           letterSpacing: 14,
           opacity: pop(0.05),
-          textShadow: `0 0 60px rgba(59, 130, 246, 0.4)`,
+          textShadow: `0 0 60px ${alpha(palette.primary, 0.4)}`,
         }}
       >
-        框架<span style={{ color: theme.primaryBright }}>影子</span>
+        框架<span style={{ color: palette.primaryBright }}>影子</span>
       </div>
 
       <div
@@ -71,7 +72,7 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           opacity: fade(0.3),
         }}
       >
-        它藏在 <span style={{ color: theme.primaryBright, fontFamily: theme.font.mono }}>JDK</span> 和{" "}
+        它藏在 <span style={{ color: palette.primaryBright, fontFamily: theme.font.mono }}>JDK</span> 和{" "}
         <span style={{ color: theme.ok, fontFamily: theme.font.mono }}>Spring</span> 里，早就认识你
       </div>
 
@@ -84,10 +85,10 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               fontSize: 25,
               fontFamily: theme.font.mono,
               color: theme.text,
-              border: `1px solid ${theme.surfaceBorder}`,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 999,
               padding: "10px 28px",
-              backgroundColor: "rgba(18, 44, 68, 0.8)",
+              backgroundColor: alpha(palette.surface, 0.8),
             }}
           >
             {t}

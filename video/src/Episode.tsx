@@ -9,9 +9,9 @@ import {
 } from "remotion";
 import { getAudioData } from "@remotion/media-utils";
 import { FPS, ESTIMATE_CPS, audioPath, splitSubtitles, type ShotData } from "./data";
-import { theme } from "./theme";
+import { getPalette, theme } from "./theme";
 import { SubtitleBar } from "./components/SubtitleBar";
-import { AnchorCtx, type SceneProps, type TimedChunk } from "./scene-kit";
+import { AnchorCtx, PaletteCtx, type SceneProps, type TimedChunk } from "./scene-kit";
 import { getEpisode, type EpisodeModule } from "./episodes/registry";
 
 export interface TimelineItem extends ShotData {
@@ -69,8 +69,9 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
   episodeId,
   timeline,
 }) => {
-  // 期模块由注册表按期号解析：场景映射、期标题都从期模块取
+  // 期模块由注册表按期号解析：场景映射、期标题、分类色板都从期模块取
   const ep = getEpisode(episodeId);
+  const palette = getPalette(ep.category);
   const tl = timeline ?? buildTimeline(ep, null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -88,13 +89,14 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: theme.bg,
+        backgroundColor: palette.bg,
         fontFamily: theme.font.sans,
         // 全局基础字色：防止未显式写 color 的文字继承浏览器默认黑色（深底黑字不可读）
         color: theme.text,
       }}
     >
-      {tl.map((it) => {
+      <PaletteCtx.Provider value={palette}>
+        {tl.map((it) => {
         const Scene = ep.scenes[it.id];
         const leadFrames = Math.round(it.leadSec * FPS);
         return (
@@ -114,6 +116,7 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
           </Sequence>
         );
       })}
+      </PaletteCtx.Provider>
 
       {/* 全局 chrome：系列标识 + 当前镜号 */}
       <div
@@ -151,7 +154,7 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
           left: 0,
           height: 5,
           width: `${(frame / totalFrames) * 100}%`,
-          backgroundColor: theme.primary,
+          backgroundColor: palette.primary,
         }}
       />
       <span style={{ display: "none" }}>{fps}</span>

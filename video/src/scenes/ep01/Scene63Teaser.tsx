@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, interpolate } from "remotion";
-import { theme } from "../../theme";
-import { useAnchors, type SceneProps } from "../../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 import { QuoteFrame } from "../../components/QuoteFrame";
 
 /**
@@ -11,6 +11,7 @@ import { QuoteFrame } from "../../components/QuoteFrame";
  */
 export const Scene63Teaser: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, pop } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
   // 收束动作：语音一落 teaser 让位（0.6s），金句 0.85s 内回屏，余下 ~2s 静止定格（tailSec 3s）
@@ -37,7 +38,7 @@ export const Scene63Teaser: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         <div
           style={{
             backgroundColor: theme.codeBg,
-            border: `1px solid ${theme.surfaceBorder}`,
+            border: `1px solid ${palette.surfaceBorder}`,
             borderRadius: 12,
             padding: "18px 26px",
             fontFamily: theme.font.mono,
@@ -58,15 +59,15 @@ export const Scene63Teaser: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             display: "flex",
             alignItems: "center",
             gap: 20,
-            border: `2px solid ${theme.primaryBright}`,
+            border: `2px solid ${palette.primaryBright}`,
             borderRadius: 14,
             padding: "18px 30px",
-            backgroundColor: "rgba(59, 130, 246, 0.12)",
+            backgroundColor: alpha(palette.primary, 0.12),
             opacity: badgeIn,
             transform: `translateY(${(1 - badgeIn) * 26}px)`,
           }}
         >
-          <span style={{ fontFamily: theme.font.mono, fontSize: 32, fontWeight: 700, color: theme.primaryBright }}>
+          <span style={{ fontFamily: theme.font.mono, fontSize: 32, fontWeight: 700, color: palette.primaryBright }}>
             EP02
           </span>
           <div>
