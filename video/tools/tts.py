@@ -59,6 +59,40 @@ def split_subtitles(text: str) -> list[str]:
     return chunks
 
 
+def chunks_from_chartimes(shot: dict, char_at: list[tuple[float, float]]) -> list[dict]:
+    """由「字符级时间轴」产出字幕 chunk 序列（whisper_align.py 复用，断句单一副本）。
+
+    char_at：与 shot["tts"] 剥离标点后逐字符对应的 (起秒, 止秒) 列表。
+    逻辑：tts 各句按剥离字数在 char_at 上切句边界；subtitle 同款断句后，
+    句内 chunk 按字符占比线性内插。
+    """
+    tts_sents = [s for s in SENT_SPLIT.split(shot["tts"]) if s.strip()]
+    sub_sents = [s for s in SENT_SPLIT.split(shot["subtitle"]) if s.strip()]
+    tts_lens = [len(STRIP.sub("", s)) for s in tts_sents]
+
+    sent_bounds: list[tuple[float, float]] = []
+    pos = 0
+    for L in tts_lens:
+        start_i = pos
+        end_i = min(pos + L, len(char_at))
+        s_t = char_at[start_i][0] if start_i < len(char_at) else char_at[-1][1]
+        e_t = char_at[end_i - 1][1] if end_i > start_i else s_t
+        sent_bounds.append((s_t, e_t))
+        pos = end_i
+
+    chunks_out = []
+    for si, s_text in enumerate(sub_sents):
+        s_t, e_t = sent_bounds[si] if si < len(sent_bounds) else sent_bounds[-1]
+        sent_chunks = split_subtitles(s_text)
+        sent_len = len(STRIP.sub("", s_text)) or 1
+        t0 = s_t
+        for c in sent_chunks:
+            frac = (len(STRIP.sub("", c)) or 1) / sent_len
+            chunks_out.append({"text": c, "s": round(t0, 3), "e": round(t0 + (e_t - s_t) * frac, 3)})
+            t0 += (e_t - s_t) * frac
+    return chunks_out
+
+
 def pick_voice() -> str:
     if "--voice" in sys.argv:
         return sys.argv[sys.argv.index("--voice") + 1]
@@ -89,32 +123,9 @@ async def synth(shot: dict, voice: str, out_dir: Path) -> dict:
         for _ in range(n):
             char_at.append((w[0], w[1]))
 
-    # tts 文本与字幕文本同句数（仅数字等局部写法不同）：
-    # 按各 tts 句的剥离字数在词时间轴上切出句边界，句内 chunk 按字符占比内插
-    tts_sents = [s for s in SENT_SPLIT.split(shot["tts"]) if s.strip()]
-    sub_sents = [s for s in SENT_SPLIT.split(shot["subtitle"]) if s.strip()]
-    tts_lens = [len(STRIP.sub("", s)) for s in tts_sents]
-
-    sent_bounds: list[tuple[float, float]] = []
-    pos = 0
-    for L in tts_lens:
-        start_i = pos
-        end_i = min(pos + L, len(char_at))
-        s_t = char_at[start_i][0] if start_i < len(char_at) else words[-1][1]
-        e_t = char_at[end_i - 1][1] if end_i > start_i else s_t
-        sent_bounds.append((s_t, e_t))
-        pos = end_i
-
-    chunks_out = []
-    for si, s_text in enumerate(sub_sents):
-        s_t, e_t = sent_bounds[si] if si < len(sent_bounds) else sent_bounds[-1]
-        sent_chunks = split_subtitles(s_text)
-        sent_len = len(STRIP.sub("", s_text)) or 1
-        t0 = s_t
-        for c in sent_chunks:
-            frac = (len(STRIP.sub("", c)) or 1) / sent_len
-            chunks_out.append({"text": c, "s": round(t0, 3), "e": round(t0 + (e_t - s_t) * frac, 3)})
-            t0 += (e_t - s_t) * frac
+    # tts 文本与字幕文本同句数（仅数字等局部写法不同）；
+    # 句边界与 chunk 内插见 chunks_from_chartimes（whisper_align.py 复用同一段逻辑）
+    chunks_out = chunks_from_chartimes(shot, char_at)
     return {"words": words, "chunks": chunks_out}
 
 
@@ -139,4 +150,5 @@ async def main() -> None:
     print(f"done ({voice}) -> public/audio/<EPxx>/")
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

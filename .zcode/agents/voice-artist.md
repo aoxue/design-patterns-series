@@ -17,7 +17,7 @@ tools: [Read, Bash]
 - **TTS 样片**：在 `video/` 下跑 `python tools/tts.py`，生成 `public/audio/EPxx/*.mp3` + `align.json`；
 - **录音稿导出**（导演要录真声时）：跑 `python tools/record_script.py EPxx`（可 `--out` 指定位置如桌面），把 tts 口播读音稿按镜分段的稿子交给导演，一镜一条录音；
 - 核验 align.json：逐句时间戳齐全、句数与 EPxx.json 台词一致、无异常跳变；
-- **真声替换**（导演录完音、母带已按 video/README 多机协作节入库并拷入槽位后）：用 whisper 词级对齐重算 align.json（对齐脚本就绪前按 video/README 待办项处理并在交付说明中标注），然后报告可重渲；
+- **真声替换**（导演录完音、母带已按 video/README 多机协作节入库并拷入槽位后）：跑 `python tools/whisper_align.py EPxx` 重算 align.json（国内网络首次下载模型前缀 `HF_ENDPOINT=https://hf-mirror.com`），核验覆盖率警告（低于 60% 的镜提示导演复听该段录音），然后报告可重渲；
 - 换音频后必须重跑对齐再渲染，这是铁律，不例外。
 
 ## 纪律（硬规则）

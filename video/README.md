@@ -24,11 +24,13 @@ src/theme.ts           SOP 色系（本期创建型蓝）唯一取色处，全�
 ```bash
 # 首次准备（Windows / macOS 通用）
 npm install              # Node ≥ 18
-pip install edge-tts     # Python 3，样片配音依赖
+pip install edge-tts faster-whisper "av==13.1.0"   # Python 3；av 固定 13.x（新版移除 metadata_errors，与 faster-whisper 不兼容，2026-11-03 踩坑）
 
 # 日常
 python tools/tts.py                                  # （重）生成 TTS 样片配音 + 逐句时间戳 align.json（--voice 可换音色）
 python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
+python tools/whisper_align.py EP01                   # 真声对齐：mp3 同名覆盖后重算 align.json（--check 只读对比偏差；--model 可调，默认 small）
+# 国内网络首次下载 whisper 模型：前面加 HF_ENDPOINT=https://hf-mirror.com
 npm run lint:colors                                  # 颜色纪律检查（提交前必跑，违规即红）
 npm run sheet                                        # 成片自查联系表：每镜首/中/尾 3 帧（SOP §8）
 npm run synccheck                                    # 音画同步对照：每镜 4 帧 + 字幕配对表（SOP §8）
@@ -65,7 +67,7 @@ npm run render                                       # 渲染成片 → out/EP01
 - [x] 联系表自动生成脚本（tools/contact-sheet：`npm run sheet`，每镜首/中/尾 3 帧拼表 + 960×540 单帧留档供放大复查；帧区间由 TimelineProbe 合成提供，音频实测驱动）
 - [x] 音画对齐治本（2026-11-03）：tts.py 采集词级时间戳 → align.json；字幕按实测时间选句、场景锚点经 AnchorCtx 穿透实测时间轴（场景零改动），实测 vs 旧字位估算普遍差 0.5–2.2s/句
 - [ ] 关键词锚点 API：`atWord("第二，")` 精确落句首（当前字符占比锚点会落在句内按比例处，如 0.917 → 句尾）
-- [ ] 真人原声对齐脚本：faster-whisper 词级时间戳 → 重算 align.json（换声流程：覆盖 mp3 → 对齐 → 重渲）。**EP01 真声收官的阻塞项**（2026-11-03 定：先补此工具再录音）
+- [x] 真人原声对齐脚本（2026-11-03 就绪，EP01 真声阻塞项解除）：`tools/whisper_align.py`，faster-whisper 词级时间戳 + difflib 字符对齐（容忍识别误差，断句逻辑 import 自 tts.py 单一副本）；EP01 TTS 全片实测偏差 avg 0.18s / max 0.60s（222 chunk），覆盖率低于 60% 的镜自动警告复听
 - [ ] episode JSON 契约（Zod）：六段全字段；分镜脚本 → JSON 转换规则（脚本仍是内容事实源，JSON 是制作副本）
 - [ ] 竖屏 composition：60 秒切片与正片同源
 - [ ] BGM / 音效轨道混音
