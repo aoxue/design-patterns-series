@@ -1,7 +1,7 @@
 # video/ · Remotion 渲染工程
 
 > 「码上购」成片生产引擎：台词 JSON + 音频槽位 → React 场景组件 → MP4。全程代码，不打开剪辑软件。
-> 2026-11-02 PoC 跑通（EP01 痛点现场 4 镜）；同日 EP01 全片 16 镜渲染成片（10:17，TTS 样片配音）。
+> 2026-11-02 PoC 跑通（EP01 痛点现场 4 镜）；同日 EP01 全片 16 镜渲染成片（10:17，TTS 样片配音）。2026-11-03 结尾重做：6.1 拆三镜（金句定格 / 决策树逐条点亮 / 预告压轴金句回屏），全片 18 镜。
 
 ## 架构（音频槽位，核心机制）
 
@@ -12,7 +12,7 @@ public/audio/EPxx/align.json  逐句时间戳（tts.py 随音频生成）：**�
 src/data.ts                读 episodes/EPxx.json → SHOTS 数组 + 字幕切分（按句读断句、字数权重分摊）；audioPath() 统一音频槽位路径
 src/Episode.tsx            调度器：calculateMetadata 实测音频时长 → 自动铺全片时间轴 + 全局字幕条；镜号→场景映射
 src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors：动画锚点按台词进度 0–1 定义，换配音自动适配
-src/scenes/*.tsx           每镜一个场景组件（useCurrentFrame 帧驱动动画；EP01 共 16 个）
+src/scenes/*.tsx           每镜一个场景组件（useCurrentFrame 帧驱动动画；EP01 共 18 个）
 src/components/*           复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
 src/theme.ts           SOP 色系（本期创建型蓝）唯一取色处，全系列组件禁止硬编码颜色
 ```
@@ -58,7 +58,7 @@ npm run render                                       # 渲染成片 → out/EP01
 
 - [x] 管线跑通：JSON→组件→渲染→MP4（含音频、字幕）
 - [x] 音频槽位：TTS 样片 → 真声终版替换机制
-- [x] EP01 全片 16 镜场景组件 + 字幕条 + 代码卡（diff 删红增绿 / kw 高亮）+ 台词进度锚点动画（scene-kit）
+- [x] EP01 全片 18 镜场景组件 + 字幕条 + 代码卡（diff 删红增绿 / kw 高亮）+ 台词进度锚点动画（scene-kit）
 - [x] EP01 视觉亮点组件：A1 线程时序、A2 指令重排时间轴（②③ 积木交换 + volatile 焊死）、UML 类图动效、五版对比卡、反射攻击终端实录（Maven 真实输出）、金句定格
 - [x] EP01 全片渲染（2026-11-02，TTS 样片配音 10:17；真声定稿后同名覆盖重渲即终版）
 - [x] 联系表自动生成脚本（tools/contact-sheet：`npm run sheet`，每镜首/中/尾 3 帧拼表 + 960×540 单帧留档供放大复查；帧区间由 TimelineProbe 合成提供，音频实测驱动）

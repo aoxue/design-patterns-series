@@ -28,6 +28,8 @@ import { Scene42Runtime } from "./scenes/Scene42Runtime";
 import { Scene43Spring } from "./scenes/Scene43Spring";
 import { Scene51Warnings } from "./scenes/Scene51Warnings";
 import { Scene61Outro } from "./scenes/Scene61Outro";
+import { Scene62Decision } from "./scenes/Scene62Decision";
+import { Scene63Teaser } from "./scenes/Scene63Teaser";
 
 export interface TimelineItem extends ShotData {
   startFrame: number;
@@ -77,7 +79,7 @@ export const computeTimeline = async (): Promise<TimelineItem[]> => {
   return buildTimeline(durations, alignShots);
 };
 
-/** 镜号 → 场景组件（EP01 全片 16 镜；PoC 四镜沿用绝对帧动画，其余走台词进度锚点） */
+/** 镜号 → 场景组件（EP01 全片 18 镜；PoC 四镜沿用绝对帧动画，其余走台词进度锚点） */
 const SCENES: Record<string, FC<SceneProps>> = {
   "1.1": HookScene,
   "1.2": CrimeScene,
@@ -95,6 +97,8 @@ const SCENES: Record<string, FC<SceneProps>> = {
   "4.3": Scene43Spring,
   "5.1": Scene51Warnings,
   "6.1": Scene61Outro,
+  "6.2": Scene62Decision,
+  "6.3": Scene63Teaser,
 };
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
