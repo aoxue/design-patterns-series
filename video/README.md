@@ -1,7 +1,7 @@
 # video/ · Remotion 渲染工程
 
 > 「码上购」成片生产引擎：台词 JSON + 音频槽位 → React 场景组件 → MP4。全程代码，不打开剪辑软件。
-> 2026-11-02 PoC 跑通（EP01 痛点现场 4 镜）；同日 EP01 全片 16 镜渲染成片（10:17，TTS 样片配音）。2026-11-03 结尾重做：6.1 拆三镜（金句定格 / 决策树逐条点亮 / 预告压轴金句回屏），全片 18 镜。
+> 2026-11-02 PoC 跑通（EP01 痛点现场 4 镜）；同日 EP01 全片 16 镜渲染成片（10:17，TTS 样片配音）。2026-11-03 结尾重做：6.1 拆三镜（金句定格 / 决策树逐条点亮 / 预告压轴金句回屏），全片 18 镜（现版实测 10:57）；同日引擎多期化重构（scenes 按期分目录 + episodes 注册表 + 四套分类色板），EP01 逐像素回归一致。
 
 ## 架构（音频槽位，核心机制）
 
@@ -9,10 +9,11 @@
 public/episodes/EPxx.json  台词制作副本（每期一文件；内容事实源是 scripts/ 分镜脚本）：tts 口播读音稿 + subtitle 字幕文本（与脚本逐字一致，双字段分工见 SOP §4.1）+ leadSec/tailSec 节奏参数
 public/audio/EPxx/*.mp3    音频槽位（每期一目录）：TTS 样片配音（tools/tts.py，edge-tts 跨平台）→ 样片定稿后真声同名覆盖，时长自动重算
 public/audio/EPxx/align.json  逐句时间戳（tts.py 随音频生成）：**音频是唯一时钟**：字幕选句与场景动画锚点（AnchorCtx）都按它走，与语音逐句锁死；真人原声覆盖后需用 whisper 对齐重算
-src/data.ts                读 episodes/EPxx.json → SHOTS 数组 + 字幕切分（按句读断句、字数权重分摊）；audioPath() 统一音频槽位路径
-src/Episode.tsx            调度器：calculateMetadata 实测音频时长 → 自动铺全片时间轴 + 全局字幕条；镜号→场景映射
-src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors：动画锚点按台词进度 0–1 定义，换配音自动适配
-src/scenes/*.tsx           每镜一个场景组件（useCurrentFrame 帧驱动动画；EP01 共 18 个）
+src/data.ts                纯函数层：字幕切分（按句读断句、字数权重分摊）、audioPath/computeTimeline（均接期参数，无全局期号）
+src/Episode.tsx            通用调度器：按 episodeId 查注册表 → calculateMetadata 实测音频时长铺时间轴 + 全局字幕条 + PaletteCtx 注入色板
+src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors + usePalette：动画锚点按台词进度 0–1 定义，换配音自动适配
+src/episodes/registry.ts   期注册表：加新期 = 新建 src/episodes/EPxx.tsx（id/title/category/lines/scenes 五样，lines import 自己的 EPxx.json）+ import 进数组，Root 遍历注册 Composition，其余零改码
+src/scenes/epXX/*.tsx      每镜一个场景组件（useCurrentFrame 帧驱动动画；按期分目录，EP01 共 18 个）
 src/components/*           复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
 src/theme.ts           色彩体系唯一取色处：中性 token（theme，全系列恒定）+ 四套分类色板（PALETTES，创建蓝/结构绿/行为橙/特辑紫，Episode 按期经 PaletteCtx 注入，组件 usePalette() 取），禁止硬编码颜色
 ```
@@ -72,5 +73,6 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 - [ ] 竖屏 composition：60 秒切片与正片同源
 - [ ] BGM / 音效轨道混音
 - [x] 音频路线已定（2026-11）：两阶段：TTS 出样片供确认修改，定稿后真人录音重渲终版（operations §2.2）
+- [x] 引擎多期化（2026-11-03）：scenes 按期分目录 + episodes/registry 注册表 + 四套分类色板；加新期纯加法（scenes/epXX/ + episodes/EPxx.tsx + registry 一行），EP01 三帧逐像素与全片时长（19703 帧）回归一致
 
 **QA 联系表纪律**：全片 render 前多帧拼查留档（EP01 见 `out/qa/contact-sheet.png`，生成当日本机；`out/` 不进 git）。
