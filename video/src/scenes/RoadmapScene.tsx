@@ -101,7 +101,7 @@ export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         </span>
       </div>
 
-      {/* 阶梯：徽标逐个报出，台阶逐级升高，连线爬升 —— 渐进改进的视觉化 */}
+      {/* 阶梯：徽标逐个报出，台阶逐级升高，连线爬升，渐进改进的视觉化 */}
       <svg viewBox="0 0 1920 720" width={1920} height={720} style={{ position: "absolute", top: 170, left: 0 }}>
         {/* 台阶踏板 */}
         {NAMES.map((_, i) => {

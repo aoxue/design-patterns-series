@@ -7,7 +7,7 @@ import { useAnchors, type SceneProps } from "../scene-kit";
 /**
  * 镜 2.5 · V5 枚举 + 反射攻击实录（4:20–5:30）
  * 左卡切换：C6 枚举（0–0.2）→ C7 攻击代码；右：Maven 真实运行输出（禁止编造）；
- * 下：五版本徽标墙——V1–V4 中弹碎裂，V5 盾牌弹开；尾：三徽章压轴理由
+ * 下：五版本徽标墙，V1–V4 中弹碎裂，V5 盾牌弹开；尾：三徽章压轴理由
  */
 
 /** C6 枚举（脚本代码卡原文） */
@@ -41,8 +41,8 @@ const C7: CodeLine[] = [
       { text: "System.out.println(ghost == PromoConfigManager.getInstance());" },
     ],
   },
-  { segs: [{ text: "// → false —— V1–V4 全线失守", kind: "comment" }] },
-  { segs: [{ text: "// 枚举：newInstance 抛 IllegalArgumentException —— JVM 拒绝", kind: "comment" }] },
+  { segs: [{ text: "// → false：V1–V4 全线失守", kind: "comment" }] },
+  { segs: [{ text: "// 枚举：newInstance 抛 IllegalArgumentException：JVM 拒绝", kind: "comment" }] },
 ];
 
 /** Maven 真实运行输出（2026-11-02 实测，mashanggou SingletonEvolutionDemo 第三幕）。
@@ -111,7 +111,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           Effective Java 钦定
         </span>
         <span style={{ fontSize: 23, color: theme.textMuted, opacity: fade(0.12) }}>
-          现代 Java：让模式隐身 —— 一个词解决的事，不写十行
+          现代 Java：让模式隐身，一个词解决的事，不写十行
         </span>
       </div>
 
@@ -186,7 +186,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         </div>
       </div>
 
-        {/* 下：五版本徽标墙 —— 攻击箭头射向五版（每个圆环标注版本名，失守/弹开状态写在名下） */}
+        {/* 下：五版本徽标墙，攻击箭头射向五版（每个圆环标注版本名，失守/弹开状态写在名下） */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 26, marginTop: 10 }}>
         <span style={{ fontSize: 30, color: theme.danger, opacity: fade(0.3) }}>🟥 攻击命中 →</span>
         {["V1", "V2", "V3", "V4", "V5"].map((v, i) => {

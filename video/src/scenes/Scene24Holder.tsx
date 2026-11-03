@@ -48,7 +48,7 @@ export const Scene24Holder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
       <div style={{ fontSize: 38, fontWeight: 700, color: theme.text, marginBottom: 24 }}>
         <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V4</span> 静态内部类 ·
-        手写首选 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>—— JVM 早就把路修好了</span>
+        手写首选 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>· JVM 早就把路修好了</span>
       </div>
 
       <div style={{ display: "flex", gap: 40, flex: 1 }}>

@@ -72,7 +72,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
       <div style={{ fontSize: 38, fontWeight: 700, color: theme.text, marginBottom: 24 }}>
         <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V1</span> 饿汉式 ·
-        类一加载，实例就建好 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>—— 饿到等不及</span>
+        类一加载，实例就建好 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>· 饿到等不及</span>
       </div>
 
       <div style={{ display: "flex", gap: 40, flex: 1 }}>
@@ -126,7 +126,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             }}
           >
             <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 12 }}>
-              事故现场的三处 new，现在——
+              事故现场的三处 new，现在：
             </div>
             {["OrderService", "PaymentService", "ReportJob"].map((f, i) => (
               <div

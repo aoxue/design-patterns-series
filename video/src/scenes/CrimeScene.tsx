@@ -133,7 +133,7 @@ export const CrimeScene: FC = () => {
               </div>
             ))}
             <div style={{ fontSize: 25, color: theme.textMuted, lineHeight: 1.7, opacity: footerIn, marginTop: 8 }}>
-              昨晚 23:59 改的规则——商品页 5 秒知道，<span style={{ color: theme.warn }}>支付要等今天整点</span>。
+              昨晚 23:59 改的规则，商品页 5 秒知道，<span style={{ color: theme.warn }}>支付要等今天整点</span>。
             </div>
           </div>
         </div>

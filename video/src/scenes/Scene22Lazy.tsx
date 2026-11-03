@@ -91,7 +91,7 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
       <div style={{ fontSize: 38, fontWeight: 700, color: theme.text, marginBottom: 24 }}>
         <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V2</span> 懒汉式 ·
-        第一次用到再建 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>—— 但多线程在等你翻车</span>
+        第一次用到再建 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>，但多线程在等你翻车</span>
       </div>
 
       <div style={{ display: "flex", gap: 40, flex: 1 }}>
@@ -154,7 +154,7 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 transform: `translateX(${shake}px)`,
               }}
             >
-              单例破裂 —— 回到事故现场：两个「自己」
+              单例破裂，回到事故现场：两个「自己」
             </div>
           </div>
 

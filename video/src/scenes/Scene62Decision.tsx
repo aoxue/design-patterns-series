@@ -5,7 +5,7 @@ import { useAnchors, type SceneProps } from "../scene-kit";
 
 /**
  * 镜 6.2 · 决策树速记（结尾三镜之二）
- * 三行分支卡随台词逐条弹入——锚点为各分支关键词在台词中的字符位（Spring 0.27 / 裸 Java 0.53 / 要防反射 0.77，
+ * 三行分支卡随台词逐条弹入，锚点为各分支关键词在台词中的字符位（Spring 0.27 / 裸 Java 0.53 / 要防反射 0.77，
  * 经 align.json 落到实测时间轴），念到哪条亮哪条；整镜居中，不再与金句、预告同屏挤占。
  */
 export const Scene62Decision: FC<SceneProps> = ({ leadFrames, audioFrames }) => {

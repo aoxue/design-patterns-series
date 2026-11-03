@@ -9,7 +9,7 @@ import { theme } from "../theme";
  */
 const INSTANCES = [
   { label: "订单", value: "减 80", fresh: true }, // 运营改完后刷新到的新值
-  { label: "支付", value: "减 50", fresh: false }, // 还停在旧值 —— 价格事故的根源
+  { label: "支付", value: "减 50", fresh: false }, // 还停在旧值，价格事故的根源
   { label: "报表", value: "减 50", fresh: false },
 ];
 
@@ -98,7 +98,7 @@ export const QuestionScene: FC = () => {
           marginBottom: 40,
         }}
       >
-        同一个类 · 三个「自己」—— <span style={{ color: theme.warn, fontWeight: 700 }}>谁是权威？</span>
+        同一个类 · 三个「自己」，<span style={{ color: theme.warn, fontWeight: 700 }}>谁是权威？</span>
       </div>
 
       <div style={{ fontSize: 58, fontWeight: 700, color: theme.text, height: 80 }}>
@@ -115,7 +115,7 @@ export const QuestionScene: FC = () => {
           transform: `translateY(${(1 - line2In) * 16}px)`,
         }}
       >
-        —— 谁来把它焊死在代码里？
+        谁来把它焊死在代码里？
       </div>
     </AbsoluteFill>
   );

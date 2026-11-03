@@ -1,6 +1,6 @@
 # EP01 分镜脚本 · 单例 Singleton「你的单例，可能被创建了两次」
 
-> 骨架：`episodes-tier1.md` §EP01 ｜ 格式：`production-sop.md` 六段结构（10 分钟版）
+> 骨架：`episodes-tier1.md` §EP01 ｜ 格式：`production-sop.md` 六段结构（10–12 分钟配比基准）
 
 | 项 | 值 |
 |---|---|
@@ -191,10 +191,10 @@ public enum PromoConfigManager {
 var ctor = PromoConfigManager.class.getDeclaredConstructor();
 ctor.setAccessible(true);                                    // 撬开 private
 PromoConfigManager ghost = ctor.newInstance();
-System.out.println(ghost == PromoConfigManager.getInstance()); // false —— 失守
+System.out.println(ghost == PromoConfigManager.getInstance()); // false:失守
 
 // 同样的攻击打向枚举版：IllegalArgumentException
-// Cannot reflectively create enum objects —— JVM 拒绝
+// Cannot reflectively create enum objects:JVM 拒绝
 ```
 
 ---
@@ -250,7 +250,7 @@ public class OrderService {
 
 | 镜号 | 台词 | 画面 | 代码切分 |
 |---|---|---|---|
-| 5.1 | 照例进入本期最重要的段落：什么时候别用。三条警告。第一，单例的本质是全局变量。类名一点，哪里都能 getInstance；依赖关系不体现在方法签名里，而是藏进代码暗处。今天爽，三个月后重构时，它从暗处给你一刀。第二，有状态单例是并发炸弹。今天五版代码防的是「只创建一次」；但实例里的可变字段，缓存的 Map、随手 set 的成员变量，并发读写照样出事。创建安全，不等于使用安全。为什么？单例只承诺「实例全系统只有一个」，从没承诺「这个实例里的数据可以随便并发访问」。拿缓存 Map 举例：线程 A 一查，没有，正要写；线程 B 也一查，也没有，也写——一边的结果，被另一边悄悄覆盖；HashMap 并发写，甚至会把内部结构写坏，整台服务卡死。所以解法不在单例模式里：要么换成 ConcurrentHashMap、给写路径加锁，要么干脆让单例无状态。第三，难测试。getInstance 写死在调用处，单测想塞个假实现进去？插不进。正解是依赖注入：实例从「自己全局去拿」变成「外面递进来」，这正是刚才 Spring 影子的深意。最后一个常见过度设计：无状态的工具类，一堆 static 方法就够，别硬套单例的壳。 | 三张警告卡逐张压屏（⚠ 全局变量 / ⚠ 状态炸弹 / ⚠ 难测试）；第四张小卡「工具类 ≠ 单例」；画面渐暗只留中间待机位，为片尾金句蓄力 | 无 |
+| 5.1 | 照例进入本期最重要的段落：什么时候别用。三条警告。第一，单例的本质是全局变量。类名一点，哪里都能 getInstance；依赖关系不体现在方法签名里，而是藏进代码暗处。今天爽，三个月后重构时，它从暗处给你一刀。第二，有状态单例是并发炸弹。今天五版代码防的是「只创建一次」；但实例里的可变字段，缓存的 Map、随手 set 的成员变量，并发读写照样出事。创建安全，不等于使用安全。为什么？单例只承诺「实例全系统只有一个」，从没承诺「这个实例里的数据可以随便并发访问」。拿缓存 Map 举例：线程 A 一查，没有，正要写；线程 B 也一查，也没有，也写，一边的结果，被另一边悄悄覆盖；HashMap 并发写，甚至会把内部结构写坏，整台服务卡死。所以解法不在单例模式里：要么换成 ConcurrentHashMap、给写路径加锁，要么干脆让单例无状态。第三，难测试。getInstance 写死在调用处，单测想塞个假实现进去？插不进。正解是依赖注入：实例从「自己全局去拿」变成「外面递进来」，这正是刚才 Spring 影子的深意。最后一个常见过度设计：无状态的工具类，一堆 static 方法就够，别硬套单例的壳。 | 三张警告卡逐张压屏（⚠ 全局变量 / ⚠ 状态炸弹 / ⚠ 难测试）；第四张小卡「工具类 ≠ 单例」；画面渐暗只留中间待机位，为片尾金句蓄力 | 无 |
 
 ---
 

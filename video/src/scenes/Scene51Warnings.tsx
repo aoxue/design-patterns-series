@@ -26,7 +26,7 @@ const WARNINGS = [
     title: "有状态单例是并发炸弹",
     lines: [
       "五版代码防的只是「只创建一次」",
-      "写入覆盖、读到脏数据——HashMap 并发写甚至写坏结构",
+      "写入覆盖、读到脏数据，HashMap 并发写甚至写坏结构",
       "模式管个数，不管使用：解法在锁 / 无状态",
     ],
     p: 0.208,
@@ -51,7 +51,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
     <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
       <div style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 26 }}>
         什么时候<span style={{ color: theme.danger }}>别用</span>它
-        <span style={{ fontSize: 24, color: theme.textMuted, fontWeight: 400 }}> —— 本期最重要的段落 · 三条警告</span>
+        <span style={{ fontSize: 24, color: theme.textMuted, fontWeight: 400 }}> · 本期最重要的段落 · 三条警告</span>
       </div>
 
       {/* 三张警告卡横排，讲到哪张点亮哪张 */}
@@ -105,7 +105,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
         <span style={{ fontSize: 30 }}>✅ 正解</span>
         <div style={{ fontSize: 26, color: theme.text }}>
           <span style={{ color: theme.ok, fontWeight: 700 }}>依赖注入</span>：实例从「自己全局去拿」变成「
-          <span style={{ color: theme.ok, fontWeight: 700 }}>外面递进来</span>」—— 这正是刚才 Spring 影子的深意
+          <span style={{ color: theme.ok, fontWeight: 700 }}>外面递进来</span>」，这正是刚才 Spring 影子的深意
         </div>
       </div>
 

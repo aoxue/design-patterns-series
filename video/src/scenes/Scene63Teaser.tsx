@@ -7,7 +7,7 @@ import { QuoteFrame } from "../components/QuoteFrame";
 /**
  * 镜 6.3 · EP02 预告 + 金句回屏（结尾三镜压轴）
  * switch 地狱卡随台词（0.23）弹入，EP02 徽标随钩子文案（0.42）弹入；
- * 台词落定（at(1)＝实测语音末尾）后 teaser 淡出、金句放大回屏定格到片尾——与 6.1 首尾呼应，末帧即封面备选帧。
+ * 台词落定（at(1)＝实测语音末尾）后 teaser 淡出、金句放大回屏定格到片尾，与 6.1 首尾呼应，末帧即封面备选帧。
  */
 export const Scene63Teaser: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, pop } = useAnchors(leadFrames, audioFrames);

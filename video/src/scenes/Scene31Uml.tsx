@@ -31,7 +31,7 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   return (
     <AbsoluteFill style={{ padding: "120px 90px 140px" }}>
       <div style={{ fontSize: 38, fontWeight: 700, color: theme.text, marginBottom: 8 }}>
-        类图拆解 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>—— 23 个模式里最寒酸的一张图</span>
+        类图拆解 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>· 23 个模式里最寒酸的一张图</span>
       </div>
 
       <div style={{ position: "relative", flex: 1 }}>
@@ -149,7 +149,7 @@ export const Scene31Uml: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             opacity: fade(0.58),
           }}
         >
-          没有第二个类 —— 它全部的工作，就是<span style={{ color: theme.primaryBright, fontWeight: 700 }}>管好自己这一个实例</span>
+          没有第二个类，它全部的工作，就是<span style={{ color: theme.primaryBright, fontWeight: 700 }}>管好自己这一个实例</span>
         </div>
       </div>
     </AbsoluteFill>

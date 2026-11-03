@@ -21,7 +21,7 @@ interface CodeCardProps {
   title: string;
   lines: CodeLine[];
   /** 与 lines 等长：每行开始出现的帧号（Infinity = 暂不显示）。
-   *  行在 revealAt 起 9 帧内确定性淡入 + 上浮——帧驱动，禁用 CSS transition
+   *  行在 revealAt 起 9 帧内确定性淡入 + 上浮，帧驱动，禁用 CSS transition
    *  （Remotion 逐帧截图下 transition 行为不确定，是「出现闪两下」的根源） */
   revealAt: number[];
   /** 代码字号（默认 25；行数多/行长长的卡用 19–21 防溢出） */

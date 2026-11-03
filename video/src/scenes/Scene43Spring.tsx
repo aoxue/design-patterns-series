@@ -46,7 +46,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
       <div style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 20 }}>
         影子二号 · <span style={{ color: theme.ok }}>Spring 容器</span>
-        <span style={{ fontSize: 24, color: theme.textMuted, fontWeight: 400 }}> —— 一个全自动的单例工厂</span>
+        <span style={{ fontSize: 24, color: theme.textMuted, fontWeight: 400 }}> · 一个全自动的单例工厂</span>
       </div>
 
       <div style={{ display: "flex", gap: 36, flex: 1 }}>
@@ -187,7 +187,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             }}
           >
             格局变了：持有实例的不是类自己，是<span style={{ color: theme.ok, fontWeight: 700 }}>容器</span>。
-            要单例，容器给；想换假实现做测试，容器换 —— 写死在类里的 getInstance 做不到。
+            要单例，容器给；想换假实现做测试，容器换，写死在类里的 getInstance 做不到。
           </div>
 
           <div
@@ -201,7 +201,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               opacity: pop(0.5),
             }}
           >
-            Spring 项目：手写单例退休 ——{" "}
+            Spring 项目：手写单例退休，{" "}
             <span style={{ color: theme.ok, fontWeight: 700 }}>注解 + 注入，就是 2026 年的单例模式</span>
           </div>
 

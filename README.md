@@ -32,7 +32,7 @@ vibe 视觉（lo-fi BGM、统一动效模板）是加分项，不替代以上三
 
 - 项目名：**码上购**（虚构电商），包根 `com.mashanggou`
 - 常用子包：`order`（订单）、`payment`（支付）、`promo`（促销）、`report`（报表）、`notify`（通知）
-- 角色：一个人维护不动的小系统，随着每期 refactor 逐步「长大」——后期模式可引用前期成果，形成知识网
+- 角色：一个人维护不动的小系统，随着每期 refactor 逐步「长大」，后期模式可引用前期成果，形成知识网
 - 禁止出现与电商无关的例子（Animal、Shape、Coffee 等一律不用）
 
 ## 4. 排期总表
@@ -103,5 +103,5 @@ vibe 视觉（lo-fi BGM、统一动效模板）是加分项，不替代以上三
 ## 8. 许可证
 
 - **代码**（`video/`、`mashanggou/`、`tools/`、封面模板）：[MIT](LICENSE)
-- **创作内容**（`scripts/` 分镜脚本与台词、`video/public/episodes/` 台词数据、成图）：[CC BY 4.0](LICENSE-CONTENT.md)——转载与二创须署名
+- **创作内容**（`scripts/` 分镜脚本与台词、`video/public/episodes/` 台词数据、成图）：[CC BY 4.0](LICENSE-CONTENT.md)，转载与二创须署名
 - 渲染工程依赖 [Remotion](https://www.remotion.dev/)：其自身许可对个人与小型团队免费，商用团队请自行购买授权

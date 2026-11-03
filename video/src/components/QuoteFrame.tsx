@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { theme } from "../theme";
 
 /**
- * 金句主句两行（6.1 全屏定格与 6.3 回屏收尾共用，保证两帧视觉一致——封面备选帧取自这里）。
+ * 金句主句两行（6.1 全屏定格与 6.3 回屏收尾共用，保证两帧视觉一致，封面备选帧取自这里）。
  * 只负责排版；透明度/缩放等动画参数由调用方驱动。
  */
 export const QuoteFrame: FC<{ opacity: number; scale: number; y?: number }> = ({

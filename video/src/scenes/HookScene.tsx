@@ -132,7 +132,7 @@ export const HookScene: FC = () => {
           transform: `translateY(${(1 - line2) * 14}px)`,
         }}
       >
-        价格事故 —— 凶手在代码里
+        价格事故，凶手在代码里
       </div>
     </AbsoluteFill>
   );

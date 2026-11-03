@@ -12,7 +12,7 @@ import { useAnchors, type SceneProps } from "../scene-kit";
 const CARDS = [
   {
     v: "V1", n: "饿汉式", p: 0.115, star: 3,
-    d: "一行到位，简单可靠；缺点是急——类加载即创建",
+    d: "一行到位，简单可靠；缺点是急，类加载即创建",
     code: "static final M I =\n    new M();",
   },
   {
@@ -27,12 +27,12 @@ const CARDS = [
   },
   {
     v: "V4", n: "静态内部类", p: 0.530, star: 5,
-    d: "借 JVM 类加载机制，懒和安全白送——手写首选",
+    d: "借 JVM 类加载机制，懒和安全白送，手写首选",
     code: "class Holder {\n    static final M I\n        = new M(); }",
   },
   {
     v: "V5", n: "枚举", p: 0.658, star: 5,
-    d: "再加防反射、防序列化——Effective Java 的答案",
+    d: "再加防反射、防序列化，Effective Java 的答案",
     code: "enum M {\n    INSTANCE;\n}",
   },
 ];
@@ -118,7 +118,7 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 22, color: theme.textMuted }}>三秒决策树 —— 一个问题帮你记住五个</div>
+        <div style={{ fontSize: 22, color: theme.textMuted }}>三秒决策树 · 一个问题帮你记住五个</div>
 
         <div style={{ position: "relative", height: 272, marginTop: 6 }}>
           <svg viewBox="0 0 1720 272" width="100%" height="272" style={{ position: "absolute", inset: 0 }}>

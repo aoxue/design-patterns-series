@@ -61,7 +61,7 @@ export const Scene42Runtime: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     <AbsoluteFill style={{ padding: "120px 90px 140px" }}>
       <div style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 20 }}>
         影子一号 · <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>Runtime.getRuntime()</span>
-        <span style={{ fontSize: 24, color: theme.textMuted, fontWeight: 400 }}> —— 你天天在用</span>
+        <span style={{ fontSize: 24, color: theme.textMuted, fontWeight: 400 }}> · 你天天在用</span>
       </div>
 
       {/* 三用途行 */}
@@ -129,7 +129,7 @@ export const Scene42Runtime: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           opacity: fade(0.26),
         }}
       >
-        static final 持有 · 私有构造 · 静态入口 —— 标准的<span style={{ color: theme.primaryBright, fontWeight: 700 }}>饿汉式</span>，
+        static final 持有 · 私有构造 · 静态入口，标准的<span style={{ color: theme.primaryBright, fontWeight: 700 }}>饿汉式</span>，
         和我们第一版一个模子刻出来的
       </div>
 

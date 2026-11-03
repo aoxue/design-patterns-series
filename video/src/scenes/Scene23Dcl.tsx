@@ -6,7 +6,7 @@ import { useAnchors, type SceneProps } from "../scene-kit";
 
 /**
  * 镜 2.3 · V3 双检锁 DCL + 动画板 A2 指令重排（2:50–3:50）★ 本期视觉亮点
- * 上：C4 四步口诀逐段显形；下：A2 时间轴——正常顺序 vs 重排顺序，
+ * 上：C4 四步口诀逐段显形；下：A2 时间轴，正常顺序 vs 重排顺序，
  * ②③ 积木交换 → 线程 B 拿走半成品 NPE → volatile 焊死回位
  */
 const LINES: CodeLine[] = [
@@ -133,7 +133,7 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       </div>
 
       {/* 下：A2 指令重排时间轴（全屏宽，本期截图页）。
-          截图强调只做「显色+光晕」（overlay 渐入），几何完全冻结——
+          截图强调只做「显色+光晕」（overlay 渐入），几何完全冻结，
           曾经 padding 10→8 + scale 0.985→1 造成卡片可见的尺寸跳变，已废除 */}
       <div
         style={{
