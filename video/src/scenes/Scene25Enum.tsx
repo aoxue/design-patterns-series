@@ -24,7 +24,7 @@ const C6: CodeLine[] = [
   { segs: [{ text: "}" }] },
 ];
 
-/** C7 反射攻击（脚本代码卡原文） */
+/** C7 反射攻击（脚本代码卡原文 + 枚举波结果行） */
 const C7: CodeLine[] = [
   { segs: [{ text: "// 攻击方：反射拆 private 构造器", kind: "comment" }] },
   { segs: [{ text: "var ctor = PromoConfigManager.class." }, { text: "getDeclaredConstructor", kind: "kw" }, { text: "();" }] },
@@ -41,7 +41,8 @@ const C7: CodeLine[] = [
       { text: "System.out.println(ghost == PromoConfigManager.getInstance());" },
     ],
   },
-  { segs: [{ text: "// → false —— 失守", kind: "comment" }] },
+  { segs: [{ text: "// → false —— V1–V4 全线失守", kind: "comment" }] },
+  { segs: [{ text: "// 枚举：newInstance 抛 IllegalArgumentException —— JVM 拒绝", kind: "comment" }] },
 ];
 
 /** Maven 真实运行输出（2026-11-02 实测，mashanggou SingletonEvolutionDemo 第三幕）。
@@ -75,7 +76,7 @@ const execActive = (p: number) => {
   return active;
 };
 
-const C7_VIS = [0.23, 0.24, 0.275, 0.31, 0.345, 0.365];
+const C7_VIS = [0.23, 0.24, 0.275, 0.31, 0.345, 0.365, 0.56];
 
 export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
@@ -128,6 +129,25 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               fontSize={21}
               activeLine={execActive(p)}
             />
+          </div>
+          {/* 攻击目标标签：第一波打 V1 普通类，第二波切 V5 枚举 */}
+          <div
+            style={{
+              position: "absolute",
+              top: -8,
+              right: 0,
+              fontSize: 21,
+              fontWeight: 700,
+              fontFamily: theme.font.mono,
+              color: seen(0.5) ? theme.ok : theme.warn,
+              border: `2px solid ${seen(0.5) ? theme.ok : theme.warn}`,
+              borderRadius: 8,
+              padding: "4px 14px",
+              backgroundColor: theme.deepBg,
+              opacity: fade(0.24, 8),
+            }}
+          >
+            {seen(0.5) ? "目标 → V5 枚举" : "目标 → V1 普通类"}
           </div>
         </div>
 

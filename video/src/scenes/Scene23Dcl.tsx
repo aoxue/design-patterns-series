@@ -95,6 +95,9 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       <div style={{ display: "flex", alignItems: "baseline", gap: 22, marginBottom: 14 }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
           <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V3</span> 双检锁 DCL
+          <span style={{ fontSize: 22, fontWeight: 400, color: theme.textMuted, marginLeft: 12 }}>
+            Double-Checked Locking
+          </span>
         </div>
         {/* 口诀四步：随台词点亮 */}
         {motto.map((m, i) => (
