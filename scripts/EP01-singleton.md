@@ -173,14 +173,14 @@ public class PromoConfigManager {
 
 | 镜号 | 台词 | 画面 | 代码切分 |
 |---|---|---|---|
-| 2.5 | 第五版，压轴：单元素枚举，Effective Java 钦定的最佳单例。INSTANCE 一个词加个分号，单例就成了，字段方法照常写。这也是现代 Java 的态度：让模式隐身，一个词解决的事，不写十行。它凭什么压轴？光说不动手不行，我们演一场攻击。反射攻击，专拆 private：getDeclaredConstructor 拿到构造器，setAccessible(true) 强行撬开，newInstance。前面四版全线失守：ghost == getInstance() 印出来是 false，第二个实例诞生，唯一性卒。你可能会说：我们项目谁会闲得写这种代码？攻击不一定来自同事：反序列化、某些框架按 class 反建对象，走的都是同一条暗道。同样的炮弹打向枚举：Constructor.newInstance 直接抛出非法参数异常（IllegalArgumentException）：Cannot reflectively create enum objects，JVM 在语言层面焊死了这扇门；序列化也一样，枚举反序列化不会产生新实例。防反射、防序列化、代码最短，三项全包，这就是它压轴的理由。 | C7 攻击代码**真实运行实录**：控制台输出 false（红字）→ 打向枚举版时 Exception 轨迹（红）；攻击箭头射向五版本徽标墙，V1–V4 碎裂、V5 盾牌弹开；字幕定格「Cannot reflectively create enum objects」 | **C6** 枚举 ＋ **C7** 反射攻击 |
+| 2.5 | 第五版，压轴：单元素枚举，Effective Java 钦定的最佳单例。INSTANCE 一个词加个分号，单例就成了，字段方法照常写。这也是现代 Java 的态度：让模式隐身，一个词解决的事，不写十行。它凭什么压轴？光说不动手不行，我们演一场攻击。反射攻击，专拆 private：getDeclaredConstructor 拿到构造器，setAccessible(true) 强行撬开，newInstance。前面四版全线失守：ghost == getInstance() 印出来是 false，第二个实例诞生，唯一性卒。你可能会说：我们项目谁会闲得写这种代码？攻击不一定来自同事：反序列化、某些框架按 class 反建对象，走的都是同一条暗道。同样的炮弹打向枚举：Constructor.newInstance 直接抛 IllegalArgumentException，报错原文：Cannot reflectively create enum objects。JVM 在语言层面焊死了这扇门。序列化也一样，枚举反序列化不会产生新实例。防反射、防序列化、代码最短，三项全包，这就是它压轴的理由。 | C7 攻击代码**真实运行实录**：控制台输出 false（红字）→ 打向枚举版时 Exception 轨迹（红）；攻击箭头射向五版本徽标墙，V1–V4 碎裂、V5 盾牌弹开；字幕定格「Cannot reflectively create enum objects」 | **C6** 枚举 ＋ **C7** 反射攻击 |
 
 **C6 · V5 枚举（3 行）**
 
 ```java
 public enum PromoConfigManager {
     INSTANCE;                                                 // 这一行，就是单例
-    public int getDiscount(int amount) { /* 查规则，同前 */ }
+    public int getDiscount(int amount) { return amount >= 300 ? 80 : 0; }
 }
 ```
 
@@ -288,6 +288,7 @@ public class OrderService {
 - [x] 「框架影子」≥ 2 个例子（Runtime.getRuntime + Spring singleton Bean）
 - [x] 「什么时候别用」存在且有干货（三条警告 + 工具类反例）
 - [x] 结尾有下期预告互链（EP02 工厂方法 teaser）
+- [x] 结尾拆镜留呼吸（6.1/6.2/6.3 各成镜，金句定格收尾）
 - [x] 封面色系匹配创建型 · 蓝（`assets/covers/EP01-cover.png` 1920×1080，视觉验收通过）
 - [x] 代码实际编译运行过（`mashanggou/` Maven 工程，`SingletonEvolutionDemo` 三幕输出验证，2026-11-02）
 
@@ -337,7 +338,7 @@ public class OrderService {
 - [x] `.puml` 类图源文件（`EP01-singleton.puml`）
 - [x] 可运行示例代码（`mashanggou/src/main/java/com/mashanggou/promo/`：V0 事故版 + V1–V5 五版 + `SingletonEvolutionDemo` 反射攻击 main，编译运行通过）
 - [x] 封面图（`assets/covers/EP01-cover.png` + 三色系模板 `assets/covers/cover-template.html`，visual-judge 验收通过 2026-11-02）
-- [x] 成片 MP4：**全片渲染完成**（`video/` 管线 16 镜全量，1920×1080，10:17，2026-11-02；当前为 **TTS 样片配音版，待样片确认 → 真人录音同名覆盖重渲终版**，见 operations §2.2；QA 联系表见 `video/out/qa/contact-sheet.png`）
+- [x] 成片 MP4：**全片渲染完成**（`video/` 管线 18 镜全量，1920×1080，10:17，2026-11-02；当前为 **TTS 样片配音版，待样片确认 → 真人录音同名覆盖重渲终版**，见 operations §2.2；QA 联系表见 `video/out/qa/contact-sheet.png`）
   - ✔ v3 样片已渲染（2026-11-02，10:18，TTS 晓晓）：v2 基础上修复 7 项（镜 1.3 重做、4:07 字幕压字、字幕句末标点、攻击执行重放绑定、徽标版本名+异常中文化、决策树分支动画、5.1 锚点修正）；**全片音画同步审查通过**（16 镜 64 帧逐格核对，`npm run synccheck`，0 处错位）；**待用户验收 + 抽听 → 真人录音重渲终版**
   - ✔ 结尾三镜重做（2026-11-03，样片验收反馈「结尾仓促」）：6.1 拆为 6.1 金句定格 / 6.2 决策树逐条点亮 / 6.3 预告压轴 + 金句回屏定格（首尾呼应，末帧兼作封面备选）；新 TTS 三段 + 单帧 QA 12 帧过（删 6.1 画面副句避字幕重复、决策树统一卡宽）；评审段 `out/EP01-ending-review.mp4` 待用户过目 → **与其他验收发现攒批全片重渲 v4**
 - [ ] 60 秒切片版（依赖成片发布节奏：主视频上线后 2 天内出，见 operations §2.1 / 附录 C.1）

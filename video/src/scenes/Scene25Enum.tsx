@@ -20,7 +20,7 @@ const C6: CodeLine[] = [
       { text: ";                                     // 这一行，就是单例", kind: "comment" },
     ],
   },
-  { segs: [{ text: "    public int getDiscount(int amount) { /* 查规则，同前 */ }" }] },
+  { segs: [{ text: "    public int getDiscount(int amount) { return amount >= 300 ? 80 : 0; }" }] },
   { segs: [{ text: "}" }] },
 ];
 

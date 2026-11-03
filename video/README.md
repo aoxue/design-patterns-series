@@ -6,7 +6,7 @@
 ## 架构（音频槽位，核心机制）
 
 ```
-public/episodes/EPxx.json  台词单一事实源（每期一文件）：tts 文本 + 字幕文本 + leadSec/tailSec 节奏参数
+public/episodes/EPxx.json  台词制作副本（每期一文件；内容事实源是 scripts/ 分镜脚本）：tts 口播读音稿 + subtitle 字幕文本（与脚本逐字一致，双字段分工见 SOP §4.1）+ leadSec/tailSec 节奏参数
 public/audio/EPxx/*.mp3    音频槽位（每期一目录）：TTS 样片配音（tools/tts.py，edge-tts 跨平台）→ 样片定稿后真声同名覆盖，时长自动重算
 public/audio/EPxx/align.json  逐句时间戳（tts.py 随音频生成）：**音频是唯一时钟**：字幕选句与场景动画锚点（AnchorCtx）都按它走，与语音逐句锁死；真人原声覆盖后需用 whisper 对齐重算
 src/data.ts                读 episodes/EPxx.json → SHOTS 数组 + 字幕切分（按句读断句、字数权重分摊）；audioPath() 统一音频槽位路径
