@@ -8,10 +8,10 @@ import {
   useVideoConfig,
 } from "remotion";
 import { getAudioData } from "@remotion/media-utils";
-import { SHOTS, FPS, ESTIMATE_CPS, audioPath, splitSubtitles, type ShotData } from "./data";
+import { SHOTS, FPS, EPISODE, ESTIMATE_CPS, audioPath, splitSubtitles, type ShotData } from "./data";
 import { theme } from "./theme";
 import { SubtitleBar } from "./components/SubtitleBar";
-import type { SceneProps } from "./scene-kit";
+import { AnchorCtx, type SceneProps, type TimedChunk } from "./scene-kit";
 import { HookScene } from "./scenes/HookScene";
 import { CrimeScene } from "./scenes/CrimeScene";
 import { QuestionScene } from "./scenes/QuestionScene";
@@ -33,22 +33,27 @@ export interface TimelineItem extends ShotData {
   startFrame: number;
   frames: number;
   audioSec: number;
+  /** 逐句时间戳（音频是唯一时钟；缺失时字幕/动画退化为等比估算） */
+  chunks?: TimedChunk[];
 }
 
 /** 由各段音频实测时长（或估算值）铺出整条时间轴 */
-export const buildTimeline = (durations: number[] | null): TimelineItem[] => {
+export const buildTimeline = (
+  durations: number[] | null,
+  alignShots: Record<string, TimedChunk[]> = {}
+): TimelineItem[] => {
   const items: TimelineItem[] = [];
   let cursor = 0;
   SHOTS.forEach((s, i) => {
     const audioSec = durations ? durations[i] : s.subtitle.length / ESTIMATE_CPS;
     const frames = Math.ceil((s.leadSec + audioSec + s.tailSec) * FPS);
-    items.push({ ...s, startFrame: cursor, frames, audioSec });
+    items.push({ ...s, startFrame: cursor, frames, audioSec, chunks: alignShots[s.id] });
     cursor += frames;
   });
   return items;
 };
 
-/** 读取 public/audio/ 实测时长；音频槽位架构：换音频零改码，时长自动重算 */
+/** 读取 public/audio/ 实测时长 + 逐句时间戳；音频槽位架构：换音频零改码，时长自动重算 */
 export const computeTimeline = async (): Promise<TimelineItem[]> => {
   const durations: number[] = [];
   for (const s of SHOTS) {
@@ -59,7 +64,17 @@ export const computeTimeline = async (): Promise<TimelineItem[]> => {
       durations.push(s.subtitle.length / ESTIMATE_CPS);
     }
   }
-  return buildTimeline(durations);
+  // 逐句时间戳（tts.py 生成；真人原声用 whisper 对齐工具重算，见 video/README）
+  let alignShots: Record<string, TimedChunk[]> = {};
+  try {
+    const res = await fetch(staticFile(`audio/${EPISODE}/align.json`));
+    if (res.ok) {
+      alignShots = ((await res.json()) as { shots?: Record<string, TimedChunk[]> }).shots ?? {};
+    }
+  } catch {
+    // 无对齐文件：字幕/锚点走估算（与旧版行为一致）
+  }
+  return buildTimeline(durations, alignShots);
 };
 
 /** 镜号 → 场景组件（EP01 全片 16 镜；PoC 四镜沿用绝对帧动画，其余走台词进度锚点） */
@@ -113,16 +128,18 @@ export const Episode: FC<{ timeline: TimelineItem[] | null }> = ({ timeline }) =
         const leadFrames = Math.round(it.leadSec * FPS);
         return (
           <Sequence key={it.id} from={it.startFrame} durationInFrames={it.frames} name={it.id}>
-            {Scene ? (
-              <Scene
-                frames={it.frames}
-                leadFrames={leadFrames}
-                audioFrames={Math.ceil(it.audioSec * FPS)}
-              />
-            ) : null}
-            <Sequence from={leadFrames} durationInFrames={Math.ceil(it.audioSec * FPS) + 5}>
-              <Audio src={staticFile(audioPath(it.audio))} />
-            </Sequence>
+            <AnchorCtx.Provider value={it.chunks ?? null}>
+              {Scene ? (
+                <Scene
+                  frames={it.frames}
+                  leadFrames={leadFrames}
+                  audioFrames={Math.ceil(it.audioSec * FPS)}
+                />
+              ) : null}
+              <Sequence from={leadFrames} durationInFrames={Math.ceil(it.audioSec * FPS) + 5}>
+                <Audio src={staticFile(audioPath(it.audio))} />
+              </Sequence>
+            </AnchorCtx.Provider>
           </Sequence>
         );
       })}
@@ -147,7 +164,12 @@ export const Episode: FC<{ timeline: TimelineItem[] | null }> = ({ timeline }) =
         </span>
       </div>
 
-      <SubtitleBar chunks={splitSubtitles(active.subtitle)} progress={progress} />
+      <SubtitleBar
+        chunks={splitSubtitles(active.subtitle)}
+        progress={progress}
+        timed={active.chunks}
+        tAudio={clamp((frame - active.startFrame - active.leadSec * FPS) / FPS, 0, active.audioSec)}
+      />
 
       {/* 全片进度条 */}
       <div

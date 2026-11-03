@@ -58,6 +58,19 @@ const probe = await selectComposition({ serveUrl, id: "TimelineProbe" });
 const timeline = probe.props.timeline;
 const fps = probe.fps;
 
+// 逐句时间戳（音频是唯一时钟）：有 align.json 时对照表用实测时间，否则退化估算
+let alignShots = {};
+try {
+  alignShots = JSON.parse(
+    await (await import("node:fs/promises")).readFile(
+      path.join(ROOT, "public/audio", COMP, "align.json"),
+      "utf-8"
+    )
+  ).shots ?? {};
+} catch {
+  console.warn("⚠ 无 align.json，对照表用字数估算（先跑 python tools/tts.py）");
+}
+
 const comp = await selectComposition({ serveUrl, id: COMP, inputProps: { timeline } });
 await mkdir(OUT_DIR, { recursive: true });
 
@@ -65,16 +78,19 @@ const rows = [];
 const queue = [];
 for (const it of timeline) {
   const chunks = splitSubtitles(it.subtitle);
+  const timed = alignShots[it.id]?.chunks;
   for (const p of SAMPLES) {
     const frame = Math.round(it.startFrame + it.leadSec * fps + p * it.audioSec * fps);
     const file = `${it.id}-${p}.jpg`;
-    queue.push({
-      shot: it.id,
-      p,
-      frame,
-      file,
-      sub: chunkAt(chunks, p),
-    });
+    let sub;
+    if (timed && timed.length > 0) {
+      const t = p * it.audioSec;
+      sub = "（对齐缺失）";
+      for (const c of timed) if (c.s <= t) sub = c.text;
+    } else {
+      sub = chunkAt(chunks, p);
+    }
+    queue.push({ shot: it.id, p, frame, file, sub });
   }
 }
 
