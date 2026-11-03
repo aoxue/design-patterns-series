@@ -5,6 +5,8 @@ import { theme } from "../theme";
 export interface CodeSeg {
   text: string;
   kind?: "plain" | "comment" | "danger" | "kw";
+  /** 呼吸+光晕标记：在 pulseWindows 任一窗口内随帧起伏，窗口外恢复常亮 */
+  pulse?: boolean;
 }
 
 export interface CodeLine {
@@ -26,6 +28,8 @@ interface CodeCardProps {
   fontSize?: number;
   /** 执行游标：该行处于「执行中」状态（▶ 前缀 + 高亮），与终端输出同步配对用 */
   activeLine?: number;
+  /** 呼吸+光晕的帧窗口（起、止）：命中 pulse 标记的代码段在此窗口内呼吸 */
+  pulseWindows?: [number, number][];
 }
 
 const segColor = (kind?: string) => {
@@ -36,8 +40,25 @@ const segColor = (kind?: string) => {
 };
 
 /** 代码卡：窗口栏 + 逐行显隐。PoC 用手工着色，全量版换 shiki 高亮 */
-export const CodeCard: FC<CodeCardProps> = ({ title, lines, revealAt, fontSize = 25, activeLine = -1 }) => {
+export const CodeCard: FC<CodeCardProps> = ({
+  title,
+  lines,
+  revealAt,
+  fontSize = 25,
+  activeLine = -1,
+  pulseWindows,
+}) => {
   const frame = useCurrentFrame();
+  /** 呼吸强度 0–1：帧在窗口内时以 ~0.8s 周期正弦起伏，窗口外为 null（常亮） */
+  const pulseK = (seg: CodeSeg): number | null => {
+    if (!seg.pulse || !pulseWindows) return null;
+    for (const [a, b] of pulseWindows) {
+      if (frame >= a && frame <= b) {
+        return 0.5 + 0.5 * Math.sin(frame / 3.8);
+      }
+    }
+    return null;
+  };
   /** 行出现进度 0–1：revealAt 起 9 帧淡入（Infinity 恒为 0） */
   const tOf = (i: number) =>
     revealAt[i] === Infinity
@@ -130,11 +151,24 @@ export const CodeCard: FC<CodeCardProps> = ({ title, lines, revealAt, fontSize =
             {i === activeLine && (
               <span style={{ color: theme.primaryBright, marginRight: 8 }}>▶</span>
             )}
-            {line.segs.map((seg, j) => (
-              <span key={j} style={{ color: segColor(seg.kind) }}>
-                {seg.text}
-              </span>
-            ))}
+            {line.segs.map((seg, j) => {
+              const k = pulseK(seg);
+              return (
+                <span
+                  key={j}
+                  style={{
+                    color: segColor(seg.kind),
+                    opacity: k == null ? 1 : 0.55 + 0.45 * k,
+                    textShadow:
+                      k == null
+                        ? "none"
+                        : `0 0 ${8 + 16 * k}px rgba(255, 82, 82, ${0.30 + 0.5 * k}), 0 0 ${20 + 30 * k}px rgba(255, 82, 82, ${0.15 + 0.3 * k})`,
+                  }}
+                >
+                  {seg.text}
+                </span>
+              );
+            })}
           </div>
         );
       })}

@@ -14,7 +14,7 @@ const LINES: CodeLine[] = [
   {
     segs: [
       { text: "    private static " },
-      { text: "volatile", kind: "danger" },
+      { text: "volatile", kind: "danger", pulse: true },
       { text: " PromoConfigManager " },
       { text: "instance", kind: "kw" },
       { text: ";        // volatile：防指令重排", kind: "comment" },
@@ -125,6 +125,10 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           lines={LINES}
           revealAt={revealAt}
           fontSize={19}
+          pulseWindows={[
+            [at(0.301), at(0.378) + 6], // 「但这段代码真正的灵魂，是…volatile」
+            [at(0.849), at(0.898) + 6], // 「volatile 的作用一句话：禁止这个重排」
+          ]}
         />
       </div>
 
