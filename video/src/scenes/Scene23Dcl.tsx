@@ -132,7 +132,9 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         />
       </div>
 
-      {/* 下：A2 指令重排时间轴（全屏宽，本期截图页） */}
+      {/* 下：A2 指令重排时间轴（全屏宽，本期截图页）。
+          截图强调只做「显色+光晕」（overlay 渐入），几何完全冻结——
+          曾经 padding 10→8 + scale 0.985→1 造成卡片可见的尺寸跳变，已废除 */}
       <div
         style={{
           display: "flex",
@@ -140,12 +142,24 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           marginTop: 16,
           flex: 1,
           opacity: boardIn,
-          transform: `scale(${0.985 + shotTip * 0.015})`,
-          border: shotTip > 0.5 ? `2px solid ${theme.primaryBright}` : "2px solid transparent",
+          border: "2px solid transparent",
           borderRadius: 16,
-          padding: shotTip > 0.5 ? 8 : 10,
+          padding: 8,
+          position: "relative",
         }}
       >
+        {/* 截图强调层：边框显色 + 光晕，随台词渐入渐出，零几何变化 */}
+        <div
+          style={{
+            position: "absolute",
+            inset: -2,
+            border: `2px solid ${theme.primaryBright}`,
+            borderRadius: 16,
+            boxShadow: `0 0 34px rgba(124, 182, 255, ${0.10 + shotTip * 0.22})`,
+            opacity: fade(0.755, 12),
+            pointerEvents: "none",
+          }}
+        />
         {/* 左面板：正常顺序 */}
         <TimelinePanel
           title="正常顺序"
