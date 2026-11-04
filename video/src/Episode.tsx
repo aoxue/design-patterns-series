@@ -13,6 +13,7 @@ import { theme } from "./theme";
 import { SubtitleBar } from "./components/SubtitleBar";
 import { AnchorCtx, type SceneProps, type TimedChunk } from "./scene-kit";
 import { HookScene } from "./scenes/HookScene";
+import { IntroScene } from "./scenes/IntroScene";
 import { CrimeScene } from "./scenes/CrimeScene";
 import { QuestionScene } from "./scenes/QuestionScene";
 import { RoadmapScene } from "./scenes/RoadmapScene";
@@ -79,8 +80,9 @@ export const computeTimeline = async (): Promise<TimelineItem[]> => {
   return buildTimeline(durations, alignShots);
 };
 
-/** 镜号 → 场景组件（EP01 全片 18 镜；PoC 四镜沿用绝对帧动画，其余走台词进度锚点） */
+/** 镜号 → 场景组件（EP01 全片 19 镜含 0.1 引导；PoC 四镜沿用绝对帧动画，其余走台词进度锚点） */
 const SCENES: Record<string, FC<SceneProps>> = {
+  "0.1": IntroScene,
   "1.1": HookScene,
   "1.2": CrimeScene,
   "1.3": QuestionScene,
