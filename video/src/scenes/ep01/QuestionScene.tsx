@@ -108,7 +108,15 @@ export const QuestionScene: FC = () => {
 
       <div style={{ fontSize: 58, fontWeight: 700, color: theme.text, height: 80 }}>
         {"约束：全系统只允许一个实例".slice(0, typed)}
-        <span style={{ color: palette.primaryBright, opacity: Math.sin(frame / 4) > 0 ? 1 : 0 }}>|</span>
+        {/* 光标随打字开始才出现（frame >= typeStart），否则镜首就悬空闪烁 11 秒 */}
+        <span
+          style={{
+            color: palette.primaryBright,
+            opacity: frame >= typeStart && Math.sin(frame / 4) > 0 ? 1 : 0,
+          }}
+        >
+          |
+        </span>
       </div>
 
       <div
