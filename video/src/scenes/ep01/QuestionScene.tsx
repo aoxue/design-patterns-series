@@ -28,7 +28,10 @@ export const QuestionScene: FC = () => {
 
   const typeStart = 330;
   const typed = Math.max(0, Math.min(Math.floor((frame - typeStart) / 2), "约束：全系统只允许一个实例".length));
-  const line2In = interpolate(frame, [480, 505], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // 问句提前进：台词「谁能把它焊死在代码里」在音频 13.45s（帧 ≈412）才念，
+  // 旧值 480 帧起已贴镜尾，闪现 0.4s 即切镜；改在句4 尾（帧 400）渐入，
+  // 念问句全程文字稳定可见（2026-11-05 导演反馈）
+  const line2In = interpolate(frame, [400, 425], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
