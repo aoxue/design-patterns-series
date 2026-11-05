@@ -61,7 +61,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 | 9 | 时长头谎报会顺带污染 Remotion 时长计算 | 同 7；切镜产物全部重编码 |
 | 10 | Windows 无系统 ffmpeg 时 tts_qwen/whisper 工具链归一化步抛 WinError 2（2026-11-05 实测） | PATH 前置 Remotion 自带 compositor：`node_modules\@remotion\compositor-win32-x64-msvc\`（含 ffmpeg/ffprobe n7.1，带 libmp3lame）；或安装系统 ffmpeg |
 
-配方参数（segs.json 顶层）：`voice`（声纹参考，assets/voice/ 全系列统一）+ `rate 0.85` + `seed 42`。每段实际下发的完整 prompt 留档在 `out/segs/Sx.prompt.txt`，质量复盘对照用。
+配方参数（segs.json 顶层）：`voice`（声纹参考，assets/voice/ 全系列统一）+ `rate 0.85` + `seed 42`。每段实际下发的完整 prompt 留档在 `out/segs/EPxx/Sx.prompt.txt`，质量复盘对照用。
 
 ## 多机协作注意
 

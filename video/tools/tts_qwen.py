@@ -14,7 +14,7 @@
   python3 tools/tts_qwen.py EP01              # 全流程；已有段音频跳过生成（断点续跑）
   python3 tools/tts_qwen.py EP01 --force      # 全部段重新生成
   python3 tools/tts_qwen.py EP01 --split-only # 只切镜（段音频已备齐）
-产物：public/audio/EPxx/<镜>.mp3（槽位）+ out/segs/Sx.mp3/.prompt.txt（段留档）
+产物：public/audio/EPxx/<镜>.mp3（槽位）+ out/segs/EPxx/Sx.mp3/.prompt.txt（段留档，按期分组防跨期覆盖）
 
 qwen 模型硬特性（踩坑实录，详见 video/README「qwen TTS 坑清单」）：
   无 voice/emotion 参数（语气全靠指令描述）；同参数多次生成结果不同（seed 不保复现，
@@ -150,13 +150,15 @@ def main():
     ref = os.path.join(ROOT, cfg["voice"])
     rate, seed = cfg.get("rate", 0.85), cfg.get("seed", 42)
     audio_dir = os.path.join(ROOT, "public/audio", ep)
-    seg_dir = os.path.join(ROOT, "out", "segs")
+    seg_dir = os.path.join(ROOT, "out", "segs", ep)
     os.makedirs(audio_dir, exist_ok=True)
     os.makedirs(seg_dir, exist_ok=True)
 
     from faster_whisper import WhisperModel
-    print("加载 whisper base（质检 + 切镜）…")
-    model = WhisperModel("base", device="cpu", compute_type="int8")
+    # small：base 转写英文代码术语会漂移（没念漏但 difflib 匹配不上），把切镜
+    # 覆盖拉到门下（EP01 S6 实测 58% 三掷全败，英文占比 31%）；align 侧本就是 small
+    print("加载 whisper small（质检 + 切镜）…")
+    model = WhisperModel("small", device="cpu", compute_type="int8")
 
     api_key = load_key()
     for seg in cfg["segments"]:
