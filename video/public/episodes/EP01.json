@@ -132,7 +132,7 @@
   "file": "4-2.mp3",
   "leadSec": 0.3,
   "tailSec": 0.5,
-  "tts": "影子一号，你天天在用：Runtime 点 getRuntime。拿 CPU 核数、算堆内存上限、exec 起个进程，入口都是它。点开 JDK 源码：private static final Runtime currentRuntime 等于 new Runtime，标准的饿汉式，和我们第一版一个模子刻出来的。JDK 一点零时代写好的单例，今天还在每一台 JVM 里跑。",
+  "tts": "影子一号，你天天在用，就是 Runtime 点 getRuntime，拿 CPU 核数、算堆内存上限、exec 起个进程，入口都是它。点开 JDK 源码：private static final Runtime currentRuntime 等于 new Runtime，标准的饿汉式，和我们第一版一个模子刻出来的。JDK 一点零时代写好的单例，今天还在每一台 JVM 里跑。",
   "subtitle": "影子一号，你天天在用：Runtime.getRuntime()。拿 CPU 核数、算堆内存上限、exec 起个进程，入口都是它。点开 JDK 源码：private static final Runtime currentRuntime = new Runtime()，标准的饿汉式，和我们第一版一个模子刻出来的。JDK 1.0 时代写好的单例，今天还在每一台 JVM 里跑。"
  },
  {
@@ -140,7 +140,7 @@
   "file": "4-3.mp3",
   "leadSec": 0.3,
   "tailSec": 0.8,
-  "tts": "影子二号规模大得多：Spring 容器，一个全自动的单例工厂。艾特 Service 标上，容器登记这个类；别处构造器注入拿到的，永远是同一个实例，Bean 的默认 scope 就是 singleton。注意这里的关键差别：持有实例的不是类自己，是容器。你要单例，容器给；哪天想换个假实现做测试，容器换。写死在类里的 getInstance 做不到这一点。所以结论很直接：Spring 项目里，手写单例基本可以退休：注解加注入，就是二零二六年的单例模式。手写五版的意义，是让你看懂别人的轮子、应付没有容器的场景：工具类库、纯 JDBC 小项目。",
+  "tts": "影子二号规模大得多，说的就是 Spring 容器：一个全自动的单例工厂。艾特 Service 标上，容器登记这个类；别处构造器注入拿到的，永远是同一个实例，Bean 的默认 scope 就是 singleton。注意这里的关键差别：持有实例的不是类自己，是容器。你要单例，容器给；哪天想换个假实现做测试，容器换。写死在类里的 getInstance 做不到这一点。所以结论很直接：Spring 项目里，手写单例基本可以退休：注解加注入，就是二零二六年的单例模式。手写五版的意义，是让你看懂别人的轮子、应付没有容器的场景：工具类库、纯 JDBC 小项目。",
   "subtitle": "影子二号规模大得多：Spring 容器，一个全自动的单例工厂。@Service 标上，容器登记这个类；别处构造器注入拿到的，永远是同一个实例，Bean 的默认 scope 就是 singleton。注意这里的关键差别：持有实例的不是类自己，是容器。你要单例，容器给；哪天想换个假实现做测试，容器换。写死在类里的 getInstance 做不到这一点。所以结论很直接：Spring 项目里，手写单例基本可以退休：注解加注入，就是 2026 年的单例模式。手写五版的意义，是让你看懂别人的轮子、应付没有容器的场景：工具类库、纯 JDBC 小项目。"
  },
  {
