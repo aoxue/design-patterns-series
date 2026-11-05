@@ -5,30 +5,32 @@ import { alpha, theme } from "../../theme";
 import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
- * 镜 2.5 · V5 枚举 + 反射攻击实录（4:20–5:30）
- * 左卡切换：C6 枚举（0–0.2）→ C7 攻击代码；右：Maven 真实运行输出（禁止编造）；
- * 下：五版本徽标墙，V1–V4 中弹碎裂，V5 盾牌弹开；尾：三徽章压轴理由
+ * 镜 2.5 族 · V5 枚举与反射攻击现场（5:08–6:17，v4 自旧 2.5 拆为三镜）
+ * 2.5a Scene25aEnum：C6 代码卡出现，INSTANCE 一词高亮呼吸
+ * 2.5b Scene25bAttack：C7 攻击代码 + Maven 真实运行实录（控制台 false 红字）；
+ *                      攻击箭头射向五版本徽标墙，V1–V4 碎裂
+ * 2.5c Scene25cShield：炮弹打向枚举被 JVM 拦下，Exception 轨迹红字；V5 盾牌弹开；
+ *                      「Cannot reflectively create enum objects」定格；压轴三徽章
+ * 三镜共用 C6/C7/终端实录/徽标墙（同族内容，拆镜后各按自己的台词字位重算锚点）
  */
 
-/** C6 枚举（脚本代码卡原文） */
+/** C6 枚举（脚本代码卡原文；getDiscount 三行形态与 PromoConfigManagerV5 真实源码一致） */
 const C6: CodeLine[] = [
   { segs: [{ text: "public enum " }, { text: "PromoConfigManager", kind: "kw" }, { text: " {" }] },
   {
     segs: [
       { text: "    " },
-      { text: "INSTANCE", kind: "danger" },
+      { text: "INSTANCE", kind: "danger", pulse: true },
       { text: ";  // 这一行，就是单例", kind: "comment" },
     ],
   },
-  // 方法体按 mashanggou 真实源码（PromoConfigManagerV5）多行形态展示：
-  // 单行压缩 65 字符在 fontSize 21 下超出卡片右边界（2026-11-05 视觉核查实锤）
   { segs: [{ text: "    public int getDiscount(int amount) {" }] },
   { segs: [{ text: "        return amount >= 300 ? 80 : 0;" }] },
   { segs: [{ text: "    }" }] },
   { segs: [{ text: "}" }] },
 ];
 
-/** C7 反射攻击（脚本代码卡原文 + 枚举波结果行） */
+/** C7 反射攻击（脚本代码卡原文 + 枚举波结果行；行 7 归 2.5c） */
 const C7: CodeLine[] = [
   { segs: [{ text: "// 攻击方：反射拆 private 构造器", kind: "comment" }] },
   { segs: [{ text: "var ctor = PromoConfigManager.class." }, { text: "getDeclaredConstructor", kind: "kw" }, { text: "();" }] },
@@ -49,57 +51,157 @@ const C7: CodeLine[] = [
   { segs: [{ text: "// 枚举：newInstance 抛 IllegalArgumentException：JVM 拒绝", kind: "comment" }] },
 ];
 
-/** Maven 真实运行输出（2026-11-02 实测，mashanggou SingletonEvolutionDemo 第三幕）。
- *  link = 由代码执行直接产生（▸ 前缀与代码卡 ▶ 执行游标配对，同刻出现） */
-const TERMINAL: { p: number; text: string; kind: "cmd" | "out" | "hot"; link?: boolean }[] = [
-  { p: 0.23, text: "$ mvn -q compile exec:java -Dexec.mainClass=…SingletonEvolutionDemo", kind: "cmd" },
-  { p: 0.24, text: "=== 第三幕 · 反射攻击（C7） ===", kind: "out" },
-  { p: 0.355, text: "攻击 V1 饿汉式（普通类）: ghost == getInstance() → false", kind: "hot", link: true },
-  { p: 0.365, text: "            ← 失守！第二个实例诞生", kind: "hot", link: true },
-  { p: 0.545, text: "攻击 V5 枚举: java.lang.IllegalArgumentException:", kind: "hot", link: true },
-  { p: 0.555, text: "            Cannot reflectively create enum objects", kind: "hot", link: true },
-  { p: 0.62, text: "← JVM 在语言层面焊死了这扇门", kind: "out" },
-];
+/** Maven 真实运行输出（2026-11-02 实测，mashanggou SingletonEvolutionDemo 第三幕，禁止编造）。
+ *  行的出现时机（opacity/link）由各镜按自己的台词字位传入；▸ 前缀与代码卡 ▶ 执行游标配对 */
+interface TermRowData {
+  text: string;
+  kind: "cmd" | "out" | "hot";
+  opacity: number;
+  link?: boolean;
+}
 
-/** 两波「执行重放」：代码行依次点亮（▶ 游标），输出恰在产生它的行执行时落地。
- *  第一波打普通类（println 印出 false）；第二波打枚举（newInstance 抛异常） */
-const WAVES = [
-  { start: 0.24, step: 0.035, lines: [1, 2, 3, 4] },
-  { start: 0.5, step: 0.02, lines: [1, 2, 3] },
-];
+/** 执行重放波：{start: 起播台词进度, step: 行距（进度）, lines: 依次点亮的 C7 行号} */
+interface Wave {
+  start: number;
+  step: number;
+  lines: number[];
+}
 
-const execActive = (p: number) => {
+/** 当前 ▶ 游标行：波内最后一条已点亮的行（帧驱动，经 at() 走实测时间轴） */
+const waveActive = (waves: Wave[], at: (p: number) => number, frame: number): number => {
   let active = -1;
-  for (const w of WAVES) {
-    const end = w.start + w.lines.length * w.step + 0.015;
-    if (p >= w.start && p < end) {
-      const k = Math.min(Math.floor((p - w.start) / w.step), w.lines.length - 1);
-      active = w.lines[k];
+  for (const w of waves) {
+    if (frame >= at(w.start) && frame < at(w.start + w.lines.length * w.step + 0.015)) {
+      for (let k = 0; k < w.lines.length; k++) {
+        if (frame >= at(w.start + k * w.step)) active = w.lines[k];
+      }
     }
   }
   return active;
 };
 
-const C7_VIS = [0.23, 0.24, 0.275, 0.31, 0.345, 0.365, 0.56];
-
-export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+/** 终端实录壳（真实输出专用） */
+const TerminalShell: FC<{ rows: TermRowData[] }> = ({ rows }) => {
   const palette = usePalette();
-  // 台词进度 0–1：驱动两波执行重放的游标
-  const p = Math.max(0, Math.min((frame - leadFrames) / audioFrames, 1));
+  return (
+    <div
+      style={{
+        flex: 1,
+        backgroundColor: theme.deepBg,
+        border: `1px solid ${palette.surfaceBorder}`,
+        borderRadius: 14,
+        padding: "18px 24px",
+        fontFamily: theme.font.mono,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div style={{ fontSize: 20, color: theme.textMuted, marginBottom: 12 }}>
+        终端 · mashanggou 真实运行实录
+      </div>
+      {rows.map((l, i) => (
+        <div
+          key={i}
+          style={{
+            fontSize: 19,
+            lineHeight: 1.85,
+            whiteSpace: "nowrap",
+            color: l.kind === "cmd" ? theme.ok : l.kind === "hot" ? theme.danger : theme.text,
+            opacity: l.opacity,
+            fontWeight: l.kind === "hot" ? 700 : 400,
+          }}
+        >
+          {l.link && <span style={{ color: palette.primaryBright, marginRight: 8 }}>▸</span>}
+          {l.text}
+        </div>
+      ))}
+    </div>
+  );
+};
 
-  const showAttack = seen(0.2); // 0.2 起 C6 淡出、C7 进场
-  const c6Out = 1 - fade(0.2, 8);
-  const ejBadge = pop(0.03); // Effective Java 徽章
-  // V1–V4 碎裂抖动（0.38 处一次脉冲）；V5 盾牌 0.54 弹开
-  const smashT = frame - at(0.38);
-  const smash = smashT > 0 && smashT < 12 ? Math.abs(Math.sin(smashT / 1.8)) : 0;
-  const shield = pop(0.56);
-  const finaleBadges = ["防反射", "防序列化", "代码最短"];
+/** 攻击目标标签：第一波打 V1 普通类，第二波（2.5c）切 V5 枚举 */
+const TargetTag: FC<{ v5: boolean; opacity: number }> = ({ v5, opacity }) => (
+  <div
+    style={{
+      position: "absolute",
+      top: -8,
+      right: 0,
+      fontSize: 21,
+      fontWeight: 700,
+      fontFamily: theme.font.mono,
+      color: v5 ? theme.ok : theme.warn,
+      border: `2px solid ${v5 ? theme.ok : theme.warn}`,
+      borderRadius: 8,
+      padding: "4px 14px",
+      backgroundColor: theme.deepBg,
+      opacity,
+    }}
+  >
+    {v5 ? "目标 → V5 枚举" : "目标 → V1 普通类"}
+  </div>
+);
+
+/** 五版本徽标墙：V1–V4 失守碎裂（smash 一次性抖动脉冲），V5 盾牌弹开（shield spring） */
+const BadgeWall: FC<{ arrowOpacity: number; dead: boolean; smash: number; shield: number }> = ({
+  arrowOpacity,
+  dead,
+  smash,
+  shield,
+}) => {
+  const palette = usePalette();
+  const names = ["饿汉式", "懒汉式", "双检锁", "静态内部类", "枚举"];
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
+      <span style={{ fontSize: 30, color: theme.danger, opacity: arrowOpacity }}>🟥 攻击命中 →</span>
+      {["V1", "V2", "V3", "V4", "V5"].map((v, i) => {
+        const isV5 = i === 4;
+        const shielded = isV5 && shield > 0.5;
+        const fell = dead && !isV5;
+        return (
+          <div key={v} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <div
+              style={{
+                width: 110,
+                height: 110,
+                borderRadius: "50%",
+                border: `4px solid ${fell ? theme.danger : shielded ? theme.ok : palette.surfaceBorder}`,
+                backgroundColor: fell ? theme.diffDel : shielded ? theme.diffAdd : alpha(palette.bg, 0.8),
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontFamily: theme.font.mono,
+                fontSize: 30,
+                color: fell ? theme.danger : shielded ? theme.ok : theme.textMuted,
+                transform: `translateY(${fell ? smash * 6 : 0}px) rotate(${fell ? smash * 4 : 0}deg)`,
+                boxShadow: shielded ? `0 0 40px ${alpha(theme.ok, 0.35)}` : "none",
+                opacity: isV5 ? 0.55 + shield * 0.45 : 1,
+              }}
+            >
+              {fell ? "💥" : shielded ? "🛡" : v}
+            </div>
+            <div style={{ fontSize: 21, color: fell ? theme.danger : shielded ? theme.ok : theme.textMuted }}>
+              {names[i]}
+              {fell ? " · 失守" : ""}
+              {shielded ? " · 弹开" : ""}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+/** ---------------------------------------------------------------- 2.5a · C6 枚举 */
+export const Scene25aEnum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
+  const { at, fade, pop } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
+  // 锚点（subtitle 101 字）：单元素枚举 0.069 / Effective Java 0.129 / INSTANCE 0.356 /
+  // 单例就成了 0.525（INSTANCE 呼吸收口）/ 字段方法照常写 0.584 / 现代 Java 0.693
+  const revealAt = [at(0.069), at(0.356), at(0.584), at(0.584), at(0.584), at(0.584)];
 
   return (
-    <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 20, marginBottom: 16 }}>
+    <AbsoluteFill style={{ padding: "108px 150px 150px" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 20, marginBottom: 20 }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
           <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>V5</span> 单元素枚举 · 压轴
         </div>
@@ -110,131 +212,196 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             border: `1px solid ${theme.warn}`,
             borderRadius: 999,
             padding: "3px 16px",
-            opacity: ejBadge,
+            opacity: pop(0.129),
           }}
         >
           Effective Java 钦定
         </span>
-        <span style={{ fontSize: 23, color: theme.textMuted, opacity: fade(0.12) }}>
-          现代 Java：让模式隐身，一个词解决的事，不写十行
+      </div>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 980 }}>
+          <CodeCard
+            title="PromoConfigManager.java · V5 枚举"
+            lines={C6}
+            revealAt={revealAt}
+            fontSize={26}
+            pulseWindows={[[at(0.356), at(0.525) + 8]]}
+          />
+        </div>
+        {/* 台词原文收条：「现代 Java 的态度」段落的落版 */}
+        <div style={{ marginTop: 26, fontSize: 24, color: theme.textMuted, opacity: fade(0.693) }}>
+          现代 Java 的态度：让模式隐身，一个词解决的事，不写十行
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/** ---------------------------------------------------------------- 2.5b · 反射攻击 V1 */
+export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
+  const { frame, at, fade, seen } = useAnchors(leadFrames, audioFrames);
+  // 锚点（subtitle 244 字）：演一场攻击 0.070 / 反射攻击 0.094 / 专拆 private 0.115 /
+  // getDeclaredConstructor 0.160 / setAccessible 0.279 / newInstance 0.381 / ghost 0.492 /
+  // 全线失守 0.533 / false 0.648 / 第二个实例 0.693 / 反序列化 0.869
+  const revealAt = [at(0.094), at(0.16), at(0.279), at(0.381), at(0.492), at(0.648), Infinity];
+  // ▶ 游标四步 = 台词四个攻击动词字位：getDeclaredConstructor 0.160 / setAccessible 0.279 /
+  // newInstance 0.381 / ghost（println）0.492，步进 (0.492-0.160)/3 ≈ 0.111
+  const waves: Wave[] = [{ start: 0.16, step: 0.111, lines: [1, 2, 3, 4] }];
+  // V1–V4 碎裂：一次性 12 帧抖动脉冲，之后定格失守态
+  const smashT = frame - at(0.533);
+  const smash = smashT > 0 && smashT < 12 ? Math.abs(Math.sin(smashT / 1.8)) : 0;
+
+  return (
+    <AbsoluteFill style={{ padding: "108px 90px 150px" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 20, marginBottom: 16 }}>
+        <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
+          <span style={{ color: theme.warn }}>反射攻击</span> · 专拆 private
+        </div>
+        <span style={{ fontSize: 23, color: theme.textMuted, opacity: fade(0.869) }}>
+          攻击不一定来自同事：反序列化、某些框架按 class 反建对象，走的都是同一条暗道
         </span>
       </div>
 
-      <div style={{ display: "flex", gap: 36, height: 470 }}>
-        {/* 左：C6 → C7 切换 */}
+      <div style={{ display: "flex", gap: 36, height: 410 }}>
+        {/* 左：C7 攻击代码（▶ 游标随台词逐步执行） */}
         <div style={{ flex: 1.15, position: "relative" }}>
-          <div style={{ position: "absolute", inset: 0, opacity: c6Out }}>
-            <CodeCard title="PromoConfigManager.java · V5 枚举" lines={C6} revealAt={[0, 0, 0, 0, 0, 0]} fontSize={21} />
-          </div>
-          <div style={{ position: "absolute", inset: 0, opacity: fade(0.21), pointerEvents: "none" }}>
-            <CodeCard
-              title="ReflectionAttack.java · 攻击方"
-              lines={C7}
-              revealAt={C7_VIS.map(at)}
-              fontSize={21}
-              activeLine={execActive(p)}
-            />
-          </div>
-          {/* 攻击目标标签：第一波打 V1 普通类，第二波切 V5 枚举 */}
-          <div
-            style={{
-              position: "absolute",
-              top: -8,
-              right: 0,
-              fontSize: 21,
-              fontWeight: 700,
-              fontFamily: theme.font.mono,
-              color: seen(0.5) ? theme.ok : theme.warn,
-              border: `2px solid ${seen(0.5) ? theme.ok : theme.warn}`,
-              borderRadius: 8,
-              padding: "4px 14px",
-              backgroundColor: theme.deepBg,
-              opacity: fade(0.24, 8),
-            }}
-          >
-            {seen(0.5) ? "目标 → V5 枚举" : "目标 → V1 普通类"}
-          </div>
+          <CodeCard
+            title="ReflectionAttack.java · 攻击方"
+            lines={C7}
+            revealAt={revealAt}
+            fontSize={21}
+            activeLine={waveActive(waves, at, frame)}
+          />
+          <TargetTag v5={false} opacity={fade(0.115, 8)} />
         </div>
 
-        {/* 右：终端实录（真实输出） */}
-        <div
-          style={{
-            flex: 1,
-            backgroundColor: theme.deepBg,
-            border: `1px solid ${palette.surfaceBorder}`,
-            borderRadius: 14,
-            padding: "18px 24px",
-            fontFamily: theme.font.mono,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ fontSize: 20, color: theme.textMuted, marginBottom: 12 }}>
-            终端 · mashanggou 真实运行实录
-          </div>
-          {TERMINAL.map((l, i) => (
-            <div
-              key={i}
-              style={{
-                fontSize: 19,
-                lineHeight: 1.85,
-                whiteSpace: "nowrap",
-                color: l.kind === "cmd" ? theme.ok : l.kind === "hot" ? theme.danger : theme.text,
-                opacity: fade(l.p),
-                fontWeight: l.kind === "hot" ? 700 : 400,
-              }}
-            >
-              {l.link && <span style={{ color: palette.primaryBright, marginRight: 8 }}>▸</span>}
-              {l.text}
-            </div>
-          ))}
-        </div>
+        {/* 右：终端实录（真实输出，false 红字） */}
+        <TerminalShell
+          rows={[
+            {
+              text: "$ mvn -q compile exec:java -Dexec.mainClass=…SingletonEvolutionDemo",
+              kind: "cmd",
+              opacity: fade(0.07),
+            },
+            { text: "=== 第三幕 · 反射攻击（C7） ===", kind: "out", opacity: fade(0.094) },
+            {
+              text: "攻击 V1 饿汉式（普通类）: ghost == getInstance() → false",
+              kind: "hot",
+              opacity: fade(0.648),
+              link: true,
+            },
+            {
+              text: "            ← 失守！第二个实例诞生",
+              kind: "hot",
+              opacity: fade(0.693),
+              link: true,
+            },
+          ]}
+        />
       </div>
 
-        {/* 下：五版本徽标墙，攻击箭头射向五版（每个圆环标注版本名，失守/弹开状态写在名下） */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 26, marginTop: 10 }}>
-        <span style={{ fontSize: 30, color: theme.danger, opacity: fade(0.3) }}>🟥 攻击命中 →</span>
-        {["V1", "V2", "V3", "V4", "V5"].map((v, i) => {
-          const dead = i < 4 && seen(0.38);
-          const isShield = i === 4;
-          const name = ["饿汉式", "懒汉式", "双检锁", "静态内部类", "枚举"][i];
-          return (
-            <div key={v} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-              <div
-                style={{
-                  width: 120,
-                  height: 120,
-                  borderRadius: "50%",
-                  border: `4px solid ${dead ? theme.danger : isShield ? theme.ok : palette.surfaceBorder}`,
-                  backgroundColor: dead
-                    ? "rgba(255, 82, 82, 0.14)"
-                    : isShield
-                      ? "rgba(63, 218, 140, 0.12)"
-                      : alpha(palette.bg, 0.8),
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontFamily: theme.font.mono,
-                  fontSize: 30,
-                  color: dead ? theme.danger : isShield ? theme.ok : theme.textMuted,
-                  transform: `translateY(${dead ? smash * 6 : 0}px) rotate(${dead ? smash * 4 : 0}deg) scale(${isShield ? 0.96 + shield * 0.04 : 1})`,
-                  boxShadow: isShield && shield > 0.5 ? `0 0 40px rgba(63, 218, 140, 0.35)` : "none",
-                  opacity: i === 4 ? (dead ? 1 : 0.55 + shield * 0.45) : 1,
-                }}
-              >
-                {dead ? "💥" : isShield ? "🛡" : v}
-              </div>
-              <div style={{ fontSize: 21, color: dead ? theme.danger : isShield ? theme.ok : theme.textMuted }}>
-                {name}
-                {dead ? " · 失守" : ""}
-                {isShield && shield > 0.5 ? " · 弹开" : ""}
-              </div>
-            </div>
-          );
-        })}
+      {/* 下：五版本徽标墙，V1–V4 中弹碎裂 */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+        <BadgeWall arrowOpacity={fade(0.16)} dead={seen(0.533)} smash={smash} shield={0} />
+      </div>
+    </AbsoluteFill>
+  );
+};
 
-        {/* 压轴三徽章 */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginLeft: 20 }}>
+/** ---------------------------------------------------------------- 2.5c · 炮弹打向枚举 */
+export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
+  const { frame, at, fade, pop } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
+  // 锚点（subtitle 156 字）：打向枚举 0.032 / newInstance 0.083 / 拦下 0.212 /
+  // IllegalArgumentException 0.244 / 报错原文 0.404 / 焊死 0.635 /
+  // 防反射 0.814 / 防序列化 0.840 / 代码最短 0.872
+  const base = leadFrames; // C7 前六行承接 2.5b（续镜快闪复位），行 7 等异常实锤
+  const revealAt = [base, base + 2, base + 4, base + 6, base + 8, base + 10, at(0.244)];
+  const waves: Wave[] = [{ start: 0.083, step: 0.05, lines: [1, 2, 3] }];
+  const shield = pop(0.212); // newInstance 被 JVM 拦下：V5 盾牌弹开
+  const finaleBadges = ["防反射", "防序列化", "代码最短"];
+  const finaleAt = [0.814, 0.84, 0.872];
+
+  return (
+    <AbsoluteFill style={{ padding: "108px 90px 150px" }}>
+      <div style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 16 }}>
+        <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>V5</span> 单元素枚举 · 压轴的理由
+        <span style={{ fontSize: 23, color: theme.textMuted, fontWeight: 400, marginLeft: 14 }}>
+          防反射、防序列化、代码最短，三项全包
+        </span>
+      </div>
+
+      <div style={{ display: "flex", gap: 36, height: 380 }}>
+        {/* 左：C7 续（攻击代码回放一轮，枚举波结果行落地） */}
+        <div style={{ flex: 1.15, position: "relative" }}>
+          <CodeCard
+            title="ReflectionAttack.java · 攻击方（续）"
+            lines={C7}
+            revealAt={revealAt}
+            fontSize={21}
+            activeLine={waveActive(waves, at, frame)}
+          />
+          <TargetTag v5={true} opacity={fade(0.032, 8)} />
+        </div>
+
+        {/* 右：终端实录（前四行承接 2.5b 压暗定格，V5 波红字落地） */}
+        <TerminalShell
+          rows={[
+            {
+              text: "$ mvn -q compile exec:java -Dexec.mainClass=…SingletonEvolutionDemo",
+              kind: "cmd",
+              opacity: 0.4,
+            },
+            { text: "=== 第三幕 · 反射攻击（C7） ===", kind: "out", opacity: 0.4 },
+            {
+              text: "攻击 V1 饿汉式（普通类）: ghost == getInstance() → false",
+              kind: "hot",
+              opacity: 0.4,
+            },
+            { text: "            ← 失守！第二个实例诞生", kind: "hot", opacity: 0.4 },
+            {
+              text: "攻击 V5 枚举: java.lang.IllegalArgumentException:",
+              kind: "hot",
+              opacity: fade(0.244),
+              link: true,
+            },
+            {
+              text: "            Cannot reflectively create enum objects",
+              kind: "hot",
+              opacity: fade(0.404),
+              link: true,
+            },
+            { text: "← JVM 在语言层面焊死了这扇门", kind: "out", opacity: fade(0.635) },
+          ]}
+        />
+      </div>
+
+      {/* Exception 定格条：报错原文贴屏（台词念到「报错原文贴在屏幕上」起，定格到镜尾） */}
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          border: `2px solid ${theme.danger}`,
+          borderRadius: 12,
+          padding: "12px 24px",
+          backgroundColor: theme.deepBg,
+          opacity: fade(0.404, 10),
+        }}
+      >
+        <span style={{ fontSize: 26, color: theme.danger }}>✖</span>
+        <span style={{ fontFamily: theme.font.mono, fontSize: 26, fontWeight: 700, color: theme.danger }}>
+          Cannot reflectively create enum objects
+        </span>
+        <span style={{ fontSize: 21, color: theme.textMuted }}>报错原文 · 无法用反射创建枚举对象</span>
+      </div>
+
+      {/* 下：徽标墙（V1–V4 承接失守态）＋ 压轴三徽章 */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+        <BadgeWall arrowOpacity={fade(0.032)} dead={true} smash={0} shield={shield} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginLeft: 24 }}>
           {finaleBadges.map((b, i) => (
             <span
               key={b}
@@ -245,8 +412,8 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 borderRadius: 999,
                 padding: "5px 18px",
                 textAlign: "center",
-                opacity: pop(0.72 + i * 0.03),
-                backgroundColor: "rgba(63, 218, 140, 0.08)",
+                opacity: pop(finaleAt[i]),
+                backgroundColor: alpha(theme.ok, 0.08),
               }}
             >
               {b} ✓

@@ -14,7 +14,7 @@ src/data.ts                纯函数层：字幕切分（按句读断句、字�
 src/Episode.tsx            通用调度器：按 episodeId 查注册表 → calculateMetadata 实测音频时长铺时间轴 + 全局字幕条 + PaletteCtx 注入色板
 src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors + usePalette：动画锚点按台词进度 0–1 定义，换配音自动适配
 src/episodes/registry.ts   期注册表：加新期 = 新建 src/episodes/EPxx.tsx（id/title/category/lines/scenes 五样，lines import 自己的 EPxx.json）+ import 进数组，Root 遍历注册 Composition，其余零改码
-src/scenes/epXX/*.tsx      每镜一个场景组件（useCurrentFrame 帧驱动动画；按期分目录，EP01 共 19 个含 0.1 引导片头）
+src/scenes/epXX/*.tsx      场景组件（useCurrentFrame 帧驱动动画；按期分目录，一镜一组件，同族拆镜可共用族文件：EP01 v4 拆镜后 24 镜、20 个文件）
 src/components/*           复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
 src/theme.ts           色彩体系唯一取色处：中性 token（theme，全系列恒定）+ 四套分类色板（PALETTES，创建蓝/结构绿/行为橙/特辑紫，Episode 按期经 PaletteCtx 注入，组件 usePalette() 取），禁止硬编码颜色
 ```
