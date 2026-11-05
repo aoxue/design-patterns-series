@@ -7,13 +7,14 @@
 
 ```
 public/episodes/EPxx.json  台词制作副本（每期一文件；内容事实源是 scripts/ 分镜脚本）：tts 口播读音稿 + subtitle 字幕文本（与脚本逐字一致，双字段分工见 SOP §4.1）+ leadSec/tailSec 节奏参数
-public/audio/EPxx/*.mp3    音频槽位（每期一目录）：TTS 样片配音（tools/tts.py，edge-tts 跨平台）→ 样片定稿后真声同名覆盖，时长自动重算
-public/audio/EPxx/align.json  逐句时间戳（tts.py 随音频生成）：**音频是唯一时钟**：字幕选句与场景动画锚点（AnchorCtx）都按它走，与语音逐句锁死；真人原声覆盖后需用 whisper 对齐重算
+public/episodes/EPxx.segs.json  配音段定义（编导交付物，随台词同步产出）：段划分（≤470 字/段）+ 每段表演指令壳，{镜id} 占位符运行时从 EPxx.json 注入台词（写法见 SOP §4.1）
+public/audio/EPxx/*.mp3    音频槽位（每期一目录）：主力 = qwen 声纹配音（tools/tts_qwen.py，一段一条 + 自动质检切镜）；tts.py（edge-tts）降级为无 key 环境快速预览；真声同名覆盖亦走同槽位
+public/audio/EPxx/align.json  逐句时间戳：**音频是唯一时钟**，字幕选句与场景动画锚点（AnchorCtx）都按它走；qwen 配音与真人原声统一由 tools/whisper_align.py 重算
 src/data.ts                纯函数层：字幕切分（按句读断句、字数权重分摊）、audioPath/computeTimeline（均接期参数，无全局期号）
 src/Episode.tsx            通用调度器：按 episodeId 查注册表 → calculateMetadata 实测音频时长铺时间轴 + 全局字幕条 + PaletteCtx 注入色板
 src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors + usePalette：动画锚点按台词进度 0–1 定义，换配音自动适配
 src/episodes/registry.ts   期注册表：加新期 = 新建 src/episodes/EPxx.tsx（id/title/category/lines/scenes 五样，lines import 自己的 EPxx.json）+ import 进数组，Root 遍历注册 Composition，其余零改码
-src/scenes/epXX/*.tsx      每镜一个场景组件（useCurrentFrame 帧驱动动画；按期分目录，EP01 共 18 个）
+src/scenes/epXX/*.tsx      每镜一个场景组件（useCurrentFrame 帧驱动动画；按期分目录，EP01 共 19 个含 0.1 引导片头）
 src/components/*           复用件：SubtitleBar（音画同步字幕）、CodeCard（代码卡，支持 diff 删红增绿 / kw 高亮 / 字号）
 src/theme.ts           色彩体系唯一取色处：中性 token（theme，全系列恒定）+ 四套分类色板（PALETTES，创建蓝/结构绿/行为橙/特辑紫，Episode 按期经 PaletteCtx 注入，组件 usePalette() 取），禁止硬编码颜色
 ```
@@ -24,13 +25,15 @@ src/theme.ts           色彩体系唯一取色处：中性 token（theme，全�
 
 ```bash
 # 首次准备（Windows / macOS 通用）
-npm install              # Node ≥ 18
-pip install edge-tts faster-whisper "av==13.1.0"   # Python 3；av 固定 13.x（新版移除 metadata_errors，与 faster-whisper 不兼容，2026-11-03 踩坑）
+npm install                                          # Node ≥ 18
+pip install requests edge-tts faster-whisper "av==13.1.0"   # Python 3；av 固定 13.x（新版移除 metadata_errors，与 faster-whisper 不兼容，2026-11-03 踩坑）
+cp .env.example .env                                 # 再填入 DASHSCOPE_API_KEY（.env 已 gitignore；qwen TTS 用）
 
 # 日常
-python tools/tts.py                                  # （重）生成 TTS 样片配音 + 逐句时间戳 align.json（--voice 可换音色）
+python tools/tts_qwen.py EP01                        # 主力配音：qwen 声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成；--split-only 只切镜）
+python tools/whisper_align.py EP01                   # 对齐重算 align.json（qwen 配音与真声统一走此路；--check 只读对比偏差；--model 可调，默认 small）
+python tools/tts.py                                  # 降级：edge-tts 快速预览（无 key 环境可用，随音频产出同构 align.json）
 python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
-python tools/whisper_align.py EP01                   # 真声对齐：mp3 同名覆盖后重算 align.json（--check 只读对比偏差；--model 可调，默认 small）
 # 国内网络首次下载 whisper 模型：前面加 HF_ENDPOINT=https://hf-mirror.com
 npm run lint:colors                                  # 颜色纪律检查（提交前必跑，违规即红）
 npm run sheet                                        # 成片自查联系表：每镜首/中/尾 3 帧（SOP §8）
@@ -42,6 +45,22 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 #   remotion 交互选择，在无终端环境（AI 后台派单/CI）下表现为「chrome 起了但 0% CPU 挂死」，
 #   极易误判为渲染资源泄漏（2026-11-05 实测踩坑，排查一小时方定位）
 ```
+
+## qwen TTS 坑清单（2026-11 EP01 全片实战，tts_qwen.py 已内置对策）
+
+| # | 坑 | 对策（工具内置 / 写作纪律） |
+|---|---|---|
+| 1 | 长 prompt 尾部整镜被吞（S1 两次漏念 1.4） | 段以悬念/自然收尾点结束，别让重要镜吊段尾（编导分段纪律） |
+| 2 | 同参数多次生成结果不同（seed 不保复现） | 质检 + 自动重掷是标配，不是异常处理 |
+| 3 | 偶发纯非语音输出（92s 转写零字） | 复读比下限拦截，删段重掷 |
+| 4 | 表演指令管语气不管节奏（prompt 写「从容」无效） | 语速只用 `rate` 硬参数压（默认 0.85 ≈ 310 字/分） |
+| 5 | 输出上限 120s（播客场景 240s） | 段预算 ≤470 字（5.1 字/秒估算） |
+| 6 | audiogen 会自配背景音乐/环境音 | 指令壳尾保留「只有干净人声」约束句（F 定稿配方实证） |
+| 7 | 带参考音频时 mp3 时长头谎报（36s 头/14s 数据） | 生成后必过 ffmpeg 归一化 |
+| 8 | 短文本（<100 字）机械感显著 | 一段一条连念（74 字版 vs 470 字版自然度差一个档次） |
+| 9 | 时长头谎报会顺带污染 Remotion 时长计算 | 同 7；切镜产物全部重编码 |
+
+配方参数（segs.json 顶层）：`voice`（声纹参考，assets/voice/ 全系列统一）+ `rate 0.85` + `seed 42`。每段实际下发的完整 prompt 留档在 `out/segs/Sx.prompt.txt`，质量复盘对照用。
 
 ## 多机协作注意
 
