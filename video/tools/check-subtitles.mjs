@@ -27,7 +27,8 @@ const RULES = [
 // 半角标点豁免：时间戳 00:01 形态的冒号不属于台词标点
 const EXEMPT = (text) => text.replace(/\d+:\d+/g, "");
 
-const files = (await readdir(DIR)).filter((f) => f.endsWith(".json")).sort();
+// 排除 .segs.json（配音段定义，对象结构非镜数组，2026-11-05 编导同步时发现扫描即崩）
+const files = (await readdir(DIR)).filter((f) => f.endsWith(".json") && !f.endsWith(".segs.json")).sort();
 let errors = 0;
 for (const file of files) {
   const shots = JSON.parse(await readFile(path.join(DIR, file), "utf8"));
