@@ -20,7 +20,11 @@ const C6: CodeLine[] = [
       { text: ";                                     // 这一行，就是单例", kind: "comment" },
     ],
   },
-  { segs: [{ text: "    public int getDiscount(int amount) { return amount >= 300 ? 80 : 0; }" }] },
+  // 方法体按 mashanggou 真实源码（PromoConfigManagerV5）多行形态展示：
+  // 单行压缩 65 字符在 fontSize 21 下超出卡片右边界（2026-11-05 视觉核查实锤）
+  { segs: [{ text: "    public int getDiscount(int amount) {" }] },
+  { segs: [{ text: "        return amount >= 300 ? 80 : 0;" }] },
+  { segs: [{ text: "    }" }] },
   { segs: [{ text: "}" }] },
 ];
 
@@ -120,7 +124,7 @@ export const Scene25Enum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         {/* 左：C6 → C7 切换 */}
         <div style={{ flex: 1.15, position: "relative" }}>
           <div style={{ position: "absolute", inset: 0, opacity: c6Out }}>
-            <CodeCard title="PromoConfigManager.java · V5 枚举" lines={C6} revealAt={[0, 0, 0, 0]} fontSize={21} />
+            <CodeCard title="PromoConfigManager.java · V5 枚举" lines={C6} revealAt={[0, 0, 0, 0, 0, 0]} fontSize={21} />
           </div>
           <div style={{ position: "absolute", inset: 0, opacity: fade(0.21), pointerEvents: "none" }}>
             <CodeCard
