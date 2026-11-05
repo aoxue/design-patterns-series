@@ -1,6 +1,6 @@
 {
  "voice": "assets/voice/voiceprint.wav",
- "rate": 0.9,
+ "rate": 1.0,
  "seed": 42,
  "segments": [
   {
