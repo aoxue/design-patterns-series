@@ -12,7 +12,7 @@
 
 用法：
   python3 tools/tts_qwen.py EP01              # 全流程；已有段音频跳过生成（断点续跑）
-  python3 tools/tts_qwen.py EP01 --force      # 全部段重新生成
+  python3 tools/tts_qwen.py EP01 --force      # 全部段重新生成（现行段留档先备份到 bak-时间戳/）
   python3 tools/tts_qwen.py EP01 --split-only # 只切镜（段音频已备齐）
 产物：public/audio/EPxx/<镜>.mp3（槽位）+ out/segs/EPxx/Sx.mp3/.prompt.txt（段留档，按期分组防跨期覆盖）
 
@@ -26,8 +26,10 @@ import base64
 import json
 import mimetypes
 import os
+import shutil
 import subprocess
 import sys
+import time
 
 import requests
 
@@ -137,6 +139,28 @@ def split_segment(seg_mp3, seg_shots, model, audio_dir):
     return []
 
 
+def backup_segs(seg_dir, cfg):
+    """--force 前把现行段留档整体归档：一次 force 一个 bak-时间戳/ 目录，
+    多次 force 互不覆盖（同秒撞名自动加序号）；copy2 保留 mtime 供考古。
+    只备份工具自有的 {Sx}.mp3/{Sx}.prompt.txt，alt/preview 等人工留档不动。"""
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    bak = os.path.join(seg_dir, f"bak-{stamp}")
+    n = 2
+    while os.path.exists(bak):
+        bak = os.path.join(seg_dir, f"bak-{stamp}-{n}")
+        n += 1
+    saved = 0
+    for seg in cfg["segments"]:
+        for fname in (f"{seg['id']}.mp3", f"{seg['id']}.prompt.txt"):
+            src = os.path.join(seg_dir, fname)
+            if os.path.exists(src):
+                os.makedirs(bak, exist_ok=True)
+                shutil.copy2(src, os.path.join(bak, fname))
+                saved += 1
+    if saved:
+        print(f"[backup] 现行段留档 {saved} 个 → {bak}")
+
+
 def main():
     args = [a for a in sys.argv[1:]]
     ep = args[0] if args and not args[0].startswith("-") else "EP01"
@@ -153,6 +177,8 @@ def main():
     seg_dir = os.path.join(ROOT, "out", "segs", ep)
     os.makedirs(audio_dir, exist_ok=True)
     os.makedirs(seg_dir, exist_ok=True)
+    if force:
+        backup_segs(seg_dir, cfg)
 
     from faster_whisper import WhisperModel
     # small：base 转写英文代码术语会漂移（没念漏但 difflib 匹配不上），把切镜

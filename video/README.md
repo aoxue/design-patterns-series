@@ -30,7 +30,7 @@ pip install requests edge-tts faster-whisper "av==13.1.0"   # Python 3；av 固�
 cp .env.example .env                                 # 再填入 DASHSCOPE_API_KEY（.env 已 gitignore；qwen TTS 用）
 
 # 日常
-python tools/tts_qwen.py EP01                        # 主力配音：qwen 声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成；--split-only 只切镜）
+python tools/tts_qwen.py EP01                        # 主力配音：qwen 声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成，现行段留档先备份到 out/segs/EPxx/bak-时间戳/；--split-only 只切镜）
 python tools/whisper_align.py EP01                   # 对齐重算 align.json（qwen 配音与真声统一走此路；--check 只读对比偏差；--model 可调，默认 small）
 python tools/tts.py                                  # 降级：edge-tts 快速预览（无 key 环境可用，随音频产出同构 align.json）
 python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
