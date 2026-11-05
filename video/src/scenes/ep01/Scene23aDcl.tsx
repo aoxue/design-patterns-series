@@ -73,7 +73,8 @@ export const Scene23aDcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const motto = ["一查", "加锁", "二查", "创建"];
 
   // 代码行出现帧：头部 4 行随「第三版，双检锁」先落地；四步行各等自己的讲解；
-  // 收尾大括号与 return 在「创建」行之后级联补齐（台词不逐行念到，按 6 帧步进收口）
+  // 收尾大括号与 return 在「创建」行之后级联补齐（台词不逐行念到，按 6 帧步进收口，
+  // QA 实拍教训：8 帧步进下尾行距镜尾仅 40 余帧、观感偏赶，收紧到 6 帧）
   const tail = at(STEP_AT[3]);
   const revealAt = [
     at(0.02),
@@ -84,12 +85,12 @@ export const Scene23aDcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     at(STEP_AT[1]),
     at(STEP_AT[2]),
     at(STEP_AT[3]),
-    tail + 8,
-    tail + 14,
-    tail + 20,
-    tail + 26,
-    tail + 32,
-    tail + 38,
+    tail + 6,
+    tail + 12,
+    tail + 18,
+    tail + 24,
+    tail + 30,
+    tail + 36,
   ];
 
   // ▶ 执行游标：落在当前正在讲解的那一步（一查行 4 / 加锁行 5 / 二查行 6 / 创建行 7）

@@ -60,20 +60,22 @@ interface TermRowData {
   link?: boolean;
 }
 
-/** 执行重放波：{start: 起播台词进度, step: 行距（进度）, lines: 依次点亮的 C7 行号} */
+/** 执行重放波：{starts: 各行点亮台词进度（= 该行 revealAt 词位）, lines: 对应 C7 行号, end: 波结束进度}。
+ *  starts 逐行给字位而非等距步进：▶ 游标与代码行揭示、台词念词三者同帧锁死
+ *  （QA 实拍教训：等距步进会在第二步早于行揭示 ~10 帧，游标指向尚未显现的行） */
 interface Wave {
-  start: number;
-  step: number;
+  starts: number[];
   lines: number[];
+  end: number;
 }
 
 /** 当前 ▶ 游标行：波内最后一条已点亮的行（帧驱动，经 at() 走实测时间轴） */
 const waveActive = (waves: Wave[], at: (p: number) => number, frame: number): number => {
   let active = -1;
   for (const w of waves) {
-    if (frame >= at(w.start) && frame < at(w.start + w.lines.length * w.step + 0.015)) {
+    if (frame >= at(w.starts[0]) && frame < at(w.end)) {
       for (let k = 0; k < w.lines.length; k++) {
-        if (frame >= at(w.start + k * w.step)) active = w.lines[k];
+        if (frame >= at(w.starts[k])) active = w.lines[k];
       }
     }
   }
@@ -244,10 +246,11 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   // 锚点（subtitle 244 字）：演一场攻击 0.070 / 反射攻击 0.094 / 专拆 private 0.115 /
   // getDeclaredConstructor 0.160 / setAccessible 0.279 / newInstance 0.381 / ghost 0.492 /
   // 全线失守 0.533 / false 0.648 / 第二个实例 0.693 / 反序列化 0.869
-  const revealAt = [at(0.094), at(0.16), at(0.279), at(0.381), at(0.492), at(0.648), Infinity];
-  // ▶ 游标四步 = 台词四个攻击动词字位：getDeclaredConstructor 0.160 / setAccessible 0.279 /
-  // newInstance 0.381 / ghost（println）0.492，步进 (0.492-0.160)/3 ≈ 0.111
-  const waves: Wave[] = [{ start: 0.16, step: 0.111, lines: [1, 2, 3, 4] }];
+  // false 结果行提前到 0.62（「ghost == getInstance() 印出来…」句首附近起淡入）：
+  // 0.648（词位）起淡的话，红字完整可见要滞后台词半秒（QA 实拍教训）
+  const revealAt = [at(0.094), at(0.16), at(0.279), at(0.381), at(0.492), at(0.62), Infinity];
+  // ▶ 游标四步 = 台词四个攻击动词字位，与各行 revealAt 同帧：0.160 / 0.279 / 0.381 / 0.492
+  const waves: Wave[] = [{ starts: [0.16, 0.279, 0.381, 0.492], lines: [1, 2, 3, 4], end: 0.55 }];
   // V1–V4 碎裂：一次性 12 帧抖动脉冲，之后定格失守态
   const smashT = frame - at(0.533);
   const smash = smashT > 0 && smashT < 12 ? Math.abs(Math.sin(smashT / 1.8)) : 0;
@@ -288,7 +291,7 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             {
               text: "攻击 V1 饿汉式（普通类）: ghost == getInstance() → false",
               kind: "hot",
-              opacity: fade(0.648),
+              opacity: fade(0.62),
               link: true,
             },
             {
@@ -318,7 +321,8 @@ export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   // 防反射 0.814 / 防序列化 0.840 / 代码最短 0.872
   const base = leadFrames; // C7 前六行承接 2.5b（续镜快闪复位），行 7 等异常实锤
   const revealAt = [base, base + 2, base + 4, base + 6, base + 8, base + 10, at(0.244)];
-  const waves: Wave[] = [{ start: 0.083, step: 0.05, lines: [1, 2, 3] }];
+  // 炮弹回放三步游标（ctor → setAccessible → newInstance），拦截点 0.244 波结束
+  const waves: Wave[] = [{ starts: [0.083, 0.133, 0.183], lines: [1, 2, 3], end: 0.244 }];
   const shield = pop(0.212); // newInstance 被 JVM 拦下：V5 盾牌弹开
   const finaleBadges = ["防反射", "防序列化", "代码最短"];
   const finaleAt = [0.814, 0.84, 0.872];

@@ -55,7 +55,16 @@ export const computeTimeline = async (ep: EpisodeModule): Promise<TimelineItem[]
   try {
     const res = await fetch(staticFile(audioPath(ep, "align.json")));
     if (res.ok) {
-      alignShots = ((await res.json()) as { shots?: Record<string, TimedChunk[]> }).shots ?? {};
+      // align.json 的镜条目形状是 {words, chunks}（tts.py / whisper_align.py 产物，
+      // sync-check.mjs 同样按 .chunks 读取）；兼容旧版直出的数组形状，统一归一成
+      // chunk 数组再下发给字幕与锚点，否则 AnchorCtx 拿到对象会静默退化为估算
+      const data = (await res.json()) as {
+        shots?: Record<string, TimedChunk[] | { chunks?: TimedChunk[] }>;
+      };
+      for (const [id, v] of Object.entries(data.shots ?? {})) {
+        const list = Array.isArray(v) ? v : v?.chunks;
+        if (Array.isArray(list) && list.length > 0) alignShots[id] = list;
+      }
     }
   } catch {
     // 无对齐文件：字幕/锚点走估算（与旧版行为一致）
