@@ -17,7 +17,7 @@ const C6: CodeLine[] = [
     segs: [
       { text: "    " },
       { text: "INSTANCE", kind: "danger" },
-      { text: ";                                     // 这一行，就是单例", kind: "comment" },
+      { text: ";  // 这一行，就是单例", kind: "comment" },
     ],
   },
   // 方法体按 mashanggou 真实源码（PromoConfigManagerV5）多行形态展示：
