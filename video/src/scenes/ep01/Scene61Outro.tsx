@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
-import { QuoteFrame } from "../components/QuoteFrame";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps } from "../../scene-kit";
+import { QuoteFrame } from "../../components/QuoteFrame";
 
 /**
  * 镜 6.1 · 金句定格（结尾三镜之首）

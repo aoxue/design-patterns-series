@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { CodeCard, type CodeLine } from "../components/CodeCard";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { CodeCard, type CodeLine } from "../../components/CodeCard";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 2.2 · V2 懒汉式 + 动画板 A1（2:10–2:50）
@@ -72,6 +72,7 @@ const RACE: { p: number; col: 0 | 1; text: string; note?: string; bad?: boolean 
 
 export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   const revealAt = VIS.map(at);
   const boardIn = fade(0.19);
@@ -90,7 +91,7 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   return (
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
       <div style={{ fontSize: 38, fontWeight: 700, color: theme.text, marginBottom: 24 }}>
-        <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V2</span> 懒汉式 ·
+        <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>V2</span> 懒汉式 ·
         第一次用到再建 <span style={{ fontSize: 26, color: theme.textMuted, fontWeight: 400 }}>，但多线程在等你翻车</span>
       </div>
 
@@ -105,7 +106,7 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           <div
             style={{
               backgroundColor: theme.codeBg,
-              border: `1px solid ${broken > 0.5 ? theme.danger : theme.surfaceBorder}`,
+              border: `1px solid ${broken > 0.5 ? theme.danger : palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "18px 24px",
               opacity: boardIn,
@@ -116,7 +117,7 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               动画板 A1 · 两线程时序
             </div>
             <div style={{ display: "flex", gap: 24, marginBottom: 10, fontSize: 24 }}>
-              <span style={{ width: "50%", color: theme.primaryBright }}>线程 A</span>
+              <span style={{ width: "50%", color: palette.primaryBright }}>线程 A</span>
               <span style={{ width: "50%", color: theme.warn }}>线程 B</span>
             </div>
             <div style={{ display: "flex", gap: 24 }}>
@@ -161,8 +162,8 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           {/* synchronized 粗暴修法 */}
           <div
             style={{
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.surfaceBorder}`,
+              backgroundColor: palette.surface,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "16px 24px",
               opacity: syncIn,
@@ -182,8 +183,8 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   flex: 1,
                   height: 12,
                   borderRadius: 6,
-                  backgroundColor: "rgba(10, 24, 38, 0.9)",
-                  border: `1px solid ${theme.surfaceBorder}`,
+                  backgroundColor: alpha(palette.bg, 0.9),
+                  border: `1px solid ${palette.surfaceBorder}`,
                   overflow: "hidden",
                 }}
               >
@@ -198,8 +199,8 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             style={{
               borderRadius: 14,
               padding: "16px 24px",
-              backgroundColor: "rgba(59, 130, 246, 0.10)",
-              border: `1px solid ${theme.primary}`,
+              backgroundColor: alpha(palette.primary, 0.10),
+              border: `1px solid ${palette.primary}`,
               opacity: knotIn,
               display: "flex",
               alignItems: "center",
@@ -212,8 +213,8 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 key={t}
                 style={{
                   fontSize: 22,
-                  color: theme.primaryBright,
-                  border: `1px solid ${theme.primary}`,
+                  color: palette.primaryBright,
+                  border: `1px solid ${palette.primary}`,
                   borderRadius: 999,
                   padding: "4px 14px",
                 }}
@@ -226,7 +227,7 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 marginLeft: "auto",
                 fontFamily: theme.font.mono,
                 fontSize: 23,
-                color: theme.primaryBright,
+                color: palette.primaryBright,
                 opacity: v3In,
               }}
             >

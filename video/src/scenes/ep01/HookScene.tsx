@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { theme } from "../theme";
+import { theme } from "../../theme";
+import { usePalette } from "../../scene-kit";
 
 /**
  * 镜 1.1 · 钩子（0:00–0:15）
@@ -8,6 +9,7 @@ import { theme } from "../theme";
  */
 export const HookScene: FC = () => {
   const frame = useCurrentFrame();
+  const palette = usePalette();
   const { fps } = useVideoConfig();
 
   const digitIn = spring({ frame, fps, config: { damping: 14 } });
@@ -66,13 +68,13 @@ export const HookScene: FC = () => {
             width: 540,
             padding: "34px 40px",
             borderRadius: 20,
-            backgroundColor: theme.surface,
-            border: `1px solid ${theme.surfaceBorder}`,
+            backgroundColor: palette.surface,
+            border: `1px solid ${palette.surfaceBorder}`,
             transform: `translateX(${slide(85)}px)`,
           }}
         >
           <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 14 }}>商品页 · 促销标签</div>
-          <div style={{ fontSize: 60, fontWeight: 700, color: theme.text }}>满 300 <span style={{ color: theme.primaryBright }}>减 80</span></div>
+          <div style={{ fontSize: 60, fontWeight: 700, color: theme.text }}>满 300 <span style={{ color: palette.primaryBright }}>减 80</span></div>
         </div>
 
         <div
@@ -80,8 +82,8 @@ export const HookScene: FC = () => {
             width: 540,
             padding: "34px 40px",
             borderRadius: 20,
-            backgroundColor: theme.surface,
-            border: `1px solid ${theme.surfaceBorder}`,
+            backgroundColor: palette.surface,
+            border: `1px solid ${palette.surfaceBorder}`,
             transform: `translateX(${-slide(100)}px)`,
           }}
         >

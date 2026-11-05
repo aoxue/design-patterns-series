@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { interpolate, useCurrentFrame } from "remotion";
-import { theme } from "../theme";
+import { alpha, theme, type CategoryPalette } from "../theme";
+import { usePalette } from "../scene-kit";
 
 export interface CodeSeg {
   text: string;
@@ -32,10 +33,11 @@ interface CodeCardProps {
   pulseWindows?: [number, number][];
 }
 
-const segColor = (kind?: string) => {
+/** kind → 颜色；kw 高亮取分类色板（palette 由调用方传入，模块级函数拿不到 Context） */
+const segColor = (kind: string | undefined, palette: CategoryPalette) => {
   if (kind === "comment") return theme.codeComment;
   if (kind === "danger") return theme.danger;
-  if (kind === "kw") return theme.primaryBright;
+  if (kind === "kw") return palette.primaryBright;
   return theme.codePlain;
 };
 
@@ -49,6 +51,7 @@ export const CodeCard: FC<CodeCardProps> = ({
   pulseWindows,
 }) => {
   const frame = useCurrentFrame();
+  const palette = usePalette();
   /** 呼吸强度 0–1：帧在窗口内时以 ~0.8s 周期正弦起伏，窗口外为 null（常亮） */
   const pulseK = (seg: CodeSeg): number | null => {
     if (!seg.pulse || !pulseWindows) return null;
@@ -72,7 +75,7 @@ export const CodeCard: FC<CodeCardProps> = ({
   <div
     style={{
       backgroundColor: theme.codeBg,
-      border: `1px solid ${theme.surfaceBorder}`,
+      border: `1px solid ${palette.surfaceBorder}`,
       borderRadius: 14,
       overflow: "hidden",
       display: "flex",
@@ -85,7 +88,7 @@ export const CodeCard: FC<CodeCardProps> = ({
         alignItems: "center",
         gap: 8,
         padding: "14px 20px",
-        backgroundColor: theme.surface,
+        backgroundColor: palette.surface,
       }}
     >
       {theme.windowDots.map((c) => (
@@ -122,7 +125,7 @@ export const CodeCard: FC<CodeCardProps> = ({
               whiteSpace: "pre",
               backgroundColor:
                 i === activeLine
-                  ? "rgba(124, 182, 255, 0.12)"
+                  ? alpha(palette.primaryBright, 0.12)
                   : t <= 0
                     ? "transparent"
                     : line.diff === "del"
@@ -134,7 +137,7 @@ export const CodeCard: FC<CodeCardProps> = ({
                           : "transparent",
               borderLeft:
                 i === activeLine
-                  ? `3px solid ${theme.primaryBright}`
+                  ? `3px solid ${palette.primaryBright}`
                   : t <= 0
                     ? "3px solid transparent"
                     : line.diff === "del"
@@ -149,7 +152,7 @@ export const CodeCard: FC<CodeCardProps> = ({
             }}
           >
             {i === activeLine && (
-              <span style={{ color: theme.primaryBright, marginRight: 8 }}>▶</span>
+              <span style={{ color: palette.primaryBright, marginRight: 8 }}>▶</span>
             )}
             {line.segs.map((seg, j) => {
               const k = pulseK(seg);
@@ -157,7 +160,7 @@ export const CodeCard: FC<CodeCardProps> = ({
                 <span
                   key={j}
                   style={{
-                    color: segColor(seg.kind),
+                    color: segColor(seg.kind, palette),
                     opacity: k == null ? 1 : 0.55 + 0.45 * k,
                     textShadow:
                       k == null

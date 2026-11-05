@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, usePalette, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 1.4 · 本期路线图（1:15–1:30）
@@ -24,6 +24,7 @@ const CY = [620, 530, 440, 350, 260];
 
 export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const frame = useCurrentFrame();
+  const palette = usePalette();
   const { fps } = useVideoConfig();
   const { at, fade, pop } = useAnchors(leadFrames, audioFrames);
 
@@ -65,7 +66,7 @@ export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             position: "relative",
             fontSize: 27,
             color: theme.textMuted,
-            border: `2px solid ${theme.surfaceBorder}`,
+            border: `2px solid ${palette.surfaceBorder}`,
             borderRadius: 10,
             padding: "7px 20px",
             opacity: pop(A.bagu),
@@ -89,8 +90,8 @@ export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           style={{
             fontSize: 27,
             fontWeight: 700,
-            color: theme.primaryBright,
-            border: `2px solid ${theme.primary}`,
+            color: palette.primaryBright,
+            border: `2px solid ${palette.primary}`,
             borderRadius: 10,
             padding: "7px 20px",
             opacity: pop(A.reinvent),
@@ -114,7 +115,7 @@ export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               width={210}
               height={10}
               rx={5}
-              fill={theme.surfaceBorder}
+              fill={palette.surfaceBorder}
               opacity={inn * 0.9}
             />
           );
@@ -135,7 +136,7 @@ export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 y1={y1}
                 x2={x2}
                 y2={y2}
-                stroke={theme.primary}
+                stroke={palette.primary}
                 strokeWidth={4}
                 pathLength={1}
                 strokeDasharray={1}
@@ -145,7 +146,7 @@ export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               {t > 0.95 && (
                 <polygon
                   points={`${x2},${y2} ${x2 - 18},${y2 + 2} ${x2 - 8},${y2 + 16}`}
-                  fill={theme.primary}
+                  fill={palette.primary}
                   opacity={0.85}
                 />
               )}
@@ -177,15 +178,15 @@ export const RoadmapScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 height: 116,
                 margin: "0 auto",
                 borderRadius: "50%",
-                border: `4px solid ${isLast ? theme.ok : theme.primary}`,
-                backgroundColor: isLast ? "rgba(63, 218, 140, 0.14)" : "rgba(59, 130, 246, 0.14)",
+                border: `4px solid ${isLast ? theme.ok : palette.primary}`,
+                backgroundColor: isLast ? "rgba(63, 218, 140, 0.14)" : alpha(palette.primary, 0.14),
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 fontFamily: theme.font.mono,
                 fontSize: 34,
-                color: isLast ? theme.ok : theme.primaryBright,
-                boxShadow: `0 0 34px ${isLast ? "rgba(63, 218, 140, 0.30)" : "rgba(59, 130, 246, 0.25)"}`,
+                color: isLast ? theme.ok : palette.primaryBright,
+                boxShadow: `0 0 34px ${isLast ? "rgba(63, 218, 140, 0.30)" : alpha(palette.primary, 0.25)}`,
               }}
             >
               V{i + 1}

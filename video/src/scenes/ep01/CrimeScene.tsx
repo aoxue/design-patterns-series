@@ -1,7 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { CodeCard, type CodeLine } from "../components/CodeCard";
-import { theme } from "../theme";
+import { CodeCard, type CodeLine } from "../../components/CodeCard";
+import { alpha, theme } from "../../theme";
+import { usePalette } from "../../scene-kit";
 
 /**
  * 镜 1.2 · 案发现场（0:15–0:50）
@@ -39,15 +40,17 @@ const LINES: CodeLine[] = [
 // 三个文件分组显形的起始帧（与台词提到各服务的节奏对齐）
 const GROUP_STARTS = [40, 320, 600];
 
-const SERVICES = [
-  { name: "订单服务", dot: theme.primary, clock: "刷新 5 秒", clockHot: true },
-  { name: "支付服务", dot: theme.warn, clock: "刷新 整点", clockHot: false },
-  { name: "报表任务", dot: theme.accentPurple, clock: "刷新 整点", clockHot: false },
-];
-
 export const CrimeScene: FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const palette = usePalette();
+
+  // 首项圆点用分类主色（色板随期切换），其余为中性功能色
+  const SERVICES = [
+    { name: "订单服务", dot: palette.primary, clock: "刷新 5 秒", clockHot: true },
+    { name: "支付服务", dot: theme.warn, clock: "刷新 整点", clockHot: false },
+    { name: "报表任务", dot: theme.accentPurple, clock: "刷新 整点", clockHot: false },
+  ];
 
   const titleIn = interpolate(frame, [0, 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
@@ -70,7 +73,7 @@ export const CrimeScene: FC = () => {
   return (
     <AbsoluteFill style={{ padding: "150px 90px 170px" }}>
       <div style={{ fontSize: 40, fontWeight: 700, color: theme.text, opacity: titleIn, marginBottom: 36 }}>
-        案发现场：<span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>PromoConfigManager</span> 被实例化了 3 次
+        案发现场：<span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>PromoConfigManager</span> 被实例化了 3 次
       </div>
 
       <div style={{ display: "flex", gap: 56, flex: 1 }}>
@@ -81,8 +84,8 @@ export const CrimeScene: FC = () => {
         <div style={{ flex: 1 }}>
           <div
             style={{
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.surfaceBorder}`,
+              backgroundColor: palette.surface,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "30px 34px",
               height: "100%",
@@ -99,7 +102,7 @@ export const CrimeScene: FC = () => {
                   gap: 18,
                   padding: "20px 22px",
                   borderRadius: 12,
-                  backgroundColor: "rgba(10, 24, 38, 0.7)",
+                  backgroundColor: alpha(palette.bg, 0.7),
                   marginBottom: 18,
                   opacity: rowIn(i),
                   transform: `translateX(${(1 - rowIn(i)) * 40}px)`,
@@ -111,7 +114,7 @@ export const CrimeScene: FC = () => {
                   style={{
                     fontSize: 22,
                     color: theme.textMuted,
-                    border: `1px solid ${theme.surfaceBorder}`,
+                    border: `1px solid ${palette.surfaceBorder}`,
                     borderRadius: 999,
                     padding: "4px 14px",
                   }}
@@ -123,7 +126,7 @@ export const CrimeScene: FC = () => {
                     marginLeft: "auto",
                     fontSize: 22,
                     color: s.clockHot ? theme.warn : theme.textMuted,
-                    border: `1px solid ${s.clockHot ? theme.warn : theme.surfaceBorder}`,
+                    border: `1px solid ${s.clockHot ? theme.warn : palette.surfaceBorder}`,
                     borderRadius: 999,
                     padding: "4px 14px",
                   }}

@@ -5,6 +5,7 @@
  *  「画面正在高亮/出现的元素」与「字幕正在说的话」是否同一件事。
  *
  *  用法：npm run synccheck   →  out/qa/sync/*.jpg + out/qa/sync-report.md
+ *  可选：node tools/sync-check.mjs --comp EP01（与 contact-sheet.mjs 同款参数）
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -13,7 +14,11 @@ import { bundle } from "@remotion/bundler";
 import { selectComposition, renderStill } from "@remotion/renderer";
 
 const SAMPLES = [0.2, 0.45, 0.7, 0.9]; // 避开首尾淡入淡出区
-const COMP = "EP01";
+const arg = (name, dflt) => {
+  const i = process.argv.indexOf(`--${name}`);
+  return i > 0 ? process.argv[i + 1] : dflt;
+};
+const COMP = arg("comp", "EP01");
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "out/qa/sync");
 
@@ -66,7 +71,7 @@ const chunkAt = (chunks, t) => {
 
 console.log("▷ 打包工程…");
 const serveUrl = await bundle({ entryPoint: path.join(ROOT, "src/index.ts") });
-const probe = await selectComposition({ serveUrl, id: "TimelineProbe" });
+const probe = await selectComposition({ serveUrl, id: `TimelineProbe-${COMP}` });
 const timeline = probe.props.timeline;
 const fps = probe.fps;
 

@@ -1,15 +1,17 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { theme } from "../../theme";
+import { useAnchors, usePalette, type SceneProps } from "../../scene-kit";
 
 /**
  * 镜 0.1 · 系列引导片头（全系列每期标配，2026-11-04 导演拍板）
  * 台词三句对齐三段动画：品牌标 → 系列定位 → 本期预告卡，末尾渐暗接钩子镜黑场。
  * 台词文本与 EPxx.json 的 0.1 镜一致（引导句由 tts_qwen 段生成，时长由音频实测驱动）。
+ * 主色/浅底从分类色板取（各期随 GoF 分类换色系），黑场底与文字用全系列恒定中性 token。
  */
 export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   // 品牌标下划线扫光：第一句（「大家好，这里是码上购」）期间 0 → 100%
   const underline = interpolate(frame, [at(0), at(0.35)], [0, 560], {
@@ -38,15 +40,15 @@ export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             opacity: pop(0.02),
           }}
         >
-          码上购<span style={{ color: theme.primaryBright }}>·设计模式</span>
+          码上购<span style={{ color: palette.primaryBright }}>·设计模式</span>
         </div>
         <div
           style={{
             width: underline,
             height: 5,
             borderRadius: 3,
-            backgroundColor: theme.primary,
-            boxShadow: `0 0 24px ${theme.primary}`,
+            backgroundColor: palette.primary,
+            boxShadow: `0 0 24px ${palette.primary}`,
             marginTop: 18,
           }}
         />
@@ -66,10 +68,10 @@ export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               style={{
                 fontSize: 27,
                 color: theme.textMuted,
-                border: `1px solid ${theme.surfaceBorder}`,
+                border: `1px solid ${palette.surfaceBorder}`,
                 borderRadius: 999,
                 padding: "10px 26px",
-                backgroundColor: theme.surface,
+                backgroundColor: palette.surface,
               }}
             >
               {t}

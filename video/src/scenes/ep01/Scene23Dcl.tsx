@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { CodeCard, type CodeLine } from "../components/CodeCard";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { CodeCard, type CodeLine } from "../../components/CodeCard";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 2.3 · V3 双检锁 DCL + 动画板 A2 指令重排（2:50–3:50）★ 本期视觉亮点
@@ -70,6 +70,7 @@ const STEPS = [
 
 export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   const revealAt = VIS.map(at);
   const boardIn = fade(0.34);
@@ -94,7 +95,7 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     <AbsoluteFill style={{ padding: "96px 90px 140px" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 22, marginBottom: 14 }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
-          <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>V3</span> 双检锁 DCL
+          <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>V3</span> 双检锁 DCL
           <span style={{ fontSize: 22, fontWeight: 400, color: theme.textMuted, marginLeft: 12 }}>
             Double-Checked Locking
           </span>
@@ -106,8 +107,8 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             style={{
               fontSize: 23,
               fontFamily: theme.font.mono,
-              color: seen(mottoAt[i]) ? theme.primaryBright : theme.textMuted,
-              border: `1px solid ${seen(mottoAt[i]) ? theme.primary : theme.surfaceBorder}`,
+              color: seen(mottoAt[i]) ? palette.primaryBright : theme.textMuted,
+              border: `1px solid ${seen(mottoAt[i]) ? palette.primary : palette.surfaceBorder}`,
               borderRadius: 999,
               padding: "3px 16px",
               opacity: seen(mottoAt[i]) ? 1 : 0.45,
@@ -153,9 +154,9 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           style={{
             position: "absolute",
             inset: -2,
-            border: `2px solid ${theme.primaryBright}`,
+            border: `2px solid ${palette.primaryBright}`,
             borderRadius: 16,
-            boxShadow: `0 0 34px rgba(124, 182, 255, ${0.10 + shotTip * 0.22})`,
+            boxShadow: `0 0 34px ${alpha(palette.primaryBright, 0.10 + shotTip * 0.22)}`,
             opacity: fade(0.755, 12),
             pointerEvents: "none",
           }}
@@ -225,10 +226,10 @@ export const Scene23Dcl: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   style={{
                     fontSize: 21,
                     color: s.early ? theme.warn : theme.text,
-                    border: `1px solid ${s.early ? theme.warn : theme.surfaceBorder}`,
+                    border: `1px solid ${s.early ? theme.warn : palette.surfaceBorder}`,
                     borderRadius: 8,
                     padding: "5px 14px",
-                    backgroundColor: "rgba(10, 24, 38, 0.8)",
+                    backgroundColor: alpha(palette.bg, 0.8),
                   }}
                 >
                   {s.t}
@@ -263,12 +264,14 @@ const TimelinePanel: FC<{
   steps: { n: string; t: string; p: number }[];
   t2: { p: number; text: string; color: string };
   fade: (p: number, dur?: number) => number;
-}> = ({ title, titleColor, steps, t2, fade }) => (
+}> = ({ title, titleColor, steps, t2, fade }) => {
+  const palette = usePalette();
+  return (
   <div
     style={{
       flex: 1,
       backgroundColor: theme.codeBg,
-      border: `1px solid ${theme.surfaceBorder}`,
+      border: `1px solid ${palette.surfaceBorder}`,
       borderRadius: 12,
       padding: "12px 20px",
     }}
@@ -281,10 +284,10 @@ const TimelinePanel: FC<{
           style={{
             fontSize: 21,
             color: theme.text,
-            border: `1px solid ${theme.surfaceBorder}`,
+            border: `1px solid ${palette.surfaceBorder}`,
             borderRadius: 8,
             padding: "5px 14px",
-            backgroundColor: "rgba(10, 24, 38, 0.8)",
+            backgroundColor: alpha(palette.bg, 0.8),
           }}
         >
           {s.t}
@@ -296,3 +299,4 @@ const TimelinePanel: FC<{
     </div>
   </div>
 );
+};

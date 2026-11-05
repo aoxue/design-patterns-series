@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { alpha, theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 3.2 · 五版对比卡 + 决策树（6:44–7:30）
@@ -42,6 +42,7 @@ const T = { root: 0.799, no: 0.868, yes: 0.906, ask: 0.949, top: 0.96 };
 
 export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   /** 决策树连线：path + 起始锚 + 分支标签（位置为标签圆片中心） */
   const SEGS = [
@@ -66,21 +67,21 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               key={c.v}
               style={{
                 flex: 1,
-                backgroundColor: theme.surface,
-                border: `2px solid ${isHot ? theme.primary : theme.surfaceBorder}`,
+                backgroundColor: palette.surface,
+                border: `2px solid ${isHot ? palette.primary : palette.surfaceBorder}`,
                 borderRadius: 14,
                 padding: "16px 16px 12px",
                 opacity: on ? 1 : 0.22,
                 transform: `translateY(${on ? 0 : 20}px)`,
-                boxShadow: isHot ? `0 0 26px rgba(59, 130, 246, 0.16)` : "none",
+                boxShadow: isHot ? `0 0 26px ${alpha(palette.primary, 0.16)}` : "none",
               }}
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontFamily: theme.font.mono, fontSize: 24, color: theme.primaryBright }}>{c.v}</span>
+                <span style={{ fontFamily: theme.font.mono, fontSize: 24, color: palette.primaryBright }}>{c.v}</span>
                 <span style={{ fontSize: 25, fontWeight: 700, color: theme.text }}>{c.n}</span>
                 <span style={{ marginLeft: "auto", fontSize: 18, color: theme.warn, letterSpacing: 1 }}>
                   {"★".repeat(c.star)}
-                  <span style={{ color: theme.surfaceBorder }}>{"★".repeat(5 - c.star)}</span>
+                  <span style={{ color: palette.surfaceBorder }}>{"★".repeat(5 - c.star)}</span>
                 </span>
               </div>
               <div style={{ fontSize: 18, color: theme.textMuted, lineHeight: 1.55, minHeight: 86 }}>{c.d}</div>
@@ -88,7 +89,7 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 style={{
                   marginTop: 10,
                   backgroundColor: theme.deepBg,
-                  border: `1px solid ${theme.surfaceBorder}`,
+                  border: `1px solid ${palette.surfaceBorder}`,
                   borderRadius: 8,
                   padding: "10px 12px",
                   fontFamily: theme.font.mono,
@@ -110,8 +111,8 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         style={{
           flex: 1,
           marginTop: 22,
-          backgroundColor: "rgba(10, 24, 38, 0.6)",
-          border: `1px solid ${theme.surfaceBorder}`,
+          backgroundColor: alpha(palette.bg, 0.6),
+          border: `1px solid ${palette.surfaceBorder}`,
           borderRadius: 16,
           padding: "18px 36px 10px",
           opacity: fade(0.77),
@@ -130,7 +131,7 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   <path
                     d={seg.d}
                     fill="none"
-                    stroke={theme.primaryBright}
+                    stroke={palette.primaryBright}
                     strokeWidth={3.5}
                     pathLength={1}
                     strokeDasharray={1}
@@ -138,7 +139,7 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                     opacity={0.9}
                   />
                   {t > 0.95 && (
-                    <polygon points="1235,140 1222,133 1222,147" fill={theme.primaryBright} transform={seg.ly > 150 ? `translate(0 ${seg.ly - 140})` : seg.ly < 100 ? `translate(0 ${seg.ly - 140})` : ""} />
+                    <polygon points="1235,140 1222,133 1222,147" fill={palette.primaryBright} transform={seg.ly > 150 ? `translate(0 ${seg.ly - 140})` : seg.ly < 100 ? `translate(0 ${seg.ly - 140})` : ""} />
                   )}
                 </g>
               );
@@ -160,9 +161,9 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 alignItems: "center",
                 fontSize: 19,
                 color: theme.text,
-                border: `2px solid ${theme.surfaceBorder}`,
+                border: `2px solid ${palette.surfaceBorder}`,
                 borderRadius: 999,
-                backgroundColor: theme.bg,
+                backgroundColor: palette.bg,
                 opacity: fade(s.a + 0.004, 8),
               }}
             >
@@ -179,10 +180,10 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               fontSize: 25,
               fontWeight: 700,
               color: theme.text,
-              border: `3px solid ${theme.primaryBright}`,
+              border: `3px solid ${palette.primaryBright}`,
               borderRadius: 14,
               padding: "14px 22px",
-              backgroundColor: "rgba(59, 130, 246, 0.12)",
+              backgroundColor: alpha(palette.primary, 0.12),
               opacity: pop(T.root),
               transform: `scale(${0.85 + pop(T.root) * 0.15})`,
             }}
@@ -227,16 +228,16 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 gap: 10,
                 fontSize: 24,
                 color: theme.text,
-                border: `2.5px solid ${leaf.hot ? theme.ok : theme.surfaceBorder}`,
+                border: `2.5px solid ${leaf.hot ? theme.ok : palette.surfaceBorder}`,
                 borderRadius: 12,
                 padding: "10px 18px",
-                backgroundColor: leaf.hot ? "rgba(63, 218, 140, 0.10)" : theme.surface,
+                backgroundColor: leaf.hot ? "rgba(63, 218, 140, 0.10)" : palette.surface,
                 opacity: pop(leaf.a),
                 transform: `translateX(${(1 - pop(leaf.a)) * 22}px)`,
                 boxShadow: leaf.hot && seen(leaf.a + 0.008) ? `0 0 26px rgba(63, 218, 140, 0.28)` : "none",
               }}
             >
-              <span style={{ fontFamily: theme.font.mono, color: leaf.hot ? theme.ok : theme.primaryBright, fontSize: 22 }}>
+              <span style={{ fontFamily: theme.font.mono, color: leaf.hot ? theme.ok : palette.primaryBright, fontSize: 22 }}>
                 {leaf.v}
               </span>
               {leaf.r}

@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { theme } from "../theme";
+import { theme } from "../../theme";
+import { usePalette } from "../../scene-kit";
 
 /**
  * 镜 1.3 · 转折（0:50–1:15）
@@ -15,6 +16,7 @@ const INSTANCES = [
 
 export const QuestionScene: FC = () => {
   const frame = useCurrentFrame();
+  const palette = usePalette();
   const { fps } = useVideoConfig();
 
   const cardIn = (i: number) => spring({ frame: frame - (30 + i * 60), fps, config: { damping: 12 } });
@@ -61,7 +63,7 @@ export const QuestionScene: FC = () => {
                   border: `2px solid ${theme.ok}`,
                   borderRadius: 999,
                   padding: "4px 14px",
-                  backgroundColor: theme.bg,
+                  backgroundColor: palette.bg,
                 }}
               >
                 new ✓
@@ -103,7 +105,7 @@ export const QuestionScene: FC = () => {
 
       <div style={{ fontSize: 58, fontWeight: 700, color: theme.text, height: 80 }}>
         {"约束：全系统只允许一个实例".slice(0, typed)}
-        <span style={{ color: theme.primaryBright, opacity: Math.sin(frame / 4) > 0 ? 1 : 0 }}>|</span>
+        <span style={{ color: palette.primaryBright, opacity: Math.sin(frame / 4) > 0 ? 1 : 0 }}>|</span>
       </div>
 
       <div

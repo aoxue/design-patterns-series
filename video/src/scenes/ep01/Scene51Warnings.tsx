@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 5.1 · 什么时候别用（8:30–9:30）差异化核心段
@@ -43,6 +43,7 @@ const WARNINGS = [
 
 export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { frame, at, fade, seen } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   // 尾段渐暗：台词最后一个字（≈0.99）后压暗，只留正解条（为片尾金句蓄力）
   const dim = fade(0.99, 20) * 0.55;
@@ -64,8 +65,8 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
               key={w.title}
               style={{
                 flex: 1,
-                backgroundColor: theme.surface,
-                border: `2px solid ${isHot ? theme.danger : theme.surfaceBorder}`,
+                backgroundColor: palette.surface,
+                border: `2px solid ${isHot ? theme.danger : palette.surfaceBorder}`,
                 borderRadius: 16,
                 padding: "24px 26px",
                 opacity: on ? 1 : 0.22,
@@ -116,8 +117,8 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
           display: "flex",
           alignItems: "center",
           gap: 18,
-          backgroundColor: theme.surface,
-          border: `1px dashed ${theme.surfaceBorder}`,
+          backgroundColor: palette.surface,
+          border: `1px dashed ${palette.surfaceBorder}`,
           borderRadius: 12,
           padding: "14px 26px",
           opacity: fade(0.947),
@@ -125,7 +126,7 @@ export const Scene51Warnings: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
       >
         <span style={{ fontSize: 24 }}>🧰 常见过度设计</span>
         <span style={{ fontSize: 24, color: theme.text }}>
-          无状态的工具类，一堆 <span style={{ fontFamily: theme.font.mono, color: theme.primaryBright }}>static</span> 方法就够，
+          无状态的工具类，一堆 <span style={{ fontFamily: theme.font.mono, color: palette.primaryBright }}>static</span> 方法就够，
           <span style={{ color: theme.warn }}>别硬套单例的壳</span>
         </span>
       </div>

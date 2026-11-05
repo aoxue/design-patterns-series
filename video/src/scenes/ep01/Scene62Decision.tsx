@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { AbsoluteFill } from "remotion";
-import { theme } from "../theme";
-import { useAnchors, type SceneProps } from "../scene-kit";
+import { theme } from "../../theme";
+import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
 /**
  * 镜 6.2 · 决策树速记（结尾三镜之二）
@@ -10,6 +10,7 @@ import { useAnchors, type SceneProps } from "../scene-kit";
  */
 export const Scene62Decision: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const { fade, pop } = useAnchors(leadFrames, audioFrames);
+  const palette = usePalette();
 
   const tree = [
     { q: "Spring 项目", a: "注解 + 注入", p: 0.27 },
@@ -30,8 +31,8 @@ export const Scene62Decision: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
               display: "flex",
               alignItems: "center",
               gap: 26,
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.surfaceBorder}`,
+              backgroundColor: palette.surface,
+              border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "20px 40px",
               width: 780, // 三行统一卡宽，避免内容长短导致的参差
@@ -41,7 +42,7 @@ export const Scene62Decision: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
           >
             <span style={{ fontSize: 32, color: theme.text, width: 380 }}>{t.q}</span>
             <span style={{ fontSize: 30, color: theme.textMuted }}>→</span>
-            <span style={{ fontSize: 32, color: theme.primaryBright, fontWeight: 700 }}>{t.a}</span>
+            <span style={{ fontSize: 32, color: palette.primaryBright, fontWeight: 700 }}>{t.a}</span>
           </div>
         ))}
       </div>
