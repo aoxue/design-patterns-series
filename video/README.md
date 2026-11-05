@@ -38,6 +38,9 @@ npm run synccheck                                    # 音画同步对照：每�
 npm run dev                                          # Remotion Studio 预览，可拖时间轴
 npx remotion still src/index.ts EP01 out/帧名.png --frame=1200  # 单帧（QA 用；也可 npm run still -- EP01 out/帧名.png --frame=1200）
 npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透传给 remotion，加新期零改码）
+# ⚠ render/still 的合成号与输出路径必须显式给出：裸跑 npm run render（不带 -- 参数）会进入
+#   remotion 交互选择，在无终端环境（AI 后台派单/CI）下表现为「chrome 起了但 0% CPU 挂死」，
+#   极易误判为渲染资源泄漏（2026-11-05 实测踩坑，排查一小时方定位）
 ```
 
 ## 多机协作注意
