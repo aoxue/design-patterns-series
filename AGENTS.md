@@ -26,7 +26,7 @@
 | `mashanggou/` | 代码 | 「码上购」Maven 示例工程：每期代码演示 + 存档，按业务线分子包（现有 `promo`） |
 | `CONTRIBUTING.md` | 协作 | 人类开发者参与指南：环境、本地跑通、任务认领、贡献约定 |
 | `operations.md` | 运营 | **周循环（运行层：节拍 / 虚拟团队分工 / WIP / retro，§2）**、发布后数据回填、go/no-go 决策 |
-| `.zcode/agents/*.md` | 机制 | 虚拟团队七个角色的 subagent 定义（编导 / 审稿人 / 代码工程师 / 配音师 / 动画师 / 质检员 / 运营），派出时各员按定义内必读清单重建上下文 |
+| `.zcode/agents/*.md` | 机制 | 虚拟团队七角色 subagent 定义（编导 / 审稿人 / 代码工程师 / 配音师 / 动画师 / 质检员 / 运营），派出时各员按定义内必读清单重建上下文。**此目录是正典**；Claude Code 读 `.claude/agents/`、Codex 读 `.codex/agents/`（TOML）副本，改正典后必跑 `python tools/sync-agents.py`（副本随仓库分发，跨工具同团队） |
 
 ## 文风（全仓文档与画面文字）
 
