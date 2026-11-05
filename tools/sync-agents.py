@@ -1,14 +1,15 @@
-"""虚拟团队定义同步器：.agents/*.md（正典）→ 各工具的 subagent 目录。
+"""虚拟团队定义同步器：.agents/*.md（正典）→ 本机各工具的 subagent 目录。
 
 架构（见 AGENTS.md「虚拟团队接入」）：
-  .agents/*.md            正典，唯一事实源，只在这里改
-  .zcode/agents/*.md      ZCode 副本（原样复制）
-  .claude/agents/*.md     Claude Code 副本（原样复制，格式同源）
-  .codex/agents/*.toml    Codex 副本（转译 TOML：developer_instructions 内联）
+  .agents/*.md            正典，唯一事实源，只在这里改（随仓库分发）
+  .zcode/agents/*.md      ZCode 本机副本（原样复制）
+  .claude/agents/*.md     Claude Code 本机副本（原样复制，格式同源）
+  .codex/agents/*.toml    Codex 本机副本（转译 TOML：developer_instructions 内联）
 
-本脚本是**已知工具的便利层**，不是接入的唯一通路：新工具按 AGENTS.md 接入协议
-由该工具的会话 AI 自行处理，脚本无需为每个新工具扩展。
-副本进 git 随仓库分发，跨机 clone 即用。
+副本是**本机运行时产物，不进 git**（已 ignore）：每台机器首次使用前跑一次本脚本
+（或由会话 AI 按 AGENTS.md 接入协议自动做），新副本需重开会话才被工具加载。
+本脚本是**已知工具的便利层**，不是接入的唯一通路：新工具按接入协议由该工具的
+会话 AI 自行处理，脚本无需为每个新工具扩展。
 
 用法：
     python tools/sync-agents.py           # 同步（有差异才写）

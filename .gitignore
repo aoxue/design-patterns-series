@@ -19,24 +19,11 @@ video/.env
 # 音频槽位文件不进库：占位音频可用 tools/tts.ps1 重新生成；真声另存
 video/public/audio/
 
-# 虚拟团队定义：正典 .agents/ 与各工具副本（.zcode/.claude/.codex 的 agents/）随仓库分发。
-# 以下白名单对冲某些机器全局 gitignore 对这些目录的忽略，只放行 agents 定义文件，
-# 各工具的本地配置（如 .claude/settings.local.json）仍被忽略
+# 虚拟团队定义：正典 .agents/*.md 进仓库；各 AI 工具的 agents 目录是**本机运行时副本**
+# （由 tools/sync-agents.py 或按 AGENTS.md 接入协议现场生成），不进库、不随仓库分发
+.zcode/
+.claude/
+.codex/
 !.agents/
 .agents/*
 !.agents/*.md
-!.claude/
-.claude/*
-!.claude/agents/
-.claude/agents/*
-!.claude/agents/*.md
-!.codex/
-.codex/*
-!.codex/agents/
-.codex/agents/*
-!.codex/agents/*.toml
-!.zcode/
-.zcode/*
-!.zcode/agents/
-.zcode/agents/*
-!.zcode/agents/*.md

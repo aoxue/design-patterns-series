@@ -64,7 +64,7 @@
 
 **派单与提交纪律（虚拟团队运行，2026-11-03 定）**：主会话任**制片人**向 subagent 派单，派单信息固定三件：任务 + 对象文件路径 + 上游交付物路径（subagent 之间不互相传话，一律经制片人转交）。subagent **一律不做 git 提交**；制片人每收一步活即提交一次（中文一句话 commit），每步有回滚点。
 
-**虚拟团队接入（跨工具，2026-11-05 定）**：角色定义正典在 `.agents/*.md`，**只在正典里改**。已接入工具的副本随仓库分发（clone 即用）：ZCode 读 `.zcode/agents/`（md 原样）、Claude Code 读 `.claude/agents/`（md 原样）、Codex 读 `.codex/agents/`（TOML）。改正典后必跑 `python tools/sync-agents.py` 刷新副本（`--check` 自查过期）。**本会话的工具若尚未接入**（其 subagent 目录缺失或过期且脚本未覆盖）：按正典自行接入——支持 md frontmatter 定义的工具直接复制 `.agents/*.md` 到该工具的 agents 目录；格式不同的按「name + description + 正文系统提示」语义转译；均不支持的工具由主会话把定义全文作为子任务 prompt 派出（通用兜底，已验证）。接入后建议把该工具目录补进 `tools/sync-agents.py` 与 `.gitignore` 白名单，惠及后续。
+**虚拟团队接入（跨工具，2026-11-05 定）**：角色定义正典在 `.agents/*.md`，**只在正典里改**。各工具的 agents 目录（ZCode `.zcode/agents/`、Claude Code `.claude/agents/`、Codex `.codex/agents/` 等）是**本机运行时副本，不进仓库**（已 ignore）。**会话自检义务**：主会话开始工作前检查本工具的 agents 目录是否存在且与正典一致，缺失或过期就先生成（已知三工具直接跑 `python tools/sync-agents.py`；其他工具按协议接入：支持 md frontmatter 的把 `.agents/*.md` 复制/链接到该工具的 agents 目录，格式不同的按「name + description + 正文系统提示」语义转译，均不支持的工具由主会话把定义全文作为子任务 prompt 派出，通用兜底已验证）。新副本**通常需重开会话**才被本工具加载（定义在会话启动时读取）；接入新工具后建议顺手把它补进 `tools/sync-agents.py`，惠及本机后续。
 
 ## 写脚本（每期主工作）
 
