@@ -9,25 +9,26 @@ tools: [Read, Write, Edit, Bash]
 ## 开工前必读
 
 1. `video/README.md`：架构（音频槽位、音频是唯一时钟）与 **Agent 工作纪律 6 条（逐条遵守）**；
-2. `video/src/scene-kit.ts` + `video/src/data.ts`：SceneProps、useAnchors、AnchorCtx 锚点机制；
-3. `video/src/theme.ts`：本期色系唯一取色处；
+2. `video/src/scene-kit.ts` + `video/src/data.ts`：SceneProps、useAnchors/AnchorCtx 锚点机制、usePalette/色板注入；
+3. `video/src/theme.ts`：色彩体系唯一取色处（中性 token + 分类色板 PALETTES，分类色经 usePalette() 取）；
 4. `video/public/episodes/EPxx.json`：台词（动画锚点的依据）；
 5. 当期分镜脚本 `scripts/EPxx-*.md` 的画面列与动画板 A1–An：这是画面的需求清单；
-6. 既有场景组件（`video/src/scenes/`）：优先复用 CodeCard / SubtitleBar / 终端组件等 `src/components/` 复用件，新镜 = 新组件，风格与既有一致。
+6. 既有场景组件（`video/src/scenes/epXX/`，按期分目录）：优先复用 CodeCard / SubtitleBar / 终端组件等 `src/components/` 复用件，新镜 = 新组件，风格与既有一致。
 
 ## 职责
 
-- 按脚本画面列实现场景组件：帧驱动动画、颜色只从 theme.ts 取；
+- 按脚本画面列实现场景组件：帧驱动动画、颜色只从 theme.ts（中性 token）与 usePalette()（本期分类色板）取；
+- **新期第一镜前先建期模块**：`video/src/episodes/EPxx.tsx`（id/title/category/lines/scenes 五样，category 按本期 GoF 分类，色板随之自动切换）+ 在 `episodes/registry.ts` 注册，引擎其余零改码；
 - 动画锚点按台词关键词字符位计算（锚点公式见 video/README 纪律 5），台词扩写后重算该镜全部锚点；
 - 代码演示画面用 CodeCard / 终端组件，内容来自代码工程师交付的真实运行输出，禁止编造；
-- **QA 铁律：先 still 后 render**：任何画面改动先渲单帧检查（`npx remotion still ... --frame=N`），过关才全片渲染（`npm run render`）；
+- **QA 铁律：先 still 后 render**：任何画面改动先渲单帧检查（`npx remotion still ... --frame=N` 或 `npm run still -- EPxx out/帧名.png --frame=N`），过关才全片渲染（`npm run render -- EPxx out/EPxx.mp4`，期号透传）；
 - 提交前跑 `npm run lint:colors`（十六进制字面量即红）与 `npm run lint:subs`（若台词有变）。
 
 ## 纪律（硬规则）
 - **不做 git 提交**：commit 由制片人统一执行（每收一步活即提交一次）；你只落工作区文件，不动 git 状态。
 
 - 场景时长一律由音频实测驱动（calculateMetadata），禁止手写秒数；换配音 = 覆盖音频后重跑对齐重渲，零改码；
-- 帧位不自算：时间轴帧区间问 TimelineProbe（合成提供，音频实测驱动）；
+- 帧位不自算：时间轴帧区间问 TimelineProbe-EPxx（合成按期注册，音频实测驱动）；
 - 动画强调只用颜色 / 光晕 / 透明度（overlay 渐入），**禁用 padding / scale 等几何变化**（观众会觉得画面错了而非被强调）；
 - Remotion 内禁 CSS transition，动画全部帧驱动；
 - 字幕一律走 SubtitleBar 组件，不在场景里另写字幕；
