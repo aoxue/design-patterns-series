@@ -26,7 +26,7 @@
 | `mashanggou/` | 代码 | 「码上购」Maven 示例工程：每期代码演示 + 存档，按业务线分子包（现有 `promo`） |
 | `CONTRIBUTING.md` | 协作 | 人类开发者参与指南：环境、本地跑通、任务认领、贡献约定 |
 | `operations.md` | 运营 | **周循环（运行层：节拍 / 虚拟团队分工 / WIP / retro，§2）**、发布后数据回填、go/no-go 决策 |
-| `.zcode/agents/*.md` | 机制 | 虚拟团队七角色 subagent 定义（编导 / 审稿人 / 代码工程师 / 配音师 / 动画师 / 质检员 / 运营），派出时各员按定义内必读清单重建上下文。**此目录是正典**；Claude Code 读 `.claude/agents/`、Codex 读 `.codex/agents/`（TOML）副本，改正典后必跑 `python tools/sync-agents.py`（副本随仓库分发，跨工具同团队） |
+| `.agents/*.md` | 机制 | 虚拟团队七角色 subagent 定义（编导 / 审稿人 / 代码工程师 / 配音师 / 动画师 / 质检员 / 运营）的**正典**，派出时各员按定义内必读清单重建上下文；各工具副本与接入协议见下方「虚拟团队接入」 |
 
 ## 文风（全仓文档与画面文字）
 
@@ -63,6 +63,8 @@
 **状态纪律（两级）**：粗状态只改 README §4 状态列；细粒度只在脚本附录 D 勾选。不新建任何进度文件。周内节拍（周五 18:00 发布锚点、虚拟团队分工、WIP 上限）见 `operations.md` §2。
 
 **派单与提交纪律（虚拟团队运行，2026-11-03 定）**：主会话任**制片人**向 subagent 派单，派单信息固定三件：任务 + 对象文件路径 + 上游交付物路径（subagent 之间不互相传话，一律经制片人转交）。subagent **一律不做 git 提交**；制片人每收一步活即提交一次（中文一句话 commit），每步有回滚点。
+
+**虚拟团队接入（跨工具，2026-11-05 定）**：角色定义正典在 `.agents/*.md`，**只在正典里改**。已接入工具的副本随仓库分发（clone 即用）：ZCode 读 `.zcode/agents/`（md 原样）、Claude Code 读 `.claude/agents/`（md 原样）、Codex 读 `.codex/agents/`（TOML）。改正典后必跑 `python tools/sync-agents.py` 刷新副本（`--check` 自查过期）。**本会话的工具若尚未接入**（其 subagent 目录缺失或过期且脚本未覆盖）：按正典自行接入——支持 md frontmatter 定义的工具直接复制 `.agents/*.md` 到该工具的 agents 目录；格式不同的按「name + description + 正文系统提示」语义转译；均不支持的工具由主会话把定义全文作为子任务 prompt 派出（通用兜底，已验证）。接入后建议把该工具目录补进 `tools/sync-agents.py` 与 `.gitignore` 白名单，惠及后续。
 
 ## 写脚本（每期主工作）
 

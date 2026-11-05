@@ -1,11 +1,13 @@
-"""虚拟团队定义跨工具同步器：.zcode/agents/*.md（正典）→ Claude / Codex 副本。
+"""虚拟团队定义同步器：.agents/*.md（正典）→ 各工具的 subagent 目录。
 
-三个工具的项目级 subagent 目录：
-  ZCode        .zcode/agents/*.md    md + frontmatter（正典，直接加载）
-  Claude Code  .claude/agents/*.md   md + frontmatter（同源格式，原样复制）
-  Codex        .codex/agents/*.toml  TOML（developer_instructions 内联，由 md 正文转译）
+架构（见 AGENTS.md「虚拟团队接入」）：
+  .agents/*.md            正典，唯一事实源，只在这里改
+  .zcode/agents/*.md      ZCode 副本（原样复制）
+  .claude/agents/*.md     Claude Code 副本（原样复制，格式同源）
+  .codex/agents/*.toml    Codex 副本（转译 TOML：developer_instructions 内联）
 
-纪律：改 .zcode/agents/ 下任何定义后必跑本脚本（地位等同 video 的 lint:colors），
+本脚本是**已知工具的便利层**，不是接入的唯一通路：新工具按 AGENTS.md 接入协议
+由该工具的会话 AI 自行处理，脚本无需为每个新工具扩展。
 副本进 git 随仓库分发，跨机 clone 即用。
 
 用法：
@@ -17,7 +19,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / ".zcode" / "agents"
+SRC = ROOT / ".agents"
 
 FM = re.compile(r"\A---\n(.*?)\n---\n(.*)\Z", re.S)
 
@@ -50,31 +52,28 @@ def to_toml(meta: dict, body: str) -> str:
     )
 
 
+def sync_one(target: Path, content: str, label: str, check_only: bool) -> int:
+    """比对并写入一个副本；返回 1（有过期）或 0。"""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not target.exists() or target.read_text(encoding="utf-8") != content:
+        print(f"过期: {target.relative_to(ROOT)}")
+        if not check_only:
+            target.write_text(content, encoding="utf-8")
+            print(f"  已同步（{label}）")
+        return 1
+    return 0
+
+
 def main() -> None:
     check_only = "--check" in sys.argv
     stale = 0
     for src in sorted(SRC.glob("*.md")):
-        meta, body = parse(src.read_text(encoding="utf-8"))
-
-        claude = ROOT / ".claude" / "agents" / src.name
-        claude.parent.mkdir(parents=True, exist_ok=True)
         src_text = src.read_text(encoding="utf-8")
-        if not claude.exists() or claude.read_text(encoding="utf-8") != src_text:
-            stale += 1
-            print(f"过期: {claude.relative_to(ROOT)}")
-            if not check_only:
-                claude.write_text(src_text, encoding="utf-8")
-                print(f"  已同步（原样复制）")
+        meta, body = parse(src_text)
 
-        codex = ROOT / ".codex" / "agents" / (src.stem + ".toml")
-        codex.parent.mkdir(parents=True, exist_ok=True)
-        toml = to_toml(meta, body)
-        if not codex.exists() or codex.read_text(encoding="utf-8") != toml:
-            stale += 1
-            print(f"过期: {codex.relative_to(ROOT)}")
-            if not check_only:
-                codex.write_text(toml, encoding="utf-8")
-                print(f"  已同步（md → TOML 转译）")
+        stale += sync_one(ROOT / ".zcode" / "agents" / src.name, src_text, "原样复制", check_only)
+        stale += sync_one(ROOT / ".claude" / "agents" / src.name, src_text, "原样复制", check_only)
+        stale += sync_one(ROOT / ".codex" / "agents" / (src.stem + ".toml"), to_toml(meta, body), "md → TOML 转译", check_only)
 
     if stale == 0:
         print("全部同步。")
