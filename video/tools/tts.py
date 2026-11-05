@@ -68,6 +68,13 @@ def chunks_from_chartimes(shot: dict, char_at: list[tuple[float, float]]) -> lis
     """
     tts_sents = [s for s in SENT_SPLIT.split(shot["tts"]) if s.strip()]
     sub_sents = [s for s in SENT_SPLIT.split(shot["subtitle"]) if s.strip()]
+    # 句界奇偶校验：subtitle 句按下标配 tts 句时间，两稿句末标点（。！？；）
+    # 必须同构。EP01 4.2 曾因口播稿把句号改逗号少了一句，全部字幕句错配到
+    # 下一句时间且无任何报错（2026-11-05 排查两小时方定位）。
+    if len(sub_sents) != len(tts_sents):
+        raise ValueError(f"{shot.get('id', shot.get('file', '?'))} 句界不同构："
+                         f"tts {len(tts_sents)} 句 / subtitle {len(sub_sents)} 句，"
+                         f"两稿句末标点（。！？；）须一一对应")
     tts_lens = [len(STRIP.sub("", s)) for s in tts_sents]
 
     sent_bounds: list[tuple[float, float]] = []

@@ -132,7 +132,7 @@
   "file": "4-2.mp3",
   "leadSec": 0.3,
   "tailSec": 0.5,
-  "tts": "影子一号，你天天在用，就是 Runtime 点 getRuntime，拿 CPU 核数、算堆内存上限、exec 起个进程，入口都是它。点开 JDK 源码：private static final Runtime currentRuntime 等于 new Runtime，标准的饿汉式，和我们第一版一个模子刻出来的。JDK 一点零时代写好的单例，今天还在每一台 JVM 里跑。",
+  "tts": "影子一号，你天天在用，就是 Runtime 点 getRuntime。拿 CPU 核数、算堆内存上限、exec 起个进程，入口都是它。点开 JDK 源码：private static final Runtime currentRuntime 等于 new Runtime，标准的饿汉式，和我们第一版一个模子刻出来的。JDK 一点零时代写好的单例，今天还在每一台 JVM 里跑。",
   "subtitle": "影子一号，你天天在用：Runtime.getRuntime()。拿 CPU 核数、算堆内存上限、exec 起个进程，入口都是它。点开 JDK 源码：private static final Runtime currentRuntime = new Runtime()，标准的饿汉式，和我们第一版一个模子刻出来的。JDK 1.0 时代写好的单例，今天还在每一台 JVM 里跑。"
  },
  {
