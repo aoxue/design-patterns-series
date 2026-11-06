@@ -13,7 +13,7 @@
 
 **制作要点**
 
-- 代码卡 C1–C9 有效代码合计 **53 行**（≤80 ✓，明细见附录 A）；diff 一律删红增绿，关键行高亮，禁止整屏滚动；
+- 代码卡 C1–C9 有效代码合计 **54 行**（≤80 ✓，明细见附录 A）；diff 一律删红增绿，关键行高亮，禁止整屏滚动；
 - 口播合计约 2,470 字（v4 修订后，含 0.1 引导镜 48 字），纯语音实测 10:47（qwen 声纹 rate 0.90，0.1 停顿修剪后），录制时靠代码停留镜头补足节奏；若超时优先压缩 2.1 饿汉与 4.2 Runtime 的过渡句；
 - BGM：全片 lo-fi；第 2 段重构演示节奏稍快；第 4 段「框架影子」用固定 BGM 变奏；
 - 动画板 A1/A2 是分镜动画参考稿，不占代码行数。
@@ -87,7 +87,7 @@ BGM：节奏稍快。每版结构固定：新代码 → 缺点暴露 → 引出�
 ```java
 public class PromoConfigManager {
     private static final PromoConfigManager INSTANCE = new PromoConfigManager();
-    private PromoConfigManager() { refresh(); }               // 私有构造：掐断外部 new
+    private PromoConfigManager() { refresh(); } // 私有构造：掐断外部 new
     public static PromoConfigManager getInstance() { return INSTANCE; }
 }
 ```
@@ -103,12 +103,12 @@ public class PromoConfigManager {
 ```diff
  public class PromoConfigManager {
 -    private static final PromoConfigManager INSTANCE = new PromoConfigManager();
-+    private static PromoConfigManager instance;              // 先不创建
++    private static PromoConfigManager instance; // 先不创建
      private PromoConfigManager() { refresh(); }
 -    public static PromoConfigManager getInstance() { return INSTANCE; }
 +    public static PromoConfigManager getInstance() {
-+        if (instance == null) {                              // ① 判空
-+            instance = new PromoConfigManager();             // ② 创建：①②之间没有锁
++        if (instance == null) { // ① 判空
++            instance = new PromoConfigManager(); // ② 创建：①②之间没有锁
 +        }
 +        return instance;
 +    }
@@ -137,12 +137,12 @@ new 实例①
 
 ```java
 public class PromoConfigManager {
-    private static volatile PromoConfigManager instance;      // volatile：防指令重排
+    private static volatile PromoConfigManager instance; // volatile：防指令重排
     private PromoConfigManager() { refresh(); }
     public static PromoConfigManager getInstance() {
-        if (instance == null) {                               // 一查：无锁，挡掉绝大多数
+        if (instance == null) { // 一查：无锁，挡掉绝大多数
             synchronized (PromoConfigManager.class) {
-                if (instance == null) {                       // 二查：拿到锁再确认
+                if (instance == null) { // 二查：拿到锁再确认
                     instance = new PromoConfigManager();
                 }
             }
@@ -176,7 +176,7 @@ T2  看到 null → 等待              T2  看到"非空" → 直接拿走
 ```java
 public class PromoConfigManager {
     private PromoConfigManager() { refresh(); }
-    private static class Holder {                             // 首次访问才加载
+    private static class Holder { // 首次访问才加载
         static final PromoConfigManager INSTANCE = new PromoConfigManager();
     }
     public static PromoConfigManager getInstance() { return Holder.INSTANCE; }
@@ -195,7 +195,7 @@ public class PromoConfigManager {
 
 ```java
 public enum PromoConfigManager {
-    INSTANCE;  // 这一行，就是单例
+    INSTANCE; // 这一行，就是单例
     public int getDiscount(int amount) {
         return amount >= 300 ? 80 : 0;
     }
@@ -207,9 +207,10 @@ public enum PromoConfigManager {
 ```java
 // 攻击方：反射拆 private 构造器
 var ctor = PromoConfigManager.class.getDeclaredConstructor();
-ctor.setAccessible(true);                                    // 撬开 private
+ctor.setAccessible(true); // 撬开 private
 PromoConfigManager ghost = ctor.newInstance();
-System.out.println(ghost == PromoConfigManager.getInstance()); // false:失守
+// 印出来是 false：失守
+System.out.println(ghost == PromoConfigManager.getInstance());
 
 // 同样的攻击打向枚举版：IllegalArgumentException
 // Cannot reflectively create enum objects:JVM 拒绝
@@ -254,7 +255,7 @@ public class PromoConfigManager { /* 容器登记：默认 singleton */ }
 
 public class OrderService {
     private final PromoConfigManager config;
-    public OrderService(PromoConfigManager config) {         // 注入的永远是同一个
+    public OrderService(PromoConfigManager config) { // 注入的永远是同一个
         this.config = config;
     }
 }
@@ -296,15 +297,15 @@ public class OrderService {
 | C4 | V3 双检锁 DCL | 10 |
 | C5 | V4 静态内部类 | 6 |
 | C6 | V5 枚举 | 5 |
-| C7 | 反射攻击演示 | 6 |
+| C7 | 反射攻击演示 | 7 |
 | C8 | Runtime 源码节选 | 2 |
 | C9 | Spring 版 | 6 |
-| **合计** | | **53** ✓ |
+| **合计** | | **54** ✓ |
 
 ## 附录 B · 发布前检查清单（SOP §7）
 
 - [x] 开头 15 秒内钩子成立（镜 1.1：双价格事故）
-- [x] 有效代码 ≤ 80 行，diff 清晰（51 行，C3 为 diff，关键行均有高亮标注）
+- [x] 有效代码 ≤ 80 行，diff 清晰（54 行，C3 为 diff，关键行均有高亮标注）
 - [x] 「框架影子」≥ 2 个例子（Runtime.getRuntime + Spring singleton Bean）
 - [x] 「什么时候别用」存在且有干货（三条警告 + 工具类反例）
 - [x] 结尾有下期预告互链（EP02 工厂方法 teaser）
