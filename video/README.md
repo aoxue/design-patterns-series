@@ -10,6 +10,7 @@ public/episodes/EPxx.json  台词制作副本（每期一文件；内容事实�
 public/episodes/EPxx.segs.json  配音段定义（编导交付物，随台词同步产出）：段划分（≤470 字/段）+ 每段表演指令壳，{镜id} 占位符运行时从 EPxx.json 注入台词（写法见 SOP §4.1）
 public/audio/EPxx/*.mp3    音频槽位（每期一目录）：主力 = qwen 声纹配音（tools/tts_qwen.py，一段一条 + 自动质检切镜）；tts.py（edge-tts）降级为无 key 环境快速预览；真声同名覆盖亦走同槽位
 public/audio/EPxx/align.json  逐句时间戳：**音频是唯一时钟**，字幕选句与场景动画锚点（AnchorCtx）都按它走；qwen 配音与真人原声统一由 tools/whisper_align.py 重算
+public/audio/EP01/bgm.mp3   独立音乐轨：按口播时钟预制分段音量、口播避让和淡入淡出，不含人声；随 Git 管理
 src/data.ts                纯函数层：字幕切分（按句读断句、字数权重分摊）、audioPath/computeTimeline（均接期参数，无全局期号）
 src/Episode.tsx            通用调度器：按 episodeId 查注册表 → calculateMetadata 实测音频时长铺时间轴 + 全局字幕条 + PaletteCtx 注入色板
 src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors + usePalette：动画锚点按台词进度 0–1 定义，换配音自动适配
@@ -25,6 +26,8 @@ src/theme.ts           色彩体系唯一取色处：中性 token（theme，全�
 
 每期落幕使用「模式笔记」卡：核心意图、适用场景及极简类图或短代码。期模块通过 `notes` 导出组件与阅读帧数，调度器在全部口播结束后追加；卡内无口播、字幕、镜号和进度条。无声阅读停留不依赖音频时长，EP01 为 20 秒（含整卡各 0.6 秒淡入淡出），独立预览合成为 `EP01-NotesPreview`，与正片共用组件。新增期需提供对应笔记内容。`TimelineProbe` 与联系表工具仍只覆盖口播镜头，笔记卡须补查衔接、首中尾帧与末帧。
 
+期模块可通过 `bgm` 导出本期音频目录内的音乐文件名。调度器在口播段播放独立音乐轨，笔记卡保持无声；音乐轨不参与镜头时长或字幕对齐计算。EP01 使用已确认的原创轻电子底乐：开场轻铺底、代码段降低音量、有人声时平滑压低，口播结束前淡出。变更配音或镜头留白后，应重新生成音乐轨并同步提交。
+
 ## 命令
 
 ```bash
@@ -37,6 +40,8 @@ cp .env.example .env                                 # 再填入 DASHSCOPE_API_K
 python tools/tts_qwen.py EP01                        # 主力配音：qwen 声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成，现行段留档先备份到 out/segs/EPxx/bak-时间戳/；--split-only 只切镜）
 python tools/whisper_align.py EP01                   # 对齐重算 align.json（qwen 配音与真声统一走此路；--check 只读对比偏差；--model 可调，默认 small）
 python tools/whisper_align.py EP01 --rechunk         # 仅修断句时复用现有词级时间戳；音频与台词须保持不变
+python tools/mix_episode_bgm.py --stem-only          # 重建 EP01 音乐轨（需 numpy、ffmpeg）；只读入库配音/底乐及实测时间轴
+python tools/mix_episode_bgm.py                      # 重建音乐轨并给 out/EP01-with-notes.mp4 混音，输出 out/EP01-with-bgm.mp4
 python tools/tts.py                                  # 降级：edge-tts 快速预览（无 key 环境可用，随音频产出同构 align.json）
 python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
 # 国内网络首次下载 whisper 模型：前面加 HF_ENDPOINT=https://hf-mirror.com
@@ -99,7 +104,8 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 - [x] 真人原声对齐脚本（2026-11-03 就绪，EP01 真声阻塞项解除）：`tools/whisper_align.py`，faster-whisper 词级时间戳 + difflib 字符对齐（容忍识别误差，断句逻辑 import 自 tts.py 单一副本）；EP01 TTS 全片实测偏差 avg 0.18s / max 0.60s（222 chunk），覆盖率低于 60% 的镜自动警告复听
 - [ ] episode JSON 契约（Zod）：六段全字段；分镜脚本 → JSON 转换规则（脚本仍是内容事实源，JSON 是制作副本）
 - [ ] 竖屏 composition：60 秒切片与正片同源
-- [ ] BGM / 音效轨道混音
+- [x] BGM 独立轨播放与 EP01 口播避让混音，音乐输入随 Git 管理
+- [ ] 音效轨道混音
 - [x] 音频路线已定（2026-11）：两阶段：TTS 出样片供确认修改，定稿后真人录音重渲终版（operations §2.2）
 - [x] 引擎多期化（2026-11-03）：scenes 按期分目录 + episodes/registry 注册表 + 四套分类色板；加新期纯加法（scenes/epXX/ + episodes/EPxx.tsx + registry 一行），EP01 三帧逐像素与全片时长（19703 帧）回归一致
 
