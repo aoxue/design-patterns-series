@@ -1,7 +1,7 @@
 # video/ · Remotion 渲染工程
 
 > 「码上购」成片生产引擎：台词 JSON + 音频槽位 → React 场景组件 → MP4。全程代码，不打开剪辑软件。
-> 2026-11-02 PoC 跑通（EP01 痛点现场 4 镜）；同日 EP01 全片 16 镜渲染成片（10:17，TTS 样片配音）。2026-11-03 结尾重做：6.1 拆三镜（金句定格 / 决策树逐条点亮 / 预告压轴金句回屏），全片 18 镜（现版实测 10:57）；同日引擎多期化重构（scenes 按期分目录 + episodes 注册表 + 四套分类色板），EP01 逐像素回归一致。
+> 管线已全流程验证，EP01 全片即由本引擎产出；多期化架构就位（scenes 按期分目录 + episodes 注册表 + 四套分类色板），加新期为纯加法。
 
 ## 架构（音频槽位，核心机制）
 
@@ -26,7 +26,7 @@ src/theme.ts           色彩体系唯一取色处：中性 token（theme，全�
 ```bash
 # 首次准备（Windows / macOS 通用）
 npm install                                          # Node ≥ 18
-pip install requests edge-tts faster-whisper "av==13.1.0"   # Python 3；av 固定 13.x（新版移除 metadata_errors，与 faster-whisper 不兼容，2026-11-03 踩坑）
+pip install requests edge-tts faster-whisper "av==13.1.0"   # Python 3；av 固定 13.x（新版移除 metadata_errors，与 faster-whisper 不兼容）
 cp .env.example .env                                 # 再填入 DASHSCOPE_API_KEY（.env 已 gitignore；qwen TTS 用）
 
 # 日常
@@ -43,10 +43,10 @@ npx remotion still src/index.ts EP01 out/帧名.png --frame=1200  # 单帧（QA 
 npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透传给 remotion，加新期零改码）
 # ⚠ render/still 的合成号与输出路径必须显式给出：裸跑 npm run render（不带 -- 参数）会进入
 #   remotion 交互选择，在无终端环境（AI 后台派单/CI）下表现为「chrome 起了但 0% CPU 挂死」，
-#   极易误判为渲染资源泄漏（2026-11-05 实测踩坑，排查一小时方定位）
+#   极易误判为渲染资源泄漏（实测踩坑）
 ```
 
-## qwen TTS 坑清单（2026-11 EP01 全片实战，tts_qwen.py 已内置对策）
+## qwen TTS 坑清单（EP01 全片实战，tts_qwen.py 已内置对策）
 
 | # | 坑 | 对策（工具内置 / 写作纪律） |
 |---|---|---|
@@ -59,7 +59,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 | 7 | 带参考音频时 mp3 时长头谎报（36s 头/14s 数据） | 生成后必过 ffmpeg 归一化 |
 | 8 | 短文本（<100 字）机械感显著 | 一段一条连念（74 字版 vs 470 字版自然度差一个档次） |
 | 9 | 时长头谎报会顺带污染 Remotion 时长计算 | 同 7；切镜产物全部重编码 |
-| 10 | Windows 无系统 ffmpeg 时 tts_qwen/whisper 工具链归一化步抛 WinError 2（2026-11-05 实测） | PATH 前置 Remotion 自带 compositor：`node_modules\@remotion\compositor-win32-x64-msvc\`（含 ffmpeg/ffprobe n7.1，带 libmp3lame）；或安装系统 ffmpeg |
+| 10 | Windows 无系统 ffmpeg 时 tts_qwen/whisper 工具链归一化步抛 WinError 2 | PATH 前置 Remotion 自带 compositor：`node_modules\@remotion\compositor-win32-x64-msvc\`（含 ffmpeg/ffprobe n7.1，带 libmp3lame）；或安装系统 ffmpeg |
 
 配方参数（segs.json 顶层）：`voice`（声纹参考，assets/voice/ 全系列统一）+ `rate 0.85` + `seed 42`。每段实际下发的完整 prompt 留档在 `out/segs/EPxx/Sx.prompt.txt`，质量复盘对照用。
 
@@ -78,7 +78,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 4. **音频槽位**：时长与逐句时间戳永远由音频驱动（align.json 是唯一时钟）；禁止在组件里写死场景秒数；换音频后必须重跑 tts.py（或 whisper 对齐）再渲染；
 5. **动画锚点按台词字位计算，禁止等间隔拍脑袋**，台词里找关键词的字符位置除以总字数得进度锚点：
    `python -c "s=json.load(open('public/episodes/EP01.json',encoding='utf-8'))[i]['subtitle']; print(s.find('关键词')/len(s))"`
-   （教训：3.2 决策树、5.1 警告卡均因拍脑袋锚点音画错位最高 9 秒，2026-11-02 修）；
+   （教训：3.2 决策树、5.1 警告卡均因拍脑袋锚点音画错位最高 9 秒）；
 6. `out/`、`public/audio/` 不进 git（已 ignore）；本目录源码即全部制作资产。
 
 ## 现状与全量化待办（PoC → 正片引擎）
