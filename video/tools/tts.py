@@ -27,33 +27,69 @@ RATE = "+8%"
 
 SENT_SPLIT = re.compile(r"(?<=[。！？；])")
 STRIP = re.compile(r"[^0-9A-Za-z\u4e00-\u9fff]")
+# 字幕原子块：连续英文/代码记号（字母数字 _ . ( ) 空格 = < > ! + - 连成的表达式，
+# 如 ghost == getInstance()、private static final …），内部永不断行
+TOKEN = re.compile(r" ?([0-9A-Za-z_][0-9A-Za-z_().=/<>!+-]*(?: [0-9A-Za-z_().=/<>!+-]+)*)| ?.")
+CLOSERS = set("）)；，。！？：、》」")
+OPENERS = set("（(《「")
 
 
 def split_subtitles(text: str) -> list[str]:
-    """与 src/data.ts 的 splitSubtitles 保持同一套断句（改那里须同步这里）"""
+    """与 src/data.ts 的 splitSubtitles 保持同一套断句（改那里须同步这里与 sync-check.mjs）。
+    三级：句末标点 → 逗号/冒号 → 原子块贪心。英文/代码原子块内部不断行：
+    装不下时整块断到下一行；行首大原子（≥12 字符）后跟短中文尾（≤8 字）时原子独立成条；
+    断行处保底剩余至少 2 个汉字，避免「了；」类孤行。"""
     sentences = [s.strip() for s in SENT_SPLIT.split(text) if s.strip()]
     chunks: list[str] = []
     for s in sentences:
         if len(s) <= 26:
             chunks.append(s)
             continue
-        buf = ""
+        buf, lead_atom_end = "", 0
         for part in re.split(r"(?<=[，——：])", s):
-            # 标点切完仍超长的片段（如长串英文/代码，内部无中文标点），
-            # 回退到空格（英文词边界）继续贪心装填，避免出现超长字幕条
-            if len(part) > 26:
-                for word in re.split(r"(?<= )", part):
-                    if len(buf + word) > 26 and buf:
+            toks = list(TOKEN.finditer(part))
+            for idx, m in enumerate(toks):
+                tok, core = m.group(0), m.group(0).strip()
+                if not core:
+                    continue
+                if core in CLOSERS:
+                    if buf.strip():
+                        buf += core
+                    elif chunks and len(chunks[-1]) < 28:
+                        chunks[-1] += core
+                    continue
+                if len(buf) + len(tok) > 26 and buf.strip():
+                    if lead_atom_end and len(buf) - lead_atom_end <= 8:
+                        # 行首大原子 + 短中文尾：原子独立成条，尾巴顺延到下一行
+                        chunks.append(buf[:lead_atom_end].strip())
+                        buf = buf[lead_atom_end:]
+                    elif buf.rstrip() and buf.rstrip()[-1] in OPENERS:
+                        # 开括号悬尾：随下一行走，避免「（」独行
+                        b = buf.rstrip()
+                        chunks.append(b[:-1].strip())
+                        buf = b[-1]
+                    elif (toks[idx].group(1) is not None
+                          and len(toks[idx].group(1)) >= 8):
+                        # 下一 token 是自给自足的大原子块（独立成行不会孤行），直接断行不匀字
                         chunks.append(buf.strip())
-                        buf = word
+                        buf = ""
                     else:
-                        buf += word
-                continue
-            if len(buf + part) > 26 and buf:
-                chunks.append(buf.strip())
-                buf = part
-            else:
-                buf += part
+                        moved = ""
+                        tail_cjk = len(re.findall(r"[一-鿿]",
+                                                   "".join(t.group(0) for t in toks[idx:])))
+                        while (tail_cjk < 2 and len(buf) > 9
+                               and buf[-1] not in OPENERS and buf[-1] != " "):
+                            moved = buf[-1] + moved
+                            buf = buf[:-1]
+                            tail_cjk += 1
+                        chunks.append(buf.strip())
+                        buf = moved
+                prev_len = len(buf)
+                buf += tok
+                if m.group(1) is not None and len(core) >= 12:
+                    lead_atom_end = len(buf) if prev_len == 0 else 0
+                elif prev_len == 0:
+                    lead_atom_end = 0
         if buf.strip():
             chunks.append(buf.strip())
     return chunks
