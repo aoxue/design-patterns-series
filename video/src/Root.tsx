@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { Composition } from "remotion";
 import { Episode, computeTimeline, type TimelineItem } from "./Episode";
 import { EPISODES, type EpisodeModule } from "./episodes/registry";
+import { SingletonNotesPreview } from "./scenes/ep01/SingletonNotesPreview";
 
 /** 工具合成：把音频实测时间轴通过 calculateMetadata 暴露给脚本（tools/contact-sheet.mjs） */
 const TimelineProbe: FC<{ episodeId: string; timeline: TimelineItem[] | null }> = () => null;
@@ -25,6 +26,15 @@ const probeMetadata = async (ep: EpisodeModule) => {
  */
 export const RemotionRoot: FC = () => (
   <>
+    {/* 无声阅读卡独立预览；固定停留供截图，不参与音频驱动的正片时间轴。 */}
+    <Composition
+      id="EP01-NotesPreview"
+      component={SingletonNotesPreview}
+      durationInFrames={600}
+      fps={30}
+      width={1920}
+      height={1080}
+    />
     {EPISODES.map((ep) => (
       <Fragment key={ep.id}>
         <Composition

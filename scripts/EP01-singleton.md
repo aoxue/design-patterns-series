@@ -368,3 +368,16 @@ public class OrderService {
 - [ ] Logo 接入版导演预览（2026-11-06）：`video/out/EP01-logo.mp4`，沿用字幕断句修复版，24 镜 / 20324 帧 / 11:17.47 / 1080p30。预渲染联系表 72 帧检查通过（`video/out/qa/logo-prerender/`）；成片逐镜首中尾 72 帧检查未见 Logo 遮挡（`video/out/qa/logo-output/contact-{1,2,3}.jpg`），全片解码通过，AAC 音轨与 `EP01-subtitle-fixed.mp4` 校验一致，头中尾音频能量正常；人工抽听与导演预览待完成。
 - [ ] 60 秒切片版（依赖成片发布节奏：主视频上线后 2 天内出，见 operations §2.1 / 附录 C.1）
 - [x] 简介文案（见附录 C.2；合集 / EP02 链接发布时补入占位）
+
+## 附录 E · 模式笔记落幕卡样片（待导演审阅）
+
+独立预览合成 `EP01-NotesPreview`，输出 `video/out/EP01-notes-preview.mp4`。20 秒无声、无底部字幕，整卡各用 0.6 秒淡入淡出，中间静止供阅读与截图；尚未接入 EP01 正片及其音频时间轴。
+
+- 标题：模式笔记 · 01 / 23；单例模式 Singleton；创建型。
+- 核心意图：保证一个类只有一个实例，并提供访问它的全局访问点。
+- 适用场景：① 某个类只应存在一个实例。② 调用方需要通过统一入口访问该实例。
+- 本集案例：统一管理促销配置的 PromoConfigManager。
+- 结构速记：`PromoConfigManager` 极简类图，保留私有静态 `instance`、私有构造器、公开静态 `getInstance()`，省略业务方法；静态成员加下划线。
+- 图下提示：私有构造 · 自持实例 · 统一入口；− 私有成员，+ 公有成员；下划线表示静态成员，省略业务方法。
+
+画面采用深底浅色笔记卡，左侧约六成展示文字，右侧约四成展示类图；保留斑马 Logo，移除正片镜号与进度条。对应组件：`video/src/scenes/ep01/SingletonNotesPreview.tsx`。
