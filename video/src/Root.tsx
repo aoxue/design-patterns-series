@@ -8,7 +8,7 @@ import { SingletonNotes, NOTES_FRAMES } from "./scenes/ep01/SingletonNotes";
 /** 工具合成：把音频实测时间轴通过 calculateMetadata 暴露给脚本（tools/contact-sheet.mjs） */
 const TimelineProbe: FC<{ episodeId: string; timeline: TimelineItem[] | null }> = () => null;
 
-/** 探针只暴露口播镜头时间轴及其帧数；无声笔记卡另做首中尾与衔接检查。 */
+/** 探针只暴露口播镜头时间轴及其帧数；无口播笔记卡另做首中尾与衔接检查。 */
 const probeMetadata = async (ep: EpisodeModule) => {
   const timeline = await computeTimeline(ep);
   return {
@@ -26,7 +26,7 @@ const probeMetadata = async (ep: EpisodeModule) => {
  */
 export const RemotionRoot: FC = () => (
   <>
-    {/* 无声阅读卡独立预览；固定停留供截图，不参与音频驱动的正片时间轴。 */}
+    {/* 无口播阅读卡独立预览；固定停留供截图，不参与音频驱动的正片时间轴。 */}
     <Composition
       id="EP01-NotesPreview"
       component={SingletonNotes}

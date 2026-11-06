@@ -2,10 +2,10 @@ import type { FC } from "react";
 import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { alpha, getPalette, theme } from "../../theme";
 
-/** 无声笔记的阅读停留独立于口播时长，预览与正片共用。 */
+/** 无口播笔记的阅读停留独立于口播时长，预览与正片共用。 */
 export const NOTES_FRAMES = 600;
 
-/** 无声落幕卡：整卡淡入淡出，frames 取本卡时长而非整集时长。 */
+/** 无口播落幕卡：整卡淡入淡出，frames 取本卡时长而非整集时长。 */
 export const SingletonNotes: FC<{ frames: number }> = ({ frames }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();

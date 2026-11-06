@@ -21,7 +21,7 @@ export interface EpisodeModule {
   scenes: Record<string, FC<SceneProps>>;
   /** 已完成分段调音、口播避让与淡出的独立音乐轨，文件位于本期音频目录；不包含人声。 */
   bgm?: string;
-  /** 口播结束后追加的无声笔记卡；独立阅读时长，不参与字幕与音频时间轴。 */
+  /** 口播结束后追加的笔记卡；无口播、可延续 BGM，独立阅读时长不参与口播与字幕时间轴。 */
   notes?: { component: FC<{ frames: number }>; durationInFrames: number };
 }
 
