@@ -19,6 +19,8 @@ export interface EpisodeModule {
   lines: ShotData[];
   /** 镜号 → 场景组件 */
   scenes: Record<string, FC<SceneProps>>;
+  /** 口播结束后追加的无声笔记卡；独立阅读时长，不参与字幕与音频时间轴。 */
+  notes?: { component: FC<{ frames: number }>; durationInFrames: number };
 }
 
 /** 期注册表：静态 import，逐期追加 */

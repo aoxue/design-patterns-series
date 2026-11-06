@@ -105,6 +105,16 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
   const { fps } = useVideoConfig();
   const totalFrames = tl.reduce((m, it) => Math.max(m, it.startFrame + it.frames), 1);
 
+  // 笔记卡不经过口播层，避免尾镜字幕、镜号与进度条延续到落幕画面。
+  if (ep.notes && frame >= totalFrames) {
+    const Notes = ep.notes.component;
+    return (
+      <Sequence from={totalFrames} durationInFrames={ep.notes.durationInFrames} name="模式笔记">
+        <Notes frames={ep.notes.durationInFrames} />
+      </Sequence>
+    );
+  }
+
   // 当前镜 & 音频内进度（驱动字幕）
   const active = tl.find((it) => frame < it.startFrame + it.frames) ?? tl[tl.length - 1];
   const audioFrames = Math.max(active.audioSec * FPS, 1);

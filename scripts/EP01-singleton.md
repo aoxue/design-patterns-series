@@ -369,9 +369,9 @@ public class OrderService {
 - [ ] 60 秒切片版（依赖成片发布节奏：主视频上线后 2 天内出，见 operations §2.1 / 附录 C.1）
 - [x] 简介文案（见附录 C.2；合集 / EP02 链接发布时补入占位）
 
-## 附录 E · 模式笔记落幕卡样片（待导演审阅）
+## 附录 E · 模式笔记落幕卡（导演已确认）
 
-独立预览合成 `EP01-NotesPreview`，输出 `video/out/EP01-notes-preview.mp4`。20 秒无声、无底部字幕，整卡各用 0.6 秒淡入淡出，中间静止供阅读与截图；尚未接入 EP01 正片及其音频时间轴。
+独立预览合成 `EP01-NotesPreview`，输出 `video/out/EP01-notes-preview.mp4`。20 秒无声、无底部字幕，整卡各用 0.6 秒淡入淡出，中间静止供阅读与截图；接在 EP01 全部口播与下期预告之后，由口播实测结束帧确定起点，不改变原镜头、配音与字幕时间轴。
 
 - 标题：模式笔记 · 01 / 23；单例模式 Singleton；创建型。
 - 核心意图：保证一个类只有一个实例，并提供访问它的全局访问点。
@@ -380,4 +380,4 @@ public class OrderService {
 - 结构速记：`PromoConfigManager` 极简类图，保留私有静态 `instance`、私有构造器、公开静态 `getInstance()`，省略业务方法；静态成员加下划线。
 - 图下提示：私有构造 · 自持实例 · 统一入口；− 私有成员，+ 公有成员；下划线表示静态成员，省略业务方法。
 
-画面采用深底浅色笔记卡，左侧约六成展示文字，右侧约四成展示类图；保留斑马 Logo，移除正片镜号与进度条。对应组件：`video/src/scenes/ep01/SingletonNotesPreview.tsx`。
+画面采用深底浅色笔记卡，左侧约六成展示文字，右侧约四成展示类图；保留斑马 Logo，移除正片镜号与进度条。对应组件：`video/src/scenes/ep01/SingletonNotes.tsx`。

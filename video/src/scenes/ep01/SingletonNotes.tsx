@@ -2,15 +2,18 @@ import type { FC } from "react";
 import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { alpha, getPalette, theme } from "../../theme";
 
-/** 独立无声落幕样片：阅读停留由合成定义，不进入正片的音频时间轴。 */
-export const SingletonNotesPreview: FC = () => {
+/** 无声笔记的阅读停留独立于口播时长，预览与正片共用。 */
+export const NOTES_FRAMES = 600;
+
+/** 无声落幕卡：整卡淡入淡出，frames 取本卡时长而非整集时长。 */
+export const SingletonNotes: FC<{ frames: number }> = ({ frames }) => {
   const frame = useCurrentFrame();
-  const { durationInFrames, fps } = useVideoConfig();
+  const { fps } = useVideoConfig();
   const palette = getPalette("creational");
   const fadeFrames = Math.round(fps * 0.6);
   const opacity = interpolate(
     frame,
-    [0, fadeFrames, durationInFrames - fadeFrames - 1, durationInFrames - 1],
+    [0, fadeFrames, frames - fadeFrames - 1, frames - 1],
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );

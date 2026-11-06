@@ -22,6 +22,9 @@ import { Scene51aGlobal, Scene51bState, Scene51cTest } from "../scenes/ep01/Scen
 import { Scene61Outro } from "../scenes/ep01/Scene61Outro";
 import { Scene62Decision } from "../scenes/ep01/Scene62Decision";
 import { Scene63Teaser } from "../scenes/ep01/Scene63Teaser";
+import { SingletonNotes, NOTES_FRAMES } from "../scenes/ep01/SingletonNotes";
+
+export const notes = { component: SingletonNotes, durationInFrames: NOTES_FRAMES };
 
 /** 期号（= 合成 id，也是 public/audio/、public/episodes/ 的目录/文件名前缀） */
 export const id = "EP01";

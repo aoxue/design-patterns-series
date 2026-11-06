@@ -3,12 +3,12 @@ import { Fragment } from "react";
 import { Composition } from "remotion";
 import { Episode, computeTimeline, type TimelineItem } from "./Episode";
 import { EPISODES, type EpisodeModule } from "./episodes/registry";
-import { SingletonNotesPreview } from "./scenes/ep01/SingletonNotesPreview";
+import { SingletonNotes, NOTES_FRAMES } from "./scenes/ep01/SingletonNotes";
 
 /** 工具合成：把音频实测时间轴通过 calculateMetadata 暴露给脚本（tools/contact-sheet.mjs） */
 const TimelineProbe: FC<{ episodeId: string; timeline: TimelineItem[] | null }> = () => null;
 
-/** 探针合成共用：该期时间轴与全片帧数（音频实测，与正片同源） */
+/** 探针只暴露口播镜头时间轴及其帧数；无声笔记卡另做首中尾与衔接检查。 */
 const probeMetadata = async (ep: EpisodeModule) => {
   const timeline = await computeTimeline(ep);
   return {
@@ -29,8 +29,9 @@ export const RemotionRoot: FC = () => (
     {/* 无声阅读卡独立预览；固定停留供截图，不参与音频驱动的正片时间轴。 */}
     <Composition
       id="EP01-NotesPreview"
-      component={SingletonNotesPreview}
-      durationInFrames={600}
+      component={SingletonNotes}
+      defaultProps={{ frames: NOTES_FRAMES }}
+      durationInFrames={NOTES_FRAMES}
       fps={30}
       width={1920}
       height={1080}
@@ -51,7 +52,10 @@ export const RemotionRoot: FC = () => (
               (max, it) => Math.max(max, it.startFrame + it.frames),
               1
             );
-            return { durationInFrames, props: { episodeId: ep.id, timeline } };
+            return {
+              durationInFrames: durationInFrames + (ep.notes?.durationInFrames ?? 0),
+              props: { episodeId: ep.id, timeline },
+            };
           }}
         />
         {/* 联系表生成器读取每镜帧区间用；不参与出片 */}
