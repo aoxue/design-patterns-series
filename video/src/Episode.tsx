@@ -2,6 +2,7 @@ import type { FC } from "react";
 import {
   AbsoluteFill,
   Audio,
+  Img,
   Sequence,
   staticFile,
   useCurrentFrame,
@@ -149,17 +150,37 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
       <div
         style={{
           position: "absolute",
-          top: 40,
+          top: 28,
           left: 64,
           right: 64,
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
           fontSize: 22,
           color: theme.textMuted,
           letterSpacing: 2,
         }}
       >
-        <span>码上购 · 设计模式 26 讲</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {/* 浅底托住黑白标志，保证各分类深色背景上的完整轮廓可见。 */}
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              padding: 4,
+              boxSizing: "border-box",
+              borderRadius: 12,
+              backgroundColor: theme.text,
+            }}
+          >
+            <Img
+              src={staticFile("brand/mashanggou-logo.png")}
+              alt="码上购 Logo"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          </div>
+          <span>码上购 · 设计模式 26 讲</span>
+        </div>
         <span style={{ fontFamily: theme.font.mono }}>
           {/* 拼成单一文本节点：多个 JSX 子表达式会在文本节点边界打断字符整形（kerning），观感与旧版有细差 */}
           {`${ep.id} ${ep.title} · ${active.id}`}

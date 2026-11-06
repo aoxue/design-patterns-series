@@ -1,5 +1,9 @@
 # 「码上购」设计模式系列 · 总纲
 
+<p align="center">
+  <img src="video/public/brand/mashanggou-logo.png" alt="码上购 Logo：黑白斑马侧面头像" width="160" />
+</p>
+
 > 23 种 GoF 设计模式 × 26 期视频 | Java 17 | B 站主平台 | vibe 知识视频
 
 ## 1. 系列定位
