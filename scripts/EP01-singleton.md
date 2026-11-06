@@ -358,7 +358,7 @@ public class OrderService {
 - [x] `.puml` 类图源文件（`EP01-singleton.puml`）
 - [x] 可运行示例代码（`mashanggou/src/main/java/com/mashanggou/promo/`：V0 事故版 + V1–V5 五版 + `SingletonEvolutionDemo` 反射攻击 main，编译运行通过）
 - [x] 封面图（`assets/covers/EP01-cover.png` + 三色系模板 `assets/covers/cover-template.html`，visual-judge 验收通过 2026-11-02）
-- [x] 成片 MP4：**全片渲染完成**（`video/` 管线 18 镜全量，1920×1080，10:17，2026-11-02；当前为 **TTS 样片配音版，待样片确认 → 真人录音同名覆盖重渲终版**，见 operations §2.2；QA 联系表见 `video/out/qa/contact-sheet.png`）
+- [x] 成片 MP4：**v4 终版渲染完成，质检员验收通过（2026-11-06）**（24 镜 11:15，1920×1080/30fps，674.97s，qwen 终版配音 rate 0.90；独立验收：联系表 24 镜逐格 + sync 报告 8 时点交叉 + 时间轴探针镜起止 + 头/中/尾音频能量 + 尾帧可解码全部通过；联系表 `video/out/qa/contact-sheet-EP01-2026-11-06.jpg`，同步报告 `video/out/qa/sync-report.md`）
   - ✔ v3 样片已渲染（2026-11-02，10:18，TTS 晓晓）：v2 基础上修复 7 项（镜 1.3 重做、4:07 字幕压字、字幕句末标点、攻击执行重放绑定、徽标版本名+异常中文化、决策树分支动画、5.1 锚点修正）；**全片音画同步审查通过**（16 镜 64 帧逐格核对，`npm run synccheck`，0 处错位）；**待用户验收 + 抽听 → 真人录音重渲终版**
   - ✔ 结尾三镜重做（2026-11-03，样片验收反馈「结尾仓促」）：6.1 拆为 6.1 金句定格 / 6.2 决策树逐条点亮 / 6.3 预告压轴 + 金句回屏定格（首尾呼应，末帧兼作封面备选）；新 TTS 三段 + 单帧 QA 12 帧过（删 6.1 画面副句避字幕重复、决策树统一卡宽）；评审段 `out/EP01-ending-review.mp4` 待用户过目 → **与其他验收发现攒批全片重渲 v4**
 - [x] v4 台词修订＋拆镜（2026-11-05）：11 镜 14 处修订，2.3/2.5/5.1 拆为八镜（19→24 镜）；台词四处同步（`EP01.json` / `EP01.segs.json` / 本文件 / SOP §4.2）；qwen 配音终版就位（rate 0.90 定档，纯语音 10:47 / 全片 11:15，0.1 开场停顿修剪 2.5s，切镜模型 small）；引擎注册表拆镜联动完成（commit 7028a7d）＋单帧 QA 18 帧修复 3 处节奏与 align 接入 bug（fcea74b）
