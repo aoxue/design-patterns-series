@@ -187,7 +187,7 @@ export const CodeCard: FC<CodeCardProps> = ({
               <span
                 style={{
                   position: "absolute",
-                  right: -6,
+                  right: -16,
                   top: "50%",
                   transform: "translateY(-50%)",
                   fontSize: Math.max(fontSize - 3, 15),

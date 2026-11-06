@@ -52,16 +52,18 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
     top: atWord("枚举封顶", 0.96),
   };
 
-  /** 决策树连线：path 终点停在箭头底、箭头尖接卡片左缘（1240）；标签圆片骑在水平线段上 */
+  /** 决策树连线：path 终点停在箭头底、箭头尖接卡片左缘（1240）。
+   *  标签圆片骑在水平线段上，lx 为左缘（v4.1 修正：下分支标签改「还要防反射」且贴住转角，
+   *  与上分支的「要」拉开语义；台词原文即「要懒…还要防反射…枚举封顶」） */
   const SEGS: Array<{ d: string; a: number; arrow: [number, number]; label?: string; lx?: number; ly?: number }> = [
-    { d: "M 185 135 H 470 V 45 H 1226", a: T.no, arrow: [1240, 45], label: "不要", lx: 700, ly: 45 },
-    { d: "M 185 135 H 1226", a: T.yes, arrow: [1240, 135], label: "要", lx: 420, ly: 135 },
-    { d: "M 185 150 V 225 H 546", a: T.ask, arrow: [560, 225], label: "要", lx: 350, ly: 225 },
+    { d: "M 185 135 H 470 V 45 H 1226", a: T.no, arrow: [1240, 45], label: "不要", lx: 640, ly: 45 },
+    { d: "M 185 135 H 1226", a: T.yes, arrow: [1240, 135], label: "要", lx: 390, ly: 135 },
+    { d: "M 185 150 V 225 H 546", a: T.ask, arrow: [560, 225], label: "还要防反射", lx: 199, ly: 225 },
     { d: "M 778 225 H 1226", a: T.top, arrow: [1240, 225] },
   ];
 
   return (
-    <AbsoluteFill style={{ padding: "104px 90px 132px" }}>
+    <AbsoluteFill style={{ padding: "104px 90px 170px" }}>
       <div style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 20 }}>
         五版对比卡 · 本期知识地图 <span style={{ fontSize: 24, color: theme.warn, fontWeight: 400 }}>📸 建议截图</span>
       </div>
@@ -116,7 +118,8 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         })}
       </div>
 
-      {/* 决策树：三问三答，随末四句逐段生长（连线接卡、箭头对齐） */}
+      {/* 决策树：三问三答，随末四句逐段生长（连线接卡、箭头对齐）。
+          v4.1 修正：底边距 132→170，面板底边与底部字幕条之间留出呼吸空间 */}
       <div
         style={{
           flex: 1,
@@ -163,7 +166,7 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             })}
           </svg>
 
-          {/* 分支标签圆片：骑在水平线段中段（底色盖线，视觉为「线上的标签」而非贴卡） */}
+          {/* 分支标签圆片：骑在水平线段上（lx=左缘，自适应宽；底色盖线，视觉为「线上的标签」而非贴卡） */}
           {SEGS.map((s, i) => {
             if (s.label === undefined || s.lx === undefined || s.ly === undefined) return null;
             return (
@@ -171,13 +174,14 @@ export const Scene32Compare: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 key={`${s.label}-${i}`}
                 style={{
                   position: "absolute",
-                  left: s.lx - 30,
+                  left: s.lx,
                   top: s.ly - 17,
-                  width: 60,
                   height: 34,
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
+                  padding: "0 15px",
+                  whiteSpace: "nowrap",
                   fontSize: 19,
                   color: theme.text,
                   border: `2px solid ${palette.surfaceBorder}`,
