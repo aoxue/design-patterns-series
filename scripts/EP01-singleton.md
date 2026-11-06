@@ -363,6 +363,7 @@ public class OrderService {
 
 - [x] 字幕断句修复版导演预览验收通过（2026-11-06）：`video/out/EP01-subtitle-fixed.mp4`，24 镜 / 20324 帧 / 11:17.47 / 1080p30；中文按标点短语优先断句，代码表达式完整、收尾标点跟前条，复用原词级时间戳重分段。三份断句实现回归测试、类型与规范检查、72 格 still、96 格同步对照、全片解码及关键成片抽帧通过；头中尾音轨与源配音对应位置一致，导演已确认成片验收通过。检查产物见 `video/out/qa/subtitle-fix/`。
 - [x] Logo 接入效果随最新成片一并获导演验收通过（2026-11-06）：`video/out/EP01-logo.mp4`，沿用字幕断句修复版，24 镜 / 20324 帧 / 11:17.47 / 1080p30。预渲染联系表 72 帧检查通过（`video/out/qa/logo-prerender/`）；成片逐镜首中尾 72 帧检查未见 Logo 遮挡（`video/out/qa/logo-output/contact-{1,2,3}.jpg`），全片解码通过，AAC 音轨与 `EP01-subtitle-fixed.mp4` 校验一致，头中尾音频能量正常；导演已在 `EP01-with-notes.mp4` 最新成片中确认 Logo 接入效果。
+- [ ] BGM 对照样片待导演试听选择（2026-11-06）：`video/out/bgm-preview/A-no-bgm.mp4`（纯人声）与 `B-with-bgm.mp4`（配乐），均 59.13 秒 / 1080p30；取最新验收成片的完整开场事故段与 2.3a 双检锁段，画面码流一致、人声增益不变。暂配原创合成轻电子氛围底乐，音乐平均相对人声为开场 -20.06dB、代码段 -29.10dB，带口播压低与淡入淡出。两版完整解码及无削波检查通过；生成脚本 `video/tools/make_bgm_preview.py`，音乐素材 `video/assets/bgm/EP01-preview.mp3`，制作参数与指标见 `video/out/bgm-preview/manifest.json`。完整成片尚未加入 BGM。
 - [ ] 60 秒切片版（依赖成片发布节奏：主视频上线后 2 天内出，见 operations §2.1 / 附录 C.1）
 
 ### 产出物完成清单
