@@ -32,10 +32,9 @@ cd design-patterns-series
 # 渲染工程（首次）
 cd video
 npm install
-pip install edge-tts
-python tools/tts.py     # 生成 TTS 样片配音（音频不入库，clone 后本地重建）
+# 已入库的逐镜 MP3 与 align.json 直接用于渲染；仅制作新配音时安装 Python 配音依赖
 npm run dev             # 打开 Remotion Studio，可拖时间轴预览每一帧
-# 出片：npm run render:poc   单帧质检：npx remotion still ...（见 video/README.md）
+# 出片：npm run render -- EP01 out/EP01.mp4（先做单帧质检，见 video/README.md）
 
 # Java 工程（另一个终端）
 cd mashanggou

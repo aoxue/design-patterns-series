@@ -12,11 +12,14 @@
     python tools/whisper_align.py EP01                 # small 模型，CPU int8，写入 align.json
     python tools/whisper_align.py EP01 --model medium  # 更高精度（更慢）
     python tools/whisper_align.py EP01 --check         # 只读不写：与现有 align.json 对比偏差（验收用）
+    python tools/whisper_align.py EP01 --rechunk       # 仅改断句后：复用现有词级时间戳，不重新识别音频
 """
 import difflib
 import json
+import re
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 from tts import STRIP, chunks_from_chartimes
 
@@ -80,17 +83,27 @@ def main() -> None:
     ep = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else "EP01"
     model_name = sys.argv[sys.argv.index("--model") + 1] if "--model" in sys.argv else "small"
     check_only = "--check" in sys.argv
+    rechunk = "--rechunk" in sys.argv
 
     audio_dir = ROOT / "public" / "audio" / ep
     shots = json.loads((ROOT / "public" / "episodes" / f"{ep}.json").read_text(encoding="utf-8"))
-    existing = json.loads((audio_dir / "align.json").read_text(encoding="utf-8")) if check_only else None
+    existing = json.loads((audio_dir / "align.json").read_text(encoding="utf-8")) if check_only or rechunk else None
 
-    from faster_whisper import WhisperModel
+    if rechunk:
+        # 只适用于音频、台词未变的断句修复；原词级时钟与元信息原样保留。
+        for shot in shots:
+            if not existing["shots"].get(shot["id"], {}).get("words"):
+                raise ValueError(f"{shot['id']} 缺少词级时间戳，不能 --rechunk，请先正常对齐")
+            previous = "".join(c["text"] for c in existing["shots"][shot["id"]]["chunks"])
+            if re.sub(r"\s", "", previous) != re.sub(r"\s", "", shot["subtitle"]):
+                raise ValueError(f"{shot['id']} 字幕已变，不能 --rechunk，请先正常对齐")
+    else:
+        from faster_whisper import WhisperModel
 
-    print(f"加载模型 {model_name}（首次运行会下载）…")
-    model = WhisperModel(model_name, device="cpu", compute_type="int8")
+        print(f"加载模型 {model_name}（首次运行会下载）…")
+        model = WhisperModel(model_name, device="cpu", compute_type="int8")
 
-    align = {"voice": "human", "shots": {}}
+    align = {**existing, "shots": dict(existing["shots"])} if rechunk else {"voice": "human", "shots": {}}
     warn = []
     diffs = []
     for shot in shots:
@@ -98,7 +111,11 @@ def main() -> None:
         if not mp3.exists():
             print(f"⚠ {shot['id']} 缺音频 {mp3.name}，跳过")
             continue
-        words = transcribe(mp3, model)
+        words = (
+            [SimpleNamespace(start=s, end=e, word=text)
+             for s, e, text in existing["shots"][shot["id"]]["words"]]
+            if rechunk else transcribe(mp3, model)
+        )
         wchars, wtimes = char_times(words)
         tchars = STRIP.sub("", shot["tts"])
         times, cov = align_chars(wchars, wtimes, tchars)
@@ -106,7 +123,9 @@ def main() -> None:
             warn.append(f"{shot['id']}（覆盖 {cov:.0%}，疑似念错/漏句/噪声，建议复听）")
         chunks = chunks_from_chartimes(shot, times)
         align["shots"][shot["id"]] = {
-            "words": [[w.start, w.end, w.word.strip()] for w in words],
+            **(existing["shots"][shot["id"]] if rechunk else {}),
+            "words": existing["shots"][shot["id"]]["words"] if rechunk else
+                     [[w.start, w.end, w.word.strip()] for w in words],
             "chunks": chunks,
         }
         msg = f"OK  {shot['file']}  chunks={len(chunks)}  覆盖 {cov:.0%}"
@@ -127,7 +146,7 @@ def main() -> None:
         print("--check 只读模式，未写入任何文件")
         return
     (audio_dir / "align.json").write_text(json.dumps(align, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"align → public/audio/{ep}/align.json（voice=human）")
+    print(f"align → public/audio/{ep}/align.json（voice={align['voice']}）")
 
 
 if __name__ == "__main__":

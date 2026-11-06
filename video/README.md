@@ -32,6 +32,7 @@ cp .env.example .env                                 # 再填入 DASHSCOPE_API_K
 # 日常
 python tools/tts_qwen.py EP01                        # 主力配音：qwen 声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成，现行段留档先备份到 out/segs/EPxx/bak-时间戳/；--split-only 只切镜）
 python tools/whisper_align.py EP01                   # 对齐重算 align.json（qwen 配音与真声统一走此路；--check 只读对比偏差；--model 可调，默认 small）
+python tools/whisper_align.py EP01 --rechunk         # 仅修断句时复用现有词级时间戳；音频与台词须保持不变
 python tools/tts.py                                  # 降级：edge-tts 快速预览（无 key 环境可用，随音频产出同构 align.json）
 python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
 # 国内网络首次下载 whisper 模型：前面加 HF_ENDPOINT=https://hf-mirror.com
@@ -65,7 +66,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 
 ## 多机协作注意
 
-- 仓库**不含**音频与成片（有意设计，见 .gitignore）：新电脑 clone 后跑完上面「首次准备」+ `python tools/tts.py`，即可完整渲染；
+- 渲染输入 `public/audio/EPxx/*.mp3` 与 `align.json` 随 Git 管理：新电脑同步对应提交并安装 npm 依赖后即可渲染，不要为复现成片重新生成配音；成片与试音备份仍不入库。
 - **真声母带是不可再生资产**：录制后另存 `assets/voice/EPxx/` 并提交入库，再拷入 `public/audio/EPxx/` 参与渲染；
 - 样片配音全平台统一音色（edge-tts 神经语音），换机器不影响听感一致；
 - 历史：`tools/tts.ps1`（Windows 专属语音）已移除，PoC 阶段产物可在 git 历史找回。
@@ -79,7 +80,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 5. **动画锚点按台词字位计算，禁止等间隔拍脑袋**，台词里找关键词的字符位置除以总字数得进度锚点：
    `python -c "s=json.load(open('public/episodes/EP01.json',encoding='utf-8'))[i]['subtitle']; print(s.find('关键词')/len(s))"`
    （教训：3.2 决策树、5.1 警告卡均因拍脑袋锚点音画错位最高 9 秒）；
-6. `out/`、`public/audio/` 不进 git（已 ignore）；本目录源码即全部制作资产。
+6. `out/` 不进 git；实际使用的 `public/audio/EPxx/*.mp3` 与 `align.json` 必须和代码、台词同步提交，保证跨机器可复现。
 
 ## 现状与全量化待办（PoC → 正片引擎）
 
