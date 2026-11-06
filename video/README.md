@@ -24,9 +24,11 @@ src/theme.ts           色彩体系唯一取色处：中性 token（theme，全�
 
 品牌 Logo 统一存放在 `public/brand/mashanggou-logo.png`（透明背景 PNG）。根目录 README 与视频共用此文件；`Episode.tsx` 在全片左上角系列标识旁展示，配浅色圆角底托，保证各分类深色背景上的辨识度。替换品牌素材时保持路径即可，无需逐镜修改。
 
-每期落幕使用「模式笔记」卡：核心意图、适用场景及极简类图或短代码。期模块通过 `notes` 导出组件与阅读帧数，调度器在全部口播结束后追加；卡内无口播、字幕、镜号和进度条。无声阅读停留不依赖音频时长，EP01 为 20 秒（含整卡各 0.6 秒淡入淡出），独立预览合成为 `EP01-NotesPreview`，与正片共用组件。新增期需提供对应笔记内容。`TimelineProbe` 与联系表工具仍只覆盖口播镜头，笔记卡须补查衔接、首中尾帧与末帧。
+每期落幕使用「模式笔记」卡：核心意图、适用场景及极简类图或短代码。期模块通过 `notes` 导出组件与阅读帧数，调度器在全部口播结束后追加；卡内无口播、字幕、镜号和进度条。无口播的阅读停留不依赖音频时长，EP01 为 20 秒（含整卡各 0.6 秒淡入淡出），独立预览合成为 `EP01-NotesPreview`，与正片共用组件。新增期需提供对应笔记内容。`TimelineProbe` 与联系表工具仍只覆盖口播镜头，笔记卡须补查衔接、首中尾帧与末帧。
 
-期模块可通过 `bgm` 导出本期音频目录内的音乐文件名。调度器在口播段播放独立音乐轨，笔记卡保持无声；音乐轨不参与镜头时长或字幕对齐计算。EP01 使用已确认的原创轻电子底乐：开场轻铺底、代码段降低音量、有人声时平滑压低，口播结束前淡出。变更配音或镜头留白后，应重新生成音乐轨并同步提交。
+期模块可通过 `bgm` 导出本期音频目录内的音乐文件名。调度器在口播段与笔记卡持续播放独立音乐轨，笔记卡仅取消口播；音乐轨不参与镜头时长或字幕对齐计算。EP01 使用已确认的原创轻电子底乐：开场轻铺底、代码段降低音量、有人声时平滑压低，笔记卡延续轻量 BGM，整片结束前淡出。变更配音、镜头留白或笔记卡时长后，应重新生成音乐轨并同步提交。
+
+混音脚本按期号复用，每期新增 `public/episodes/EPxx.bgm.json`，不复制或重写 Python：`music` 指定相对 `video/` 的音乐素材路径，`loopStartSec` / `loopPeriodSec` / `crossfadeSec` 指定该素材的循环窗口，`quietShots` 用镜号或通配符指定压低音乐的镜头；可选 `openingEndShot` 指定开场音量校准的结束镜号。时长、是否有笔记卡及笔记卡长度均读取当前 Remotion 元数据。命令的 `--music` 可覆盖素材路径，换曲时仍须同步确认循环窗口；`--source` / `--output` 可指定无 BGM 源片与配乐输出，防止叠加已有 BGM。
 
 ## 命令
 
@@ -40,8 +42,8 @@ cp .env.example .env                                 # 再填入 DASHSCOPE_API_K
 python tools/tts_qwen.py EP01                        # 主力配音：qwen 声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成，现行段留档先备份到 out/segs/EPxx/bak-时间戳/；--split-only 只切镜）
 python tools/whisper_align.py EP01                   # 对齐重算 align.json（qwen 配音与真声统一走此路；--check 只读对比偏差；--model 可调，默认 small）
 python tools/whisper_align.py EP01 --rechunk         # 仅修断句时复用现有词级时间戳；音频与台词须保持不变
-python tools/mix_episode_bgm.py --stem-only          # 重建 EP01 音乐轨（需 numpy、ffmpeg）；只读入库配音/底乐及实测时间轴
-python tools/mix_episode_bgm.py                      # 重建音乐轨并给 out/EP01-with-notes.mp4 混音，输出 out/EP01-with-bgm.mp4
+python tools/mix_episode_bgm.py EP01 --stem-only     # 按 EP01.bgm.json 重建音乐轨（需 numpy、ffmpeg），不依赖成片
+python tools/mix_episode_bgm.py EP01                 # 重建音乐轨并给 out/EP01-with-notes.mp4 混音，输出 out/EP01-with-bgm-notes.mp4
 python tools/tts.py                                  # 降级：edge-tts 快速预览（无 key 环境可用，随音频产出同构 align.json）
 python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
 # 国内网络首次下载 whisper 模型：前面加 HF_ENDPOINT=https://hf-mirror.com
