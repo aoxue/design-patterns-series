@@ -1,22 +1,28 @@
 import type { FC } from "react";
-import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { alpha, theme } from "../../theme";
-import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
+import type { SceneProps } from "../../scene-kit";
+import { usePalette } from "../../scene-kit";
 
 /**
- * 镜 4.1 · 「框架影子」固定片头（7:00–7:08）
- * 系列记忆点：环形扫描光环 + 环节徽标 + 两个影子名字预告（每期同一套动效）
+ * 镜 4.1 · 「框架影子」固定片头（8:02–8:09）
+ * 系列记忆点：环形扫描光环 + 环节徽标 + 两个影子名字预告（每期同一套动效）。
+ * v4.1 黑屏治理：场景动画从第 0 帧起跑（不等台词；首句实测 1.74s 才起音，
+ * 原锚点让片头空黑 ~2.8s），光环扫满整镜、各元素前 2 秒内全部就位。
  */
-export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, pop } = useAnchors(leadFrames, audioFrames);
+export const Scene41Intro: FC<SceneProps> = ({ frames }) => {
+  const frame = useCurrentFrame();
   const palette = usePalette();
 
-  // 光环扫描：0–100% 转一圈（8 秒片头内转完）
-  const sweep = interpolate(frame, [at(0), at(1)], [0, 360], {
+  // 光环扫描：第 0 帧起转，整镜（lead+audio+tail）转完一圈
+  const sweep = interpolate(frame, [0, frames], [0, 360], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.linear,
   });
+  const sub = interpolate(frame, [0, 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const jdkLine = interpolate(frame, [18, 36], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const chips = interpolate(frame, [42, 62], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill
@@ -44,7 +50,7 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           fontSize: 30,
           color: theme.textMuted,
           letterSpacing: 10,
-          opacity: fade(0.1),
+          opacity: sub,
           marginBottom: 30,
         }}
       >
@@ -57,7 +63,7 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           fontWeight: 700,
           color: theme.text,
           letterSpacing: 14,
-          opacity: pop(0.05),
+          opacity: sub,
           textShadow: `0 0 60px ${alpha(palette.primary, 0.4)}`,
         }}
       >
@@ -69,7 +75,7 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           fontSize: 36,
           color: theme.textMuted,
           marginTop: 34,
-          opacity: fade(0.3),
+          opacity: jdkLine,
         }}
       >
         它藏在 <span style={{ color: palette.primaryBright, fontFamily: theme.font.mono }}>JDK</span> 和{" "}
@@ -77,7 +83,7 @@ export const Scene41Intro: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       </div>
 
       {/* 本期两个影子预告 */}
-      <div style={{ display: "flex", gap: 28, marginTop: 70, opacity: fade(0.55) }}>
+      <div style={{ display: "flex", gap: 28, marginTop: 70, opacity: chips }}>
         {["影子一号 · java.lang.Runtime", "影子二号 · Spring 容器"].map((t) => (
           <span
             key={t}

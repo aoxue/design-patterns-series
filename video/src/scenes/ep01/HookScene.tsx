@@ -1,45 +1,54 @@
 import type { FC } from "react";
-import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Easing, interpolate, spring, useVideoConfig } from "remotion";
 import { theme } from "../../theme";
-import { usePalette } from "../../scene-kit";
+import { useAnchors, usePalette, type SceneProps } from "../../scene-kit";
 
 /**
- * 镜 1.1 · 钩子（0:00–0:15）
+ * 镜 1.1 · 钩子（0:13–0:31）
  * 黑屏 → 红色 00:01 → 商品页/账单左右对撞 → 差值红圈 → 「凶手在代码里」
+ * v4.1 锚点实测化：原绝对帧动画改挂 align.json 实测词位
+ * （00:01 数字仍第 0 帧起跑消 leadSec 黑屏，其余节拍逐词锁定：
+ *  同一件商品 4.5s / 两个价格 6.0s / 用户实付 9.3s / 差值圈 10.3s / 价格事故 11.3s）。
  */
-export const HookScene: FC = () => {
-  const frame = useCurrentFrame();
+export const HookScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
+  const { frame, fps, atWord, fadeAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
-  const { fps } = useVideoConfig();
 
   const digitIn = spring({ frame, fps, config: { damping: 14 } });
   // 数字放大进场后，收小上移让位给对撞卡片。
   // 几何约定（transformOrigin 顶边中心）：收小后停靠 y=120（200-80），
   // 字高约 78px，与顶部信息行（40–70px）留 50px 间距，不再越出画面。
-  const digitShrink = interpolate(frame, [70, 95], [1, 0.34], {
+  // 收小时点 ≈ 00:01 念完（约 2.2s，chunk 字位）：数字退居背景、品牌段开始。
+  const shrinkA = atWord("码上购", 0.2);
+  const digitShrink = interpolate(frame, [shrinkA, shrinkA + 25], [1, 0.34], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
-  const digitY = interpolate(frame, [70, 95], [0, -80], {
+  const digitY = interpolate(frame, [shrinkA, shrinkA + 25], [0, -80], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
   const digitScale = (0.8 + digitIn * 0.2) * digitShrink;
 
+  // 对撞卡：左卡踩「两个价格」（约 6.0s，商品页促销即将登场）、右卡踩「用户」（约 9.3s 实付段）
   const slide = (from: number) =>
     interpolate(frame, [from, from + 28], [-760, 0], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
       easing: Easing.out(Easing.cubic),
     });
+  const slideL = atWord("两个价格", 0.35);
+  const slideR = atWord("用户", 0.6);
 
-  const diffIn = spring({ frame: frame - 150, fps, config: { damping: 9 } });
+  // 差值红圈：踩「减了」（约 10.3s），「只减了 50」话音落前差值成圈
+  const diffIn = spring({ frame: frame - Math.round(atWord("减了", 0.7)), fps, config: { damping: 9 } });
   const pulse = 1 + 0.05 * Math.sin(frame / 5);
 
-  const line1 = interpolate(frame, [195, 215], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const line2 = interpolate(frame, [285, 305], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // 两行结论：line1 踩「同一件商品」（约 4.5s）、line2 踩「价格事故」（约 11.3s，v4.1 修 2.6s 早出）
+  const line1 = fadeAt(atWord("同一件", 0.3), 20);
+  const line2 = fadeAt(atWord("价格事故", 0.68), 20);
 
   return (
     <AbsoluteFill style={{ backgroundColor: theme.deepBg, justifyContent: "center", alignItems: "center" }}>
@@ -70,7 +79,7 @@ export const HookScene: FC = () => {
             borderRadius: 20,
             backgroundColor: palette.surface,
             border: `1px solid ${palette.surfaceBorder}`,
-            transform: `translateX(${slide(85)}px)`,
+            transform: `translateX(${slide(slideL)}px)`,
           }}
         >
           <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 14 }}>商品页 · 促销标签</div>
@@ -84,7 +93,7 @@ export const HookScene: FC = () => {
             borderRadius: 20,
             backgroundColor: palette.surface,
             border: `1px solid ${palette.surfaceBorder}`,
-            transform: `translateX(${-slide(100)}px)`,
+            transform: `translateX(${-slide(slideR)}px)`,
           }}
         >
           <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 14 }}>支付账单 · 实付款</div>

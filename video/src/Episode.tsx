@@ -11,7 +11,7 @@ import { getAudioData } from "@remotion/media-utils";
 import { FPS, ESTIMATE_CPS, audioPath, splitSubtitles, type ShotData } from "./data";
 import { getPalette, theme } from "./theme";
 import { SubtitleBar } from "./components/SubtitleBar";
-import { AnchorCtx, PaletteCtx, type SceneProps, type TimedChunk } from "./scene-kit";
+import { AnchorCtx, PaletteCtx, type SceneProps, type ShotAlign, type TimedChunk } from "./scene-kit";
 import { getEpisode, type EpisodeModule } from "./episodes/registry";
 
 export interface TimelineItem extends ShotData {
@@ -20,20 +20,29 @@ export interface TimelineItem extends ShotData {
   audioSec: number;
   /** 逐句时间戳（音频是唯一时钟；缺失时字幕/动画退化为等比估算） */
   chunks?: TimedChunk[];
+  /** 词级时间戳（atWord 关键词锚点用；缺失时 atWord 退到 chunk 内插） */
+  words?: ShotAlign["words"];
 }
 
 /** 由各段音频实测时长（或估算值）铺出整条时间轴 */
 export const buildTimeline = (
   ep: EpisodeModule,
   durations: number[] | null,
-  alignShots: Record<string, TimedChunk[]> = {}
+  alignShots: Record<string, ShotAlign> = {}
 ): TimelineItem[] => {
   const items: TimelineItem[] = [];
   let cursor = 0;
   ep.lines.forEach((s, i) => {
     const audioSec = durations ? durations[i] : s.subtitle.length / ESTIMATE_CPS;
     const frames = Math.ceil((s.leadSec + audioSec + s.tailSec) * FPS);
-    items.push({ ...s, startFrame: cursor, frames, audioSec, chunks: alignShots[s.id] });
+    items.push({
+      ...s,
+      startFrame: cursor,
+      frames,
+      audioSec,
+      chunks: alignShots[s.id]?.chunks,
+      words: alignShots[s.id]?.words,
+    });
     cursor += frames;
   });
   return items;
@@ -51,19 +60,28 @@ export const computeTimeline = async (ep: EpisodeModule): Promise<TimelineItem[]
     }
   }
   // 逐句时间戳（tts.py 生成；真人原声用 whisper 对齐工具重算，见 video/README）
-  let alignShots: Record<string, TimedChunk[]> = {};
+  let alignShots: Record<string, ShotAlign> = {};
   try {
     const res = await fetch(staticFile(audioPath(ep, "align.json")));
     if (res.ok) {
       // align.json 的镜条目形状是 {words, chunks}（tts.py / whisper_align.py 产物，
       // sync-check.mjs 同样按 .chunks 读取）；兼容旧版直出的数组形状，统一归一成
-      // chunk 数组再下发给字幕与锚点，否则 AnchorCtx 拿到对象会静默退化为估算
+      // {chunks, words} 再下发给字幕与锚点，否则 AnchorCtx 拿到对象会静默退化为估算
       const data = (await res.json()) as {
-        shots?: Record<string, TimedChunk[] | { chunks?: TimedChunk[] }>;
+        shots?: Record<
+          string,
+          TimedChunk[] | { chunks?: TimedChunk[]; words?: Array<[number, number, string]> }
+        >;
       };
       for (const [id, v] of Object.entries(data.shots ?? {})) {
         const list = Array.isArray(v) ? v : v?.chunks;
-        if (Array.isArray(list) && list.length > 0) alignShots[id] = list;
+        if (Array.isArray(list) && list.length > 0) {
+          const rawWords = Array.isArray(v) ? undefined : v?.words;
+          alignShots[id] = {
+            chunks: list,
+            words: rawWords?.map(([s, e, text]) => ({ s, e, text })),
+          };
+        }
       }
     }
   } catch {
@@ -110,7 +128,7 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
         const leadFrames = Math.round(it.leadSec * FPS);
         return (
           <Sequence key={it.id} from={it.startFrame} durationInFrames={it.frames} name={it.id}>
-            <AnchorCtx.Provider value={it.chunks ?? null}>
+            <AnchorCtx.Provider value={it.chunks ? { chunks: it.chunks, words: it.words } : null}>
               {Scene ? (
                 <Scene
                   frames={it.frames}

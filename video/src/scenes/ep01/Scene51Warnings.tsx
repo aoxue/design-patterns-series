@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { AbsoluteFill } from "remotion";
+import { AbsoluteFill, interpolate } from "remotion";
 import { alpha, theme } from "../../theme";
 import { useAnchors, type SceneProps, usePalette } from "../../scene-kit";
 
@@ -39,7 +39,7 @@ const WarnChip: FC<{ label: string; mode: "done" | "active" | "todo"; opacity?: 
   );
 };
 
-/** 大警告卡（压屏主体）：icon + 标题 + 逐行点亮 */
+/** 大警告卡（压屏主体）：icon + 标题 + 逐行点亮（fade 入参语义由调用方定：进度 p 或实测帧号） */
 const WarnCard: FC<{
   icon: string;
   no: number;
@@ -123,9 +123,18 @@ export const Scene51aGlobal: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
 /** ---------------------------------------------------------------- 5.1b · 警告二：状态炸弹 */
 export const Scene51bState: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { fade, pop } = useAnchors(leadFrames, audioFrames);
-  // 锚点（subtitle 268 字）：只创建一次 0.090 / 可变字段 0.134 / 创建安全 0.265 /
-  // 悄悄覆盖 0.672 / HashMap 0.690 / 写坏 0.765 / 解法 0.810
+  const { atWord, fadeAt, pop } = useAnchors(leadFrames, audioFrames);
+  // v4.1 实测锚点：只创建一次 ≈4.2 / 可变字段 ≈5.9 / 创建安全 11.6 /
+  // 举例段 20.7（导演定档 9:58，原字位锚点晚出 7s）/ HashMap 29.4 / 解法 34.4
+  // rows 的 p 字段此处传帧号、fade 传 fadeAt（WarnCard 只做透传）
+  const rows = [
+    { text: "今天五版代码防的只是「只创建一次」", p: atWord("只创建一次", 0.09) },
+    { text: "实例里的可变字段：缓存的 Map、随手 set 的成员变量，并发读写照样出事", p: atWord("可变字段", 0.134) },
+    { text: "创建安全，不等于使用安全", p: atWord("创建安全", 0.265) },
+    { text: "线程 A 一查没有正要写，线程 B 也查也写：一边的结果被另一边悄悄覆盖", p: atWord("拿缓存", 0.672) },
+    { text: "HashMap 并发写甚至把内部结构写坏，整台服务卡死", p: atWord("HashMap", 0.75) },
+    { text: "解法不在单例模式里：ConcurrentHashMap / 写路径加锁 / 干脆无状态", p: atWord("解法", 0.81) },
+  ];
   return (
     <AbsoluteFill style={{ padding: "108px 90px 150px" }}>
       <SectionHeader />
@@ -141,15 +150,8 @@ export const Scene51bState: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             icon="💣"
             no={2}
             title="有状态单例是并发炸弹"
-            fade={fade}
-            rows={[
-              { text: "今天五版代码防的只是「只创建一次」", p: 0.09 },
-              { text: "实例里的可变字段：缓存的 Map、随手 set 的成员变量，并发读写照样出事", p: 0.134 },
-              { text: "创建安全，不等于使用安全", p: 0.265 },
-              { text: "线程 A 一查没有正要写，线程 B 也查也写：一边的结果被另一边悄悄覆盖", p: 0.672 },
-              { text: "HashMap 并发写甚至把内部结构写坏，整台服务卡死", p: 0.765 },
-              { text: "解法不在单例模式里：ConcurrentHashMap / 写路径加锁 / 干脆无状态", p: 0.81 },
-            ]}
+            fade={fadeAt}
+            rows={rows}
           />
         </div>
       </div>
@@ -158,12 +160,18 @@ export const Scene51bState: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 };
 
 /** ---------------------------------------------------------------- 5.1c · 警告三：难测试 ＋ 正解 ＋ 小卡 */
-export const Scene51cTest: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { fade, pop } = useAnchors(leadFrames, audioFrames);
+export const Scene51cTest: FC<SceneProps> = ({ leadFrames, audioFrames, frames }) => {
+  const { frame, fade, pop } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
   // 锚点（subtitle 131 字）：写死在调用处 0.145 / 插不进 0.282 / 正解依赖注入 0.313 /
-  // 过度设计 0.725 / 收尾渐暗 0.95
-  const dim = fade(0.95, 25) * 0.55;
+  // 过度设计 0.725
+  // v4.1 黑屏治理：渐暗罩推后到镜尾最后 ~0.8s（原 0.95 字位起淡，10:37 前黑场偏长）
+  const dim = interpolate(
+    frame,
+    [frames - 26, frames - 6],
+    [0, 0.55],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
 
   return (
     <AbsoluteFill style={{ padding: "108px 90px 150px" }}>

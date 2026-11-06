@@ -6,11 +6,12 @@ import { QuoteFrame } from "../../components/QuoteFrame";
 
 /**
  * 镜 6.3 · EP02 预告 + 金句回屏（结尾三镜压轴）
- * switch 地狱卡随台词（0.23）弹入，EP02 徽标随钩子文案（0.42）弹入；
+ * v4.1 黑屏治理：switch 地狱卡从第 0 帧弹入（原 pop(0.23) 要等到 ≈3.4s，
+ * teaser 开头空黑 3 秒+），EP02 徽标仍踩「工厂方法」实测词位（≈7.8s）；
  * 台词落定（at(1)＝实测语音末尾）后 teaser 淡出、金句放大回屏定格到片尾，与 6.1 首尾呼应，末帧即封面备选帧。
  */
 export const Scene63Teaser: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, pop } = useAnchors(leadFrames, audioFrames);
+  const { frame, at, atWord, popAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
 
   const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -19,8 +20,8 @@ export const Scene63Teaser: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   const quoteIn = interpolate(frame, [at(1), at(1) + 25], [0, 1], clamp);
   const quoteScale = interpolate(frame, [at(1), at(1) + 25], [0.92, 1], clamp);
 
-  const switchIn = pop(0.23);
-  const badgeIn = pop(0.42);
+  const switchIn = popAt(2); // 第 0 帧起跑（lead 期间即开画），台词「下期」几乎同时
+  const badgeIn = popAt(atWord("工厂方法", 0.42));
 
   return (
     <AbsoluteFill style={{ backgroundColor: theme.deepBg, justifyContent: "center", alignItems: "center" }}>

@@ -59,34 +59,85 @@ const LINES: CodeLine[] = [
   { segs: [{ text: " }" }] },
 ];
 
-// diff 各行出现的台词进度（对应「先留空 → 判空/创建/返回」讲解顺序）
-const VIS = [0.04, 0.055, 0.075, 0.085, 0.1, 0.12, 0.14, 0.15, 0.155, 0.16, 0.165, 0.17];
-
-/** A1 时序板行：[台词进度, 线程列(0=A 1=B), 文本, 是否翻车步] */
-const RACE: { p: number; col: 0 | 1; text: string; note?: string; bad?: boolean }[] = [
-  { p: 0.21, col: 0, text: "判空 → null ✓" },
-  { p: 0.25, col: 1, text: "判空 → null ✓", note: "两人都通过了检查" },
-  { p: 0.31, col: 0, text: "new 实例①", bad: true },
-  { p: 0.35, col: 1, text: "new 实例②", bad: true },
-];
-
 export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const { frame, atWord, fadeAt, popAt, seenAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
 
-  const revealAt = VIS.map(at);
-  const boardIn = fade(0.19);
-  const broken = pop(0.4); // 「单例？只剩个名字」破裂标签
+  // ---- v4.1 实测锚点（align.json 词位）----
+  // diff 显形：第二版 1.7 / 懒汉式 2.6 / 先留空 3.6 / 判空段 7.3（组内 8–60 帧级联收口）
+  const v2F = atWord("第二版", 0.04);
+  const lazyF = atWord("懒汉式", 0.055);
+  const emptyF = atWord("先留空", 0.075);
+  const checkF = atWord("判空、创建", 0.1);
+  const revealAt = [
+    v2F,
+    lazyF,
+    emptyF,
+    emptyF + 20,
+    checkF,
+    checkF + 8,
+    checkF + 18, // 判空①
+    checkF + 30, // new②
+    checkF + 36,
+    checkF + 46, // return
+    checkF + 52,
+    checkF + 60,
+  ];
+
+  // A1 时序板：A 判空 15.0 / B 判空 18.5 / 擦肩而过 20.4 / 各自创建 21.6
+  const boardIn = fadeAt(atWord("多线程的", 0.19), 14);
+  const raceA1 = atWord("执行到判空", 0.21);
+  const raceB1 = atWord("也判空", 0.25);
+  const raceA2 = atWord("擦肩而过", 0.31);
+  const raceB2 = atWord("各自创建", 0.35);
+  const RACE: { f: number; col: 0 | 1; text: string; note?: string; bad?: boolean }[] = [
+    { f: raceA1, col: 0, text: "判空 → null ✓" },
+    { f: raceB1, col: 1, text: "判空 → null ✓", note: "两人都通过了检查" },
+    { f: raceA2, col: 0, text: "new 实例①", bad: true },
+    { f: raceB2, col: 1, text: "new 实例②", bad: true },
+  ];
+
+  const brokenF = atWord("只剩", 0.4); // 「单例？只剩个名字」破裂标签 ≈25.0s
+  const broken = popAt(brokenF);
   // 破裂抖动：标签出现后 12 帧内横向震颤
-  const shake = seen(0.4) ? Math.max(0, 1 - (frame - at(0.4)) / 12) * Math.sin((frame - at(0.4)) / 1.4) * 8 : 0;
-  const syncIn = fade(0.46);
-  const lockBarW = interpolate(frame, [at(0.56), at(0.66)], [0, 100], {
+  const shake = seenAt(brokenF)
+    ? Math.max(0, 1 - (frame - brokenF) / 12) * Math.sin((frame - brokenF) / 1.4) * 8
+    : 0;
+
+  // ---- synchronized 粗暴修法（v4.1 D 项动效）----
+  // 台词「方法上加 synchronized」≈31.3s：C3 的 getInstance 签名行瞬时插入关键字（diff 绿）
+  // +「⚠ 每次抢锁」标签；念到「不值」≈41.5s 划掉，随后回落原状（死结段前还原）
+  const syncF = atWord("最粗暴的修法", 0.46);
+  const insertF = atWord("上加", 0.52);
+  const lockHotF = atWord("热路径", 0.56);
+  const notWorthF = atWord("不值", 0.9);
+  const strikeF = notWorthF;
+  const revertF = notWorthF + 14;
+  const insertOn = seenAt(insertF) && !seenAt(revertF);
+  const striking = seenAt(strikeF);
+  const lines = LINES.map((l, i) =>
+    i === 5 && insertOn
+      ? {
+          diff: "add" as const,
+          segs: [
+            { text: "+    public static " },
+            { text: "synchronized", kind: "ok" as const, strike: striking },
+            { text: " PromoConfigManager " },
+            { text: "getInstance", kind: "kw" as const },
+            { text: "() {" },
+          ],
+        }
+      : l
+  );
+
+  const syncIn = fadeAt(syncF, 12);
+  const lockBarW = interpolate(frame, [lockHotF, notWorthF], [0, 100], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.cubic),
   });
-  const knotIn = fade(0.74);
-  const v3In = pop(0.84);
+  const knotIn = fadeAt(atWord("死结", 0.74), 14);
+  const v3In = popAt(atWord("第三版", 0.84));
 
   return (
     <AbsoluteFill style={{ padding: "130px 90px 150px" }}>
@@ -98,7 +149,17 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       <div style={{ display: "flex", gap: 40, flex: 1 }}>
         {/* 左：C3 diff 卡 */}
         <div style={{ flex: 1.5 }}>
-          <CodeCard title="PromoConfigManager.java · V1 → V2（diff）" lines={LINES} revealAt={revealAt} fontSize={19} />
+          <CodeCard
+            title="PromoConfigManager.java · V1 → V2（diff）"
+            lines={lines}
+            revealAt={revealAt}
+            fontSize={19}
+            notes={
+              insertOn
+                ? [{ line: 5, text: "⚠ 每次抢锁", opacity: fadeAt(insertF, 8), strike: striking }]
+                : undefined
+            }
+          />
         </div>
 
         {/* 右：A1 时序板 + synchronized 警告 + 死结 */}
@@ -131,8 +192,8 @@ export const Scene22Lazy: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                         lineHeight: 1.7,
                         whiteSpace: "nowrap",
                         color: r.bad ? theme.danger : theme.text,
-                        opacity: fade(r.p),
-                        transform: `translateX(${(1 - fade(r.p)) * 18}px)`,
+                        opacity: fadeAt(r.f),
+                        transform: `translateX(${(1 - fadeAt(r.f)) * 18}px)`,
                       }}
                     >
                       {r.bad ? "💥 " : ""}

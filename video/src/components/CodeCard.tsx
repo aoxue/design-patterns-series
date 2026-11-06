@@ -5,9 +5,11 @@ import { usePalette } from "../scene-kit";
 
 export interface CodeSeg {
   text: string;
-  kind?: "plain" | "comment" | "danger" | "kw";
+  kind?: "plain" | "comment" | "danger" | "kw" | "ok";
   /** 呼吸+光晕标记：在 pulseWindows 任一窗口内随帧起伏，窗口外恢复常亮 */
   pulse?: boolean;
+  /** 删除线（帧驱动由调用方换参实现出现/消失，如 synchronized 粗暴修法被否决） */
+  strike?: boolean;
 }
 
 export interface CodeLine {
@@ -31,6 +33,8 @@ interface CodeCardProps {
   activeLine?: number;
   /** 呼吸+光晕的帧窗口（起、止）：命中 pulse 标记的代码段在此窗口内呼吸 */
   pulseWindows?: [number, number][];
+  /** 行级悬浮标注（帧驱动透明度）：贴在指定代码行右缘外的小标签，不占文档流、不挤代码 */
+  notes?: { line: number; text: string; opacity: number; strike?: boolean }[];
 }
 
 /** kind → 颜色；kw 高亮取分类色板（palette 由调用方传入，模块级函数拿不到 Context） */
@@ -38,6 +42,7 @@ const segColor = (kind: string | undefined, palette: CategoryPalette) => {
   if (kind === "comment") return theme.codeComment;
   if (kind === "danger") return theme.danger;
   if (kind === "kw") return palette.primaryBright;
+  if (kind === "ok") return theme.ok;
   return theme.codePlain;
 };
 
@@ -49,6 +54,7 @@ export const CodeCard: FC<CodeCardProps> = ({
   fontSize = 25,
   activeLine = -1,
   pulseWindows,
+  notes,
 }) => {
   const frame = useCurrentFrame();
   const palette = usePalette();
@@ -116,6 +122,7 @@ export const CodeCard: FC<CodeCardProps> = ({
       {lines.map((line, i) => {
         if (line.blank) return <div key={i} style={{ height: 20 }} />;
         const t = tOf(i); // 帧驱动出现进度：底色/边条随行整体淡入，无跳变
+        const note = notes?.find((n) => n.line === i && n.opacity > 0.01);
         return (
           <div
             key={i}
@@ -123,6 +130,7 @@ export const CodeCard: FC<CodeCardProps> = ({
               opacity: t,
               transform: `translateY(${(1 - t) * 10}px)`,
               whiteSpace: "pre",
+              position: note ? "relative" : undefined,
               backgroundColor:
                 i === activeLine
                   ? alpha(palette.primaryBright, 0.12)
@@ -166,12 +174,37 @@ export const CodeCard: FC<CodeCardProps> = ({
                       k == null
                         ? "none"
                         : `0 0 ${8 + 16 * k}px rgba(255, 82, 82, ${0.30 + 0.5 * k}), 0 0 ${20 + 30 * k}px rgba(255, 82, 82, ${0.15 + 0.3 * k})`,
+                    textDecoration: seg.strike ? "line-through" : undefined,
+                    textDecorationColor: seg.strike ? theme.danger : undefined,
+                    textDecorationThickness: seg.strike ? 2 : undefined,
                   }}
                 >
                   {seg.text}
                 </span>
               );
             })}
+            {note && (
+              <span
+                style={{
+                  position: "absolute",
+                  right: -6,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontSize: Math.max(fontSize - 3, 15),
+                  color: theme.warn,
+                  border: `1px solid ${theme.warn}`,
+                  borderRadius: 8,
+                  padding: "2px 10px",
+                  backgroundColor: theme.deepBg,
+                  whiteSpace: "nowrap",
+                  opacity: note.opacity,
+                  textDecoration: note.strike ? "line-through" : undefined,
+                  textDecorationColor: note.strike ? theme.danger : undefined,
+                }}
+              >
+                {note.text}
+              </span>
+            )}
           </div>
         );
       })}

@@ -37,36 +37,44 @@ const LINES: CodeLine[] = [
   { segs: [{ text: "}" }] },
 ];
 
-// 台词同步锚点（0–1）：三行看门 / 编译报错 / 太急 / 冷启动 / 推向 V2
-const STEP = [0.1, 0.17, 0.32, 0.5, 0.72];
-
 export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const { frame, atWord, fadeAt, popAt, seenAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
 
+  // v4.1 实测锚点：类落地 0s / INSTANCE 2.2s / 构造器 10s / getInstance 16.7s /
+  // 编译报错 13.9s / 太急 23.4s / 冷启动连库 31.1s / 团队提需求 35.1s（原 0.72 字位早出 5.8s）
+  const firstF = atWord("第一版", 0.02);
+  const loadF = atWord("类一加载", 0.08);
+  const ctorF = atWord("构造器", 0.32);
+  const getterF = atWord("getInstance", 0.62);
+  const errF = atWord("编译报错", 0.3);
+  const tooFastF = atWord("太急", 0.5);
+  const dbF = atWord("连库", 0.66);
+  const teamF = atWord("团队就会提需求", 0.9);
+
   const revealAt = [
-    at(STEP[0] - 0.02),
-    at(STEP[0]),
-    at(STEP[1]),
-    at(STEP[2]),
-    at(STEP[2] + 0.01),
+    firstF + 6,
+    loadF,
+    ctorF,
+    getterF,
+    getterF + 10,
   ];
 
   // 「类一加载实例就建好」：类加载进度条在代码卡成形后跑满，实例弹出
-  const loadP = interpolate(frame, [at(0.05), at(STEP[0])], [0, 1], {
+  const loadP = interpolate(frame, [firstF, loadF + 10], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // 缺点段：冷启动被拖慢的进度条（无人使用也照建）
-  const slowP = interpolate(frame, [at(0.66), at(0.78)], [0, 0.35], {
+  // 缺点段：冷启动被拖慢的进度条（无人使用也照建），「连库」起蠕行到「团队提需求」
+  const slowP = interpolate(frame, [dbF, teamF], [0, 0.35], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.in(Easing.quad),
   });
 
-  const lockShake = seen(STEP[1])
-    ? Math.max(0, 1 - (frame - at(STEP[1])) / 12) * Math.sin((frame - at(STEP[1])) / 1.5) * 6
+  const lockShake = seenAt(ctorF)
+    ? Math.max(0, 1 - (frame - atWord("掐死", 0.36)) / 12) * Math.sin((frame - atWord("掐死", 0.36)) / 1.5) * 6
     : 0;
 
   return (
@@ -80,7 +88,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         {/* 左：C2 代码卡 + 类加载进度条 */}
         <div style={{ flex: 1.25, display: "flex", flexDirection: "column", gap: 20 }}>
           <CodeCard title="PromoConfigManager.java · V1 饿汉式" lines={LINES} revealAt={revealAt} fontSize={21} />
-          <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: fade(STEP[0]) }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: fadeAt(loadF) }}>
             <span style={{ fontSize: 24, color: theme.textMuted, width: 130 }}>类加载</span>
             <div
               style={{
@@ -122,8 +130,8 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               border: `1px solid ${palette.surfaceBorder}`,
               borderRadius: 14,
               padding: "20px 26px",
-              opacity: fade(STEP[1] - 0.02),
-              transform: `translateY(${(1 - fade(STEP[1] - 0.02)) * 20}px)`,
+              opacity: fadeAt(errF),
+              transform: `translateY(${(1 - fadeAt(errF)) * 20}px)`,
             }}
           >
             <div style={{ fontSize: 24, color: theme.textMuted, marginBottom: 12 }}>
@@ -141,10 +149,10 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   color: theme.text,
                   padding: "6px 0",
                   whiteSpace: "nowrap",
-                  opacity: fade(STEP[1] + i * 0.02),
+                  opacity: fadeAt(errF + i * 6),
                 }}
               >
-                <span style={{ color: seen(STEP[1] + i * 0.02) ? theme.danger : theme.textMuted }}>✕</span>
+                <span style={{ color: seenAt(errF + i * 6) ? theme.danger : theme.textMuted }}>✕</span>
                 {f}
                 <span
                   style={{
@@ -168,8 +176,8 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               border: `1px solid ${theme.warn}`,
               borderRadius: 14,
               padding: "20px 26px",
-              opacity: fade(STEP[3]),
-              transform: `translateX(${lockShake}px) scale(${0.94 + fade(STEP[3]) * 0.06})`,
+              opacity: fadeAt(tooFastF),
+              transform: `translateX(${lockShake}px) scale(${0.94 + fadeAt(tooFastF) * 0.06})`,
             }}
           >
             <div style={{ fontSize: 26, fontWeight: 700, color: theme.warn, marginBottom: 10 }}>
@@ -208,7 +216,7 @@ export const Scene21Eager: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               display: "flex",
               alignItems: "center",
               gap: 18,
-              opacity: fade(STEP[4]),
+              opacity: fadeAt(teamF),
             }}
           >
             <span style={{ fontSize: 26, color: theme.text }}>

@@ -318,7 +318,9 @@ export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   // IllegalArgumentException 0.244 / 报错原文 0.404 / 焊死 0.635 /
   // 防反射 0.814 / 防序列化 0.840 / 代码最短 0.872
   const base = leadFrames; // C7 前六行承接 2.5b（续镜快闪复位），行 7 等异常实锤
-  const revealAt = [base, base + 2, base + 4, base + 6, base + 8, base + 10, at(0.244)];
+  // v4.1：行 5（「// 印出来是 false：失守」）是 2.5b 的故事，枚举演示不存在 v1-v4
+  // 失守结果，本镜不再呈现（行占位保留，与 2.5b 版式对齐、衔接不跳）
+  const revealAt = [base, base + 2, base + 4, base + 6, Infinity, base + 10, at(0.244)];
   // 炮弹回放三步游标（ctor → setAccessible → newInstance），拦截点 0.244 波结束
   const waves: Wave[] = [{ starts: [0.083, 0.133, 0.183], lines: [1, 2, 3], end: 0.244 }];
   const shield = pop(0.212); // newInstance 被 JVM 拦下：V5 盾牌弹开

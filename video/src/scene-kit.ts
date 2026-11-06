@@ -22,8 +22,21 @@ export interface TimedChunk {
   e: number;
 }
 
-/** Episode 注入的对齐上下文；at(p) 据此把「字符占比」映射到实测时间 */
-export const AnchorCtx = createContext<TimedChunk[] | null>(null);
+/** 词级时间戳（whisper/tts 产物；中文常为单字词，英文/数字为整词） */
+export interface TimedWord {
+  text: string;
+  s: number;
+  e: number;
+}
+
+/** 一镜的对齐数据：chunks 为字幕原文断句（权威），words 为转写词级时间（可能有同音误差） */
+export interface ShotAlign {
+  chunks: TimedChunk[];
+  words?: TimedWord[];
+}
+
+/** Episode 注入的对齐上下文；at(p)/atWord() 据此把台词位置映射到实测时间 */
+export const AnchorCtx = createContext<ShotAlign | null>(null);
 
 /** Episode 按期注入的分类色板（bg/surface/primary 等 8 个 token；中性色仍走 theme） */
 export const PaletteCtx = createContext<CategoryPalette | null>(null);
@@ -39,7 +52,8 @@ export const usePalette = (): CategoryPalette => {
 export const useAnchors = (leadFrames: number, audioFrames: number) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const chunks = useContext(AnchorCtx);
+  const align = useContext(AnchorCtx);
+  const chunks = align?.chunks ?? null;
 
   /**
    * 台词进度 p（0–1，全字幕字符占比）对应的帧号。
@@ -67,6 +81,54 @@ export const useAnchors = (leadFrames: number, audioFrames: number) => {
     return leadFrames + p * audioFrames;
   };
 
+  /**
+   * 关键词 → 实测帧号（v4.1 锚点实测化主力 API）。三级命中：
+   * ① 词级精确命中（words 拼串后子串搜索，命中词的 s 即答案）；
+   * ② chunk 兜底：字幕原文含关键词 → 在该 chunk 内按字位内插（chunk 仅 2–5s，误差远小于全镜等分）；
+   * ③ 无对齐数据 → 退回 at(fallback)（调用方传旧字符占比锚点即保底旧行为）。
+   * 注意：whisper 转写有同音误差（饿汉→恶焊），关键词优先选字幕原文独有片段；
+   * 「不要」这类会被「要不要」包含的短词，加标点（「不要，」）或换长词规避。
+   * occ：第几次出现（默认第一次）。
+   */
+  const atWord = (kw: string, fallback = 0.5, occ = 0): number => {
+    const words = align?.words;
+    if (words && words.length > 0) {
+      const ranges: Array<[number, number]> = [];
+      let joined = "";
+      for (const w of words) {
+        ranges.push([joined.length, joined.length + w.text.length]);
+        joined += w.text;
+      }
+      let from = 0;
+      let n = 0;
+      for (;;) {
+        const hit = joined.indexOf(kw, from);
+        if (hit === -1) break;
+        if (n === occ) {
+          for (let i = 0; i < ranges.length; i++) {
+            if (hit >= ranges[i][0] && hit < ranges[i][1]) return leadFrames + words[i].s * fps;
+          }
+        }
+        n++;
+        from = hit + 1;
+      }
+    }
+    if (chunks && chunks.length > 0) {
+      let n = 0;
+      for (const c of chunks) {
+        const off = c.text.indexOf(kw);
+        if (off >= 0) {
+          if (n === occ) {
+            const t = c.s + (off / c.text.length) * (c.e - c.s);
+            return leadFrames + t * fps;
+          }
+          n++;
+        }
+      }
+    }
+    return at(fallback);
+  };
+
   /** 进度 p 处淡入（约 0.5 秒） */
   const fade = (p: number, dur = 15) =>
     interpolate(frame, [at(p), at(p) + dur], [0, 1], {
@@ -78,5 +140,14 @@ export const useAnchors = (leadFrames: number, audioFrames: number) => {
     spring({ frame: frame - Math.round(at(p)), fps, config: { damping: 13 } });
   /** 进度 p 起是否已过（用于逐行显隐等布尔开关） */
   const seen = (p: number) => frame >= at(p);
-  return { frame, fps, at, fade, pop, seen };
+  /** 以下三个是帧号直挂版（配 atWord 用）：语义同 fade/pop/seen，入参已是帧号 */
+  const fadeAt = (f: number, dur = 15) =>
+    interpolate(frame, [f, f + dur], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    });
+  const popAt = (f: number) =>
+    spring({ frame: frame - Math.round(f), fps, config: { damping: 13 } });
+  const seenAt = (f: number) => frame >= f;
+  return { frame, fps, at, atWord, fade, pop, seen, fadeAt, popAt, seenAt };
 };

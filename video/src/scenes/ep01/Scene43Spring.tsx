@@ -31,17 +31,32 @@ const C9: CodeLine[] = [
   { segs: [{ text: "}" }] },
 ];
 
-const C9_VIS = [0.1, 0.11, true, 0.36, 0.37, 0.38, 0.39, true, true];
-
-const CONSUMERS = [
-  { name: "OrderService", p: 0.2 },
-  { name: "PaymentService", p: 0.23 },
-  { name: "ReportJob", p: 0.26 },
-];
-
 export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const { atWord, fadeAt, popAt, seenAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
+
+  // ---- v4.1 实测锚点 ----
+  // C9 逐行：@Service 6.4 / 容器登记 7.1 / 构造器注入 8.9 / 永远是同一个 10.1 / singleton 12.4；
+  // 收尾两个「}」推迟到注入讲解完成（singleton 句 ≈12.4s）后级联补齐（原第 0 帧就显示）
+  const serviceF = atWord("标上", 0.1);
+  const regF = atWord("容器登记", 0.11);
+  const injectF = atWord("构造器注入", 0.36);
+  const sameF = atWord("永远是同一个", 0.38);
+  const singletonF = atWord("singleton", 0.44);
+  const C9_VIS: Array<number | boolean> = [
+    serviceF,
+    regF,
+    true,
+    injectF,
+    injectF + 8,
+    sameF,
+    sameF + 8,
+    singletonF,
+    singletonF + 10,
+  ];
+  const retireF = atWord("所以结论", 0.5); // 退休结论 ≈25.4s（原 pop(0.5) 早出 11s）
+  const meaningF = atWord("的意义", 0.66);
+  const diffF = atWord("关键差别", 0.32);
 
   return (
     <AbsoluteFill style={{ padding: "118px 90px 140px" }}>
@@ -51,12 +66,12 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
       </div>
 
       <div style={{ display: "flex", gap: 36, flex: 1 }}>
-        {/* 左：容器仓库动效 */}
+        {/* 左：容器仓库动效（v4.1 高度压缩：定高 320px 框 + 两行格子，修下半大片空白） */}
         <div style={{ flex: 1.1, position: "relative" }}>
           <div
             style={{
               position: "absolute",
-              inset: "0 0 190px 0",
+              inset: "0 0 436px 0",
               border: `2px solid ${theme.ok}`,
               borderRadius: 18,
               backgroundColor: "rgba(63, 218, 140, 0.04)",
@@ -66,14 +81,14 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             <div style={{ fontSize: 23, color: theme.ok, fontFamily: theme.font.mono, marginBottom: 14 }}>
               ApplicationContext · singleton 仓库
             </div>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               {/* 装着 PromoConfigManager 的格子 */}
               <div
                 style={{
-                  width: 300,
-                  height: 120,
+                  width: 280,
+                  height: 104,
                   borderRadius: 12,
-                  border: `2px solid ${seen(0.12) ? theme.ok : palette.surfaceBorder}`,
+                  border: `2px solid ${seenAt(regF) ? theme.ok : palette.surfaceBorder}`,
                   backgroundColor: alpha(palette.bg, 0.9),
                   display: "flex",
                   flexDirection: "column",
@@ -81,8 +96,8 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                   alignItems: "center",
                   gap: 6,
                   position: "relative",
-                  transform: `translateY(${(1 - pop(0.12)) * -60}px)`,
-                  opacity: fade(0.1),
+                  transform: `translateY(${(1 - popAt(serviceF)) * -60}px)`,
+                  opacity: fadeAt(serviceF),
                 }}
               >
                 <span style={{ fontSize: 22, fontFamily: theme.font.mono, color: theme.warn }}>@Service</span>
@@ -100,8 +115,8 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                     borderRadius: 8,
                     padding: "4px 12px",
                     backgroundColor: palette.bg,
-                    transform: `scale(${0.7 + pop(0.28) * 0.3}) rotate(-4deg)`,
-                    opacity: pop(0.28),
+                    transform: `scale(${0.7 + popAt(singletonF - 12) * 0.3}) rotate(-4deg)`,
+                    opacity: popAt(singletonF - 12),
                   }}
                 >
                   scope = singleton
@@ -112,8 +127,8 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 <div
                   key={i}
                   style={{
-                    width: 300,
-                    height: 120,
+                    width: 280,
+                    height: 104,
                     borderRadius: 12,
                     border: `1px dashed ${palette.surfaceBorder}`,
                     opacity: 0.4,
@@ -123,57 +138,60 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             </div>
           </div>
 
-          {/* 三个消费方：连线汇聚到同一格（bottom 抬高 40px，避开字幕条） */}
+          {/* 三个消费方：连线汇聚到仓库框下缘（框压缩后虚线加长到 306px 接住框底） */}
           <div style={{ position: "absolute", bottom: 40, left: 0, right: 0, display: "flex", gap: 18 }}>
-            {CONSUMERS.map((c) => (
-              <div key={c.name} style={{ flex: 1, opacity: fade(c.p), position: "relative" }}>
-                {/* 向上的连线（虚线 + 顶箭头） */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 86,
-                    left: "50%",
-                    height: 70,
-                    borderLeft: `3px dashed ${theme.ok}`,
-                    opacity: fade(c.p + 0.01),
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 152,
-                    left: "50%",
-                    marginLeft: -8,
-                    width: 0,
-                    height: 0,
-                    borderLeft: `8px solid transparent`,
-                    borderRight: `8px solid transparent`,
-                    borderBottom: `14px solid ${theme.ok}`,
-                    opacity: fade(c.p + 0.01),
-                  }}
-                />
-                <div
-                  style={{
-                    backgroundColor: palette.surface,
-                    border: `1px solid ${palette.surfaceBorder}`,
-                    borderRadius: 10,
-                    padding: "14px 18px",
-                    textAlign: "center",
-                    fontFamily: theme.font.mono,
-                    fontSize: 21,
-                    color: theme.text,
-                  }}
-                >
-                  {c.name}
+            {["OrderService", "PaymentService", "ReportJob"].map((name, i) => {
+              const cF = injectF + i * 7;
+              return (
+                <div key={name} style={{ flex: 1, opacity: fadeAt(cF), position: "relative" }}>
+                  {/* 向上的连线（虚线 + 顶箭头） */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 116,
+                      left: "50%",
+                      height: 306,
+                      borderLeft: `3px dashed ${theme.ok}`,
+                      opacity: fadeAt(cF + 2),
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 422,
+                      left: "50%",
+                      marginLeft: -8,
+                      width: 0,
+                      height: 0,
+                      borderLeft: `8px solid transparent`,
+                      borderRight: `8px solid transparent`,
+                      borderBottom: `14px solid ${theme.ok}`,
+                      opacity: fadeAt(cF + 2),
+                    }}
+                  />
+                  <div
+                    style={{
+                      backgroundColor: palette.surface,
+                      border: `1px solid ${palette.surfaceBorder}`,
+                      borderRadius: 10,
+                      padding: "14px 18px",
+                      textAlign: "center",
+                      fontFamily: theme.font.mono,
+                      fontSize: 21,
+                      color: theme.text,
+                    }}
+                  >
+                    {name}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* 右：C9 代码 + 格局对比 + 结论 */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
-          <CodeCard title="Spring 版 · 注解 + 构造器注入" lines={C9} revealAt={C9_VIS.map((v) => (typeof v === "boolean" ? (v ? 0 : Infinity) : at(v)))} fontSize={19} />
+          <CodeCard title="Spring 版 · 注解 + 构造器注入" lines={C9} revealAt={C9_VIS.map((v) => (typeof v === "boolean" ? (v ? 0 : Infinity) : Math.round(v)))} fontSize={19} />
 
           <div
             style={{
@@ -184,7 +202,7 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               borderRadius: 12,
               padding: "12px 20px",
               lineHeight: 1.7,
-              opacity: fade(0.32),
+              opacity: fadeAt(diffF),
             }}
           >
             格局变了：持有实例的不是类自己，是<span style={{ color: theme.ok, fontWeight: 700 }}>容器</span>。
@@ -199,14 +217,14 @@ export const Scene43Spring: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
               border: `1px solid ${theme.ok}`,
               fontSize: 24,
               color: theme.text,
-              opacity: pop(0.5),
+              opacity: popAt(retireF),
             }}
           >
             Spring 项目：手写单例退休，{" "}
             <span style={{ color: theme.ok, fontWeight: 700 }}>注解 + 注入，就是 2026 年的单例模式</span>
           </div>
 
-          <div style={{ fontSize: 20, color: theme.textMuted, lineHeight: 1.7, opacity: fade(0.66) }}>
+          <div style={{ fontSize: 20, color: theme.textMuted, lineHeight: 1.7, opacity: fadeAt(meaningF) }}>
             手写五版的意义：看懂别人的轮子 · 应付没有容器的场景（工具类库、纯 JDBC 小项目）
           </div>
         </div>
