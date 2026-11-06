@@ -22,73 +22,83 @@ const COMP = arg("comp", "EP01");
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "out/qa/sync");
 
-/** 与 src/data.ts 的 splitSubtitles 保持同一套断句逻辑（改那里须同步这里与 tts.py）。
- * 英文/代码原子块内部不断行，≥12 字符独立成条，收尾标点跟随。 */
-const TOKEN = / ?([0-9A-Za-z_][0-9A-Za-z_().=/<>!+-]*(?: [0-9A-Za-z_().=/<>!+-]+)*)| ?./gu;
+/** 与 src/data.ts、tts.py 保持相同的标点短语优先断句。 */
+const TOKEN = / ?(?:[0-9A-Za-z_][0-9A-Za-z_().=/<>!+-]*(?: [0-9A-Za-z_().=/<>!+-]+)*|「[^」]*」|《[^》]*》|[一-鿿]+|.)/gu;
 const CLOSERS = "）)；，。！？：、》」";
 const OPENERS = "（(《「";
-const splitSubtitles = (text) => {
-  const sentences = text.split(/(?<=[。！？；])/)
-.map((s) => s.trim()).filter(Boolean);
-  const chunks = [];
-  for (const s of sentences) {
-    if (s.length <= 26) {
-      chunks.push(s);
-      continue;
+
+// 半角文本按半个汉字估算，避免混排短语因代码字符多而被切碎；最终仍需检查实际渲染宽度。
+const estimatedWidth = (text) => [...text].reduce((sum, c) => sum + (c.charCodeAt(0) < 128 ? 0.5 : 1), 0);
+
+// 只有无标点短语本身超长才走此兜底；中文连续片段、代码表达式和成对引号优先保持完整。
+function splitPhrase(phrase) {
+  const atoms = [];
+  let opening = "";
+  for (const match of phrase.matchAll(TOKEN)) {
+    const token = match[0];
+    const core = token.trim();
+    if (core && OPENERS.includes(core)) {
+      opening += token;
+    } else if (core && CLOSERS.includes(core) && atoms.length && !opening) {
+      atoms[atoms.length - 1] += token;
+    } else {
+      atoms.push(opening + token);
+      opening = "";
     }
+  }
+  if (opening) atoms.push(opening);
+  const pieces = [];
+  let buf = "";
+  for (const atom of atoms) {
+    // 纯中文且无标点的长串无法自动判断语义；均衡切分，避免末条只剩一两个字。
+    const core = atom.trim();
+    const chinese = core.match(/^([一-鿿]{27,})([）)；，。！？：、》」]*)$/u);
+    const size = chinese ? Math.ceil(chinese[1].length / Math.ceil(chinese[1].length / 26)) : 0;
+    const units = chinese ? chinese[1].match(new RegExp(`.{1,${size}}`, "gu")) : [atom];
+    if (chinese) units[units.length - 1] += chinese[2];
+    for (const unit of units) {
+      if (estimatedWidth(buf + unit) > 26 && buf.trim()) {
+        pieces.push(buf.trim());
+        buf = "";
+      }
+      buf += unit;
+    }
+  }
+  if (buf.trim()) pieces.push(buf.trim());
+  return pieces;
+}
+
+function splitSubtitles(text) {
+  const chunks = [];
+  const sentences = text.split(/(?<=[。！？；])/).map((s) => s.trim()).filter(Boolean);
+  for (const sentence of sentences) {
     let buf = "";
-    let leadAtomEnd = 0;
-    for (const part of s.split(/(?<=[，——：])/)) {
-      const toks = [...part.matchAll(TOKEN)];
-      for (let idx = 0; idx < toks.length; idx++) {
-        const m = toks[idx], tok = m[0], core = tok.trim();
-        if (!core) continue;
-        if (CLOSERS.includes(core)) {
-          if (buf.trim()) buf += core;
-          else if (chunks.length && chunks[chunks.length - 1].length < 28) chunks[chunks.length - 1] += core;
-          continue;
-        }
-        if (buf.length + tok.length > 26 && buf.trim()) {
-          if (leadAtomEnd && buf.length - leadAtomEnd <= 8) {
-            // 行首大原子 + 短中文尾：原子独立成条，尾巴顺延到下一行
-            chunks.push(buf.slice(0, leadAtomEnd).trim());
-            buf = buf.slice(leadAtomEnd);
-          } else if (buf.trimEnd() && OPENERS.includes(buf.trimEnd().slice(-1))) {
-            // 开括号悬尾：随下一行走，避免「（」独行
-            const b = buf.trimEnd();
-            chunks.push(b.slice(0, -1).trim());
-            buf = b.slice(-1);
-          } else if (toks[idx][1] !== undefined && toks[idx][1].length >= 8) {
-            // 下一 token 是自给自足的大原子块（独立成行不会孤行），直接断行不匀字
-            chunks.push(buf.trim());
-            buf = "";
-          } else {
-            // 断行保底：剩余至少 2 个汉字，避免「了；」类孤行
-            const tail = toks.slice(idx).map((t) => t[0]).join("");
-            let tailCjk = (tail.match(/[一-鿿]/g) || []).length;
-            let moved = "";
-            while (tailCjk < 2 && buf.length > 9 && !OPENERS.includes(buf[buf.length - 1]) && buf[buf.length - 1] !== " ") {
-              moved = buf[buf.length - 1] + moved;
-              buf = buf.slice(0, -1);
-              tailCjk += 1;
-            }
-            chunks.push(buf.trim());
-            buf = moved;
-          }
-        }
-        const prevLen = buf.length;
-        buf += tok;
-        if (m[1] !== undefined && core.length >= 12) {
-          leadAtomEnd = prevLen === 0 ? buf.length : 0;
-        } else if (prevLen === 0) {
-          leadAtomEnd = 0;
-        }
+    for (const raw of sentence.split(/(?<=[，：、])/)) {
+      let phrase = raw.trim();
+      // 引号可能落在标点后的片段开头，收尾符号仍归前条，不能因长度上限被丢弃。
+      while (phrase && CLOSERS.includes(phrase[0]) && (buf || chunks.length)) {
+        if (buf) buf += phrase[0];
+        else chunks[chunks.length - 1] += phrase[0];
+        phrase = phrase.slice(1);
+      }
+      if (!phrase) continue;
+      if (estimatedWidth(buf + phrase) > 26 && buf) {
+        chunks.push(buf.trim());
+        buf = "";
+      }
+      if (estimatedWidth(phrase) > 26) {
+        const pieces = splitPhrase(phrase);
+        chunks.push(...pieces.slice(0, -1));
+        buf = pieces[pieces.length - 1] ?? "";
+      } else {
+        buf += raw.startsWith(" ") && buf ? " " + phrase : phrase;
       }
     }
     if (buf.trim()) chunks.push(buf.trim());
   }
   return chunks;
-};
+}
+
 /** 台词进度 t（0–1）时正在显示的字幕条（与 SubtitleBar 同为字数权重分摊） */
 const chunkAt = (chunks, t) => {
   const weights = chunks.map((c) => Math.max(c.length, 1));

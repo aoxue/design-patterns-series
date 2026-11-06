@@ -18,8 +18,6 @@ import re
 import sys
 from pathlib import Path
 
-import edge_tts
-
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural"
 # 知识区节奏稍快；如需更慢改 "+0%"
@@ -27,69 +25,82 @@ RATE = "+8%"
 
 SENT_SPLIT = re.compile(r"(?<=[。！？；])")
 STRIP = re.compile(r"[^0-9A-Za-z\u4e00-\u9fff]")
-# 字幕原子块：连续英文/代码记号（字母数字 _ . ( ) 空格 = < > ! + - 连成的表达式，
-# 如 ghost == getInstance()、private static final …），内部永不断行
-TOKEN = re.compile(r" ?([0-9A-Za-z_][0-9A-Za-z_().=/<>!+-]*(?: [0-9A-Za-z_().=/<>!+-]+)*)| ?.")
+# 代码表达式与连续中文优先保持完整，只有超长无标点中文才按字数兜底。
+TOKEN = re.compile(r" ?(?:[0-9A-Za-z_][0-9A-Za-z_().=/<>!+-]*(?: [0-9A-Za-z_().=/<>!+-]+)*|「[^」]*」|《[^》]*》|[一-鿿]+|.)")
 CLOSERS = set("）)；，。！？：、》」")
 OPENERS = set("（(《「")
 
 
+def estimated_width(text: str) -> float:
+    """半角文本按半个汉字估算；实际字体宽度仍由渲染验收。"""
+    return sum(0.5 if ord(c) < 128 else 1 for c in text)
+
+
+def split_phrase(phrase: str) -> list[str]:
+    """仅用于超长标点短语，代码原子块和收尾标点不可拆开。"""
+    atoms: list[str] = []
+    opening = ""
+    for match in TOKEN.finditer(phrase):
+        token = match.group(0)
+        core = token.strip()
+        if core and core in OPENERS:
+            opening += token
+        elif core and core in CLOSERS and atoms and not opening:
+            atoms[-1] += token
+        else:
+            atoms.append(opening + token)
+            opening = ""
+    if opening:
+        atoms.append(opening)
+    pieces: list[str] = []
+    buf = ""
+    for atom in atoms:
+        core = atom.strip()
+        chinese = re.fullmatch(r"([一-鿿]{27,})([）)；，。！？：、》」]*)", core)
+        if chinese:
+            body, suffix = chinese.groups()
+            count = (len(body) + 25) // 26
+            size = (len(body) + count - 1) // count
+            units = [body[i:i + size] for i in range(0, len(body), size)]
+            units[-1] += suffix
+        else:
+            units = [atom]
+        for unit in units:
+            if estimated_width(buf + unit) > 26 and buf.strip():
+                pieces.append(buf.strip())
+                buf = ""
+            buf += unit
+    if buf.strip():
+        pieces.append(buf.strip())
+    return pieces
+
+
 def split_subtitles(text: str) -> list[str]:
-    """与 src/data.ts 的 splitSubtitles 保持同一套断句（改那里须同步这里与 sync-check.mjs）。
-    三级：句末标点 → 逗号/冒号 → 原子块贪心。英文/代码原子块内部不断行：
-    装不下时整块断到下一行；行首大原子（≥12 字符）后跟短中文尾（≤8 字）时原子独立成条；
-    断行处保底剩余至少 2 个汉字，避免「了；」类孤行。"""
-    sentences = [s.strip() for s in SENT_SPLIT.split(text) if s.strip()]
+    """与 src/data.ts、sync-check.mjs 同步：先完整标点短语，再原子块兜底。"""
     chunks: list[str] = []
-    for s in sentences:
-        if len(s) <= 26:
-            chunks.append(s)
-            continue
-        buf, lead_atom_end = "", 0
-        for part in re.split(r"(?<=[，——：])", s):
-            toks = list(TOKEN.finditer(part))
-            for idx, m in enumerate(toks):
-                tok, core = m.group(0), m.group(0).strip()
-                if not core:
-                    continue
-                if core in CLOSERS:
-                    if buf.strip():
-                        buf += core
-                    elif chunks and len(chunks[-1]) < 28:
-                        chunks[-1] += core
-                    continue
-                if len(buf) + len(tok) > 26 and buf.strip():
-                    if lead_atom_end and len(buf) - lead_atom_end <= 8:
-                        # 行首大原子 + 短中文尾：原子独立成条，尾巴顺延到下一行
-                        chunks.append(buf[:lead_atom_end].strip())
-                        buf = buf[lead_atom_end:]
-                    elif buf.rstrip() and buf.rstrip()[-1] in OPENERS:
-                        # 开括号悬尾：随下一行走，避免「（」独行
-                        b = buf.rstrip()
-                        chunks.append(b[:-1].strip())
-                        buf = b[-1]
-                    elif (toks[idx].group(1) is not None
-                          and len(toks[idx].group(1)) >= 8):
-                        # 下一 token 是自给自足的大原子块（独立成行不会孤行），直接断行不匀字
-                        chunks.append(buf.strip())
-                        buf = ""
-                    else:
-                        moved = ""
-                        tail_cjk = len(re.findall(r"[一-鿿]",
-                                                   "".join(t.group(0) for t in toks[idx:])))
-                        while (tail_cjk < 2 and len(buf) > 9
-                               and buf[-1] not in OPENERS and buf[-1] != " "):
-                            moved = buf[-1] + moved
-                            buf = buf[:-1]
-                            tail_cjk += 1
-                        chunks.append(buf.strip())
-                        buf = moved
-                prev_len = len(buf)
-                buf += tok
-                if m.group(1) is not None and len(core) >= 12:
-                    lead_atom_end = len(buf) if prev_len == 0 else 0
-                elif prev_len == 0:
-                    lead_atom_end = 0
+    sentences = [s.strip() for s in SENT_SPLIT.split(text) if s.strip()]
+    for sentence in sentences:
+        buf = ""
+        for raw in re.split(r"(?<=[，：、])", sentence):
+            phrase = raw.strip()
+            # 引号可能跟在标点之后，收尾符号必须归前条，且不可因长度上限丢失。
+            while phrase and phrase[0] in CLOSERS and (buf or chunks):
+                if buf:
+                    buf += phrase[0]
+                else:
+                    chunks[-1] += phrase[0]
+                phrase = phrase[1:]
+            if not phrase:
+                continue
+            if estimated_width(buf + phrase) > 26 and buf:
+                chunks.append(buf.strip())
+                buf = ""
+            if estimated_width(phrase) > 26:
+                pieces = split_phrase(phrase)
+                chunks.extend(pieces[:-1])
+                buf = pieces[-1] if pieces else ""
+            else:
+                buf += (" " if raw.startswith(" ") and buf else "") + phrase
         if buf.strip():
             chunks.append(buf.strip())
     return chunks
@@ -144,6 +155,8 @@ def pick_voice() -> str:
 
 async def synth(shot: dict, voice: str, out_dir: Path) -> dict:
     """合成一镜音频并采集词级边界 → {words, chunks}（时间均为音频内相对秒）"""
+    import edge_tts
+
     words: list[list] = []
     buf = bytearray()
     comm = edge_tts.Communicate(shot["tts"], voice, rate=RATE, boundary="WordBoundary")
