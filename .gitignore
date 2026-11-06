@@ -16,8 +16,12 @@ video/node_modules/
 video/out/
 video/dist/
 video/.env
-# 音频槽位文件不进库：占位音频可用 tools/tts.ps1 重新生成；真声另存
-video/public/audio/
+# 渲染输入纳入版本管理：逐镜配音与对应的字幕时间戳
+video/public/audio/*
+!video/public/audio/EP*/
+video/public/audio/EP*/*
+!video/public/audio/EP*/*.mp3
+!video/public/audio/EP*/align.json
 
 # 虚拟团队定义：正典 .agents/*.md 进仓库；各 AI 工具的 agents 目录是**本机运行时副本**
 # （由 tools/sync-agents.py 或按 AGENTS.md 接入协议现场生成），不进库、不随仓库分发
