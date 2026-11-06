@@ -32,6 +32,7 @@ export const id = "EP01";
 export const title = "单例";
 /** GoF 分类（创建型/结构型/行为型），后续期据此切色系 */
 export const category = "creational";
+export const bgm = "bgm.mp3";
 
 /** 台词制作副本（public/episodes/EP01.json）→ ShotData[]；内容事实源是 scripts/ 分镜脚本 */
 export const lines: ShotData[] = EP01_LINES.map((l) => ({

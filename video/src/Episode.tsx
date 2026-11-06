@@ -133,6 +133,7 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
         color: theme.text,
       }}
     >
+      {ep.bgm ? <Audio src={staticFile(audioPath(ep, ep.bgm))} /> : null}
       <PaletteCtx.Provider value={palette}>
         {tl.map((it) => {
         const Scene = ep.scenes[it.id];
