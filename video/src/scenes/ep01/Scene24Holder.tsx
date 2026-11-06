@@ -16,7 +16,7 @@ const LINES: CodeLine[] = [
     segs: [
       { text: "    private static class " },
       { text: "Holder", kind: "kw" },
-      { text: " {                       // 首次访问才加载", kind: "comment" },
+      { text: " { // 首次访问才加载", kind: "comment" },
     ],
   },
   {

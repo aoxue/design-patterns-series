@@ -20,14 +20,14 @@ const LINES: CodeLine[] = [
       { text: "volatile", kind: "danger" },
       { text: " PromoConfigManager " },
       { text: "instance", kind: "kw" },
-      { text: ";        // volatile：防指令重排", kind: "comment" },
+      { text: "; // volatile：防指令重排", kind: "comment" },
     ],
   },
   { segs: [{ text: "    private PromoConfigManager() { refresh(); }" }] },
   { segs: [{ text: "    public static PromoConfigManager getInstance() {" }] },
   {
     segs: [
-      { text: "        if (instance == null) {                  // " },
+      { text: "        if (instance == null) { // " },
       { text: "一查：无锁，挡掉绝大多数", kind: "comment" },
     ],
   },
@@ -35,13 +35,13 @@ const LINES: CodeLine[] = [
     segs: [
       { text: "            " },
       { text: "synchronized", kind: "kw" },
-      { text: " (PromoConfigManager.class) {   // " },
+      { text: " (PromoConfigManager.class) { // " },
       { text: "加锁", kind: "comment" },
     ],
   },
   {
     segs: [
-      { text: "                if (instance == null) {          // " },
+      { text: "                if (instance == null) { // " },
       { text: "二查：拿到锁再确认", kind: "comment" },
     ],
   },
@@ -49,7 +49,7 @@ const LINES: CodeLine[] = [
     segs: [
       { text: "                    instance = " },
       { text: "new PromoConfigManager()", kind: "danger" },
-      { text: ";      // " },
+      { text: "; // " },
       { text: "创建", kind: "comment" },
     ],
   },

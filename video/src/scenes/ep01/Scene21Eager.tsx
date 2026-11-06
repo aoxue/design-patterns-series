@@ -24,7 +24,7 @@ const LINES: CodeLine[] = [
       { text: "    " },
       { text: "private PromoConfigManager()", kind: "kw" },
       { text: " { refresh(); }" },
-      { text: "                              // 私有构造：掐断外部 new", kind: "comment" },
+      { text: " // 私有构造：掐断外部 new", kind: "comment" },
     ],
   },
   {

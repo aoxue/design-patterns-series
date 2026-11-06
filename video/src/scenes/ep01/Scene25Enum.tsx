@@ -21,7 +21,7 @@ const C6: CodeLine[] = [
     segs: [
       { text: "    " },
       { text: "INSTANCE", kind: "danger", pulse: true },
-      { text: ";  // 这一行，就是单例", kind: "comment" },
+      { text: "; // 这一行，就是单例", kind: "comment" },
     ],
   },
   { segs: [{ text: "    public int getDiscount(int amount) {" }] },
@@ -38,16 +38,12 @@ const C7: CodeLine[] = [
     segs: [
       { text: "ctor." },
       { text: "setAccessible(true)", kind: "danger" },
-      { text: ";                        // 撬开 private", kind: "comment" },
+      { text: "; // 撬开 private", kind: "comment" },
     ],
   },
   { segs: [{ text: "PromoConfigManager ghost = ctor." }, { text: "newInstance", kind: "kw" }, { text: "();" }] },
-  {
-    segs: [
-      { text: "System.out.println(ghost == PromoConfigManager.getInstance());" },
-    ],
-  },
-  { segs: [{ text: "// → false：V1–V4 全线失守", kind: "comment" }] },
+  { segs: [{ text: "// 印出来是 false：失守", kind: "comment" }] },
+  { segs: [{ text: "System.out.println(ghost == PromoConfigManager.getInstance());" }] },
   { segs: [{ text: "// 枚举：newInstance 抛 IllegalArgumentException：JVM 拒绝", kind: "comment" }] },
 ];
 
@@ -246,11 +242,13 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
   // 锚点（subtitle 244 字）：演一场攻击 0.070 / 反射攻击 0.094 / 专拆 private 0.115 /
   // getDeclaredConstructor 0.160 / setAccessible 0.279 / newInstance 0.381 / ghost 0.492 /
   // 全线失守 0.533 / false 0.648 / 第二个实例 0.693 / 反序列化 0.869
-  // false 结果行提前到 0.62（「ghost == getInstance() 印出来…」句首附近起淡入）：
-  // 0.648（词位）起淡的话，红字完整可见要滞后台词半秒（QA 实拍教训）
-  const revealAt = [at(0.094), at(0.16), at(0.279), at(0.381), at(0.492), at(0.62), Infinity];
+  // false 结论行提前到 0.62（「ghost == getInstance() 印出来…」句首附近起淡入）：
+  // 0.648（词位）起淡的话，红字完整可见要滞后台词半秒（QA 实拍教训）。
+  // 行序照脚本 f5105ec：印出来注释行在 println 上一行，但出现时序是 println 先（0.492，
+  // ghost 句段）注释后（0.62，与终端 false 红字同帧），代码先齐、结论后至
+  const revealAt = [at(0.094), at(0.16), at(0.279), at(0.381), at(0.62), at(0.492), Infinity];
   // ▶ 游标四步 = 台词四个攻击动词字位，与各行 revealAt 同帧：0.160 / 0.279 / 0.381 / 0.492
-  const waves: Wave[] = [{ starts: [0.16, 0.279, 0.381, 0.492], lines: [1, 2, 3, 4], end: 0.55 }];
+  const waves: Wave[] = [{ starts: [0.16, 0.279, 0.381, 0.492], lines: [1, 2, 3, 5], end: 0.55 }];
   // V1–V4 碎裂：一次性 12 帧抖动脉冲，之后定格失守态
   const smashT = frame - at(0.533);
   const smash = smashT > 0 && smashT < 12 ? Math.abs(Math.sin(smashT / 1.8)) : 0;

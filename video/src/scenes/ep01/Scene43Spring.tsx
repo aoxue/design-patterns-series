@@ -22,7 +22,7 @@ const C9: CodeLine[] = [
   { segs: [{ text: "    private final PromoConfigManager config;" }] },
   {
     segs: [
-      { text: "    public OrderService(PromoConfigManager config) {  // " },
+      { text: "    public OrderService(PromoConfigManager config) { // " },
       { text: "注入的永远是同一个", kind: "comment" },
     ],
   },

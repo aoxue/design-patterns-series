@@ -23,7 +23,7 @@ const LINES: CodeLine[] = [
     segs: [
       { text: "+    private static PromoConfigManager " },
       { text: "instance", kind: "kw" },
-      { text: ";                         // 先不创建", kind: "comment" },
+      { text: "; // 先不创建", kind: "comment" },
     ],
   },
   { segs: [{ text: "     private PromoConfigManager() { refresh(); }" }] },
@@ -42,7 +42,7 @@ const LINES: CodeLine[] = [
   {
     diff: "add",
     segs: [
-      { text: "+        if (instance == null) {                 // ① 判空", kind: "plain" },
+      { text: "+        if (instance == null) { // ① 判空", kind: "plain" },
     ],
   },
   {
@@ -50,7 +50,7 @@ const LINES: CodeLine[] = [
     segs: [
       { text: "+            instance = " },
       { text: "new PromoConfigManager()", kind: "danger" },
-      { text: "();      // ② 创建：①②之间没有锁" },
+      { text: "(); // ② 创建：①②之间没有锁" },
     ],
   },
   { diff: "add", segs: [{ text: "+        }" }] },
