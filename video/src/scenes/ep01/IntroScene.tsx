@@ -10,17 +10,25 @@ import { useAnchors, usePalette, type SceneProps } from "../../scene-kit";
  * 主色/浅底从分类色板取（各期随 GoF 分类换色系），黑场底与文字用全系列恒定中性 token。
  */
 export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, pop } = useAnchors(leadFrames, audioFrames);
+  const { frame, at, atWord, fadeAt, popAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
 
-  // 品牌标下划线扫光：第一句（「大家好，这里是码上购」）期间 0 → 100%
-  const underline = interpolate(frame, [at(0), at(0.35)], [0, 560], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-  // 收尾渐暗：第三句说完后整体压向黑场，衔接 1.1 钩子的 deepBg 开场
-  const dim = interpolate(frame, [at(0.95), at(1)], [1, 0.15], {
+  // 品牌标下划线扫光：第一句（「大家好，这里是码上购」）期间 0 → 100%；
+  // atWord 落首词「大家好」的 s，与旧 at(0)（首 chunk 起点）等值
+  const underline = interpolate(
+    frame,
+    [atWord("大家好", 0), atWord("真实的工程现场", 0.35)],
+    [0, 560],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    }
+  );
+  // 收尾渐暗：第三句说完后整体压向黑场，衔接 1.1 钩子的 deepBg 开场。
+  // at(1) 是语音末尾边界锚（读 align 末句 e 值，换轨自动重排；atWord 只能落词首，
+  // 会比真实语音末尾早半秒，故边界锚保留 at 形式）
+  const dim = interpolate(frame, [atWord("说起", 0.95), at(1)], [1, 0.15], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -37,7 +45,7 @@ export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             fontWeight: 700,
             color: theme.text,
             letterSpacing: 16,
-            opacity: pop(0.02),
+            opacity: popAt(atWord("大家好", 0.02)),
           }}
         >
           码上购<span style={{ color: palette.primaryBright }}>·设计模式</span>
@@ -59,7 +67,7 @@ export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             display: "flex",
             gap: 26,
             marginTop: 60,
-            opacity: fade(0.4),
+            opacity: fadeAt(atWord("工程现场", 0.4)),
           }}
         >
           {["23 个 GoF 模式", "1 个真实电商系统", "26 期连载"].map((t) => (
@@ -86,7 +94,7 @@ export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             display: "flex",
             alignItems: "center",
             gap: 20,
-            opacity: fade(0.7),
+            opacity: fadeAt(atWord("第一场", 0.7)),
           }}
         >
           <span style={{ fontSize: 40 }}>🕰️</span>

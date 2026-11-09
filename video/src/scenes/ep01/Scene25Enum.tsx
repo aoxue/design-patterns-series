@@ -56,8 +56,8 @@ interface TermRowData {
   link?: boolean;
 }
 
-/** 执行重放波：{starts: 各行点亮台词进度（= 该行 revealAt 词位）, lines: 对应 C7 行号, end: 波结束进度}。
- *  starts 逐行给字位而非等距步进：▶ 游标与代码行揭示、台词念词三者同帧锁死
+/** 执行重放波：{starts: 各行点亮帧号（= 该行 revealAt 的 atWord 词位）, lines: 对应 C7 行号, end: 波结束帧}。
+ *  starts 逐词给帧而非等距步进：▶ 游标与代码行揭示、台词念词三者同帧锁死
  *  （QA 实拍教训：等距步进会在第二步早于行揭示 ~10 帧，游标指向尚未显现的行） */
 interface Wave {
   starts: number[];
@@ -65,13 +65,13 @@ interface Wave {
   end: number;
 }
 
-/** 当前 ▶ 游标行：波内最后一条已点亮的行（帧驱动，经 at() 走实测时间轴） */
-const waveActive = (waves: Wave[], at: (p: number) => number, frame: number): number => {
+/** 当前 ▶ 游标行：波内最后一条已点亮的行（starts/end 已是 atWord 实测帧号） */
+const waveActive = (waves: Wave[], frame: number): number => {
   let active = -1;
   for (const w of waves) {
-    if (frame >= at(w.starts[0]) && frame < at(w.end)) {
+    if (frame >= w.starts[0] && frame < w.end) {
       for (let k = 0; k < w.lines.length; k++) {
-        if (frame >= at(w.starts[k])) active = w.lines[k];
+        if (frame >= w.starts[k]) active = w.lines[k];
       }
     }
   }
@@ -191,11 +191,13 @@ const BadgeWall: FC<{ arrowOpacity: number; dead: boolean; smash: number; shield
 
 /** ---------------------------------------------------------------- 2.5a · C6 枚举 */
 export const Scene25aEnum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { at, fade, pop } = useAnchors(leadFrames, audioFrames);
+  const { atWord, fadeAt, popAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
-  // 锚点（subtitle 101 字）：单元素枚举 0.069 / Effective Java 0.129 / INSTANCE 0.356 /
-  // 单例就成了 0.525（INSTANCE 呼吸收口）/ 字段方法照常写 0.584 / 现代 Java 0.693
-  const revealAt = [at(0.069), at(0.356), at(0.584), at(0.584), at(0.584), at(0.584)];
+  // 词位帧锚（fallback = 旧字符占比）；「INSTANCE」转写为词「Instance,」，关键词按转写大小写选
+  const enumInF = atWord("第五版", 0.069);
+  const instF = atWord("Instance", 0.356);
+  const fieldsF = atWord("字段", 0.584);
+  const revealAt = [enumInF, instF, fieldsF, fieldsF, fieldsF, fieldsF];
 
   return (
     <AbsoluteFill style={{ padding: "108px 150px 150px" }}>
@@ -210,7 +212,7 @@ export const Scene25aEnum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             border: `1px solid ${theme.warn}`,
             borderRadius: 999,
             padding: "3px 16px",
-            opacity: pop(0.129),
+            opacity: popAt(atWord("单元素", 0.129)),
           }}
         >
           Effective Java 钦定
@@ -224,11 +226,11 @@ export const Scene25aEnum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             lines={C6}
             revealAt={revealAt}
             fontSize={26}
-            pulseWindows={[[at(0.356), at(0.525) + 8]]}
+            pulseWindows={[[instF, atWord("单例就成了", 0.525) + 8]]}
           />
         </div>
         {/* 台词原文收条：「现代 Java 的态度」段落的落版 */}
-        <div style={{ marginTop: 26, fontSize: 24, color: theme.textMuted, opacity: fade(0.693) }}>
+        <div style={{ marginTop: 26, fontSize: 24, color: theme.textMuted, opacity: fadeAt(atWord("现代", 0.693)) }}>
           现代 Java 的态度：让模式隐身，一个词解决的事，不写十行
         </div>
       </div>
@@ -238,19 +240,26 @@ export const Scene25aEnum: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
 /** ---------------------------------------------------------------- 2.5b · 反射攻击 V1 */
 export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, seen } = useAnchors(leadFrames, audioFrames);
-  // 锚点（subtitle 244 字）：演一场攻击 0.070 / 反射攻击 0.094 / 专拆 private 0.115 /
-  // getDeclaredConstructor 0.160 / setAccessible 0.279 / newInstance 0.381 / ghost 0.492 /
-  // 全线失守 0.533 / false 0.648 / 第二个实例 0.693 / 反序列化 0.869
-  // false 结论行提前到 0.62（「ghost == getInstance() 印出来…」句首附近起淡入）：
-  // 0.648（词位）起淡的话，红字完整可见要滞后台词半秒（QA 实拍教训）。
-  // 行序照脚本 f5105ec：印出来注释行在 println 上一行，但出现时序是 println 先（0.492，
-  // ghost 句段）注释后（0.62，与终端 false 红字同帧），代码先齐、结论后至
-  const revealAt = [at(0.094), at(0.16), at(0.279), at(0.381), at(0.62), at(0.492), Infinity];
-  // ▶ 游标四步 = 台词四个攻击动词字位，与各行 revealAt 同帧：0.160 / 0.279 / 0.381 / 0.492
-  const waves: Wave[] = [{ starts: [0.16, 0.279, 0.381, 0.492], lines: [1, 2, 3, 5], end: 0.55 }];
+  const { frame, atWord, fadeAt, seenAt } = useAnchors(leadFrames, audioFrames);
+  // 词位帧锚（fallback = 旧字符占比）。转写注意：API 名小写连写（setaccessible）、
+  // 「实例」转写为「实力」，关键词均避开误差字。
+  // false 结论行从「等于」起淡（词位 false 本身要再等半秒，红字完整可见滞后，QA 实拍教训）。
+  // 行序照脚本 f5105ec：印出来注释行在 println 上一行，但出现时序是 println 先（ghost 句段）
+  // 注释后（falseF，与终端 false 红字同帧），代码先齐、结论后至
+  const attackF = atWord("反射攻击", 0.094);
+  const privateF = atWord("private", 0.16);
+  const setAccF = atWord("setaccessible", 0.279);
+  const newInstF = atWord("instance", 0.381); // occ 0 = newInstance（转写 in-instance）那次
+  const ghostF = atWord("ghost", 0.492); // occ 0 = 「变量名就叫 ghost」那次
+  const falseF = atWord("等于", 0.62);
+  const smashF = atWord("全线", 0.533); // V1–V4 碎裂
+  const revealAt = [attackF, privateF, setAccF, newInstF, falseF, ghostF, Infinity];
+  // ▶ 游标四步 = 台词四个攻击动词词位，与各行 revealAt 同帧
+  const waves: Wave[] = [
+    { starts: [privateF, setAccF, newInstF, ghostF], lines: [1, 2, 3, 5], end: atWord("全线", 0.55) },
+  ];
   // V1–V4 碎裂：一次性 12 帧抖动脉冲，之后定格失守态
-  const smashT = frame - at(0.533);
+  const smashT = frame - smashF;
   const smash = smashT > 0 && smashT < 12 ? Math.abs(Math.sin(smashT / 1.8)) : 0;
 
   return (
@@ -259,7 +268,7 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
         <div style={{ fontSize: 36, fontWeight: 700, color: theme.text }}>
           <span style={{ color: theme.warn }}>反射攻击</span> · 专拆 private
         </div>
-        <span style={{ fontSize: 23, color: theme.textMuted, opacity: fade(0.869) }}>
+        <span style={{ fontSize: 23, color: theme.textMuted, opacity: fadeAt(atWord("反序列化", 0.869)) }}>
           攻击不一定来自同事：反序列化、某些框架按 class 反建对象，走的都是同一条暗道
         </span>
       </div>
@@ -272,9 +281,9 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             lines={C7}
             revealAt={revealAt}
             fontSize={21}
-            activeLine={waveActive(waves, at, frame)}
+            activeLine={waveActive(waves, frame)}
           />
-          <TargetTag v5={false} opacity={fade(0.115, 8)} />
+          <TargetTag v5={false} opacity={fadeAt(atWord("攻击", 0.115, 1), 8)} />
         </div>
 
         {/* 右：终端实录（真实输出，false 红字） */}
@@ -283,19 +292,19 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             {
               text: "$ mvn -q compile exec:java -Dexec.mainClass=…SingletonEvolutionDemo",
               kind: "cmd",
-              opacity: fade(0.07),
+              opacity: fadeAt(atWord("演一场", 0.07)),
             },
-            { text: "=== 第三幕 · 反射攻击（C7） ===", kind: "out", opacity: fade(0.094) },
+            { text: "=== 第三幕 · 反射攻击（C7） ===", kind: "out", opacity: fadeAt(attackF) },
             {
               text: "攻击 V1 饿汉式（普通类）: ghost == getInstance() → false",
               kind: "hot",
-              opacity: fade(0.62),
+              opacity: fadeAt(falseF),
               link: true,
             },
             {
               text: "            ← 失守！第二个实例诞生",
               kind: "hot",
-              opacity: fade(0.693),
+              opacity: fadeAt(atWord("诞生", 0.693)),
               link: true,
             },
           ]}
@@ -304,7 +313,7 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
       {/* 下：五版本徽标墙，V1–V4 中弹碎裂 */}
       <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-        <BadgeWall arrowOpacity={fade(0.16)} dead={seen(0.533)} smash={smash} shield={0} />
+        <BadgeWall arrowOpacity={fadeAt(privateF)} dead={seenAt(smashF)} smash={smash} shield={0} />
       </div>
     </AbsoluteFill>
   );
@@ -312,20 +321,25 @@ export const Scene25bAttack: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
 /** ---------------------------------------------------------------- 2.5c · 炮弹打向枚举 */
 export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, pop } = useAnchors(leadFrames, audioFrames);
+  const { frame, atWord, fadeAt, popAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
-  // 锚点（subtitle 156 字）：打向枚举 0.032 / newInstance 0.083 / 拦下 0.212 /
-  // IllegalArgumentException 0.244 / 报错原文 0.404 / 焊死 0.635 /
-  // 防反射 0.814 / 防序列化 0.840 / 代码最短 0.872
+  // 词位帧锚（fallback = 旧字符占比）。转写注意：「枚举」→「美举」、newInstance→Neistat、
+  // 报错→爆错，关键词均避开误差字；「JVM」全镜两次，occ 0 = 「被 JVM 拦下」那次
+  const targetF = atWord("同样的", 0.032);
+  const ctorF = atWord("打向", 0.083);
+  const againF = atWord("这次", 0.133);
+  const directF = atWord("直接", 0.183);
+  const jvmF = atWord("JVM", 0.244);
+  const textF = atWord("原文", 0.404); // 「报错原文就一行」
   const base = leadFrames; // C7 前六行承接 2.5b（续镜快闪复位），行 7 等异常实锤
   // v4.1：行 5（「// 印出来是 false：失守」）是 2.5b 的故事，枚举演示不存在 v1-v4
   // 失守结果，本镜不再呈现（行占位保留，与 2.5b 版式对齐、衔接不跳）
-  const revealAt = [base, base + 2, base + 4, base + 6, Infinity, base + 10, at(0.244)];
-  // 炮弹回放三步游标（ctor → setAccessible → newInstance），拦截点 0.244 波结束
-  const waves: Wave[] = [{ starts: [0.083, 0.133, 0.183], lines: [1, 2, 3], end: 0.244 }];
-  const shield = pop(0.212); // newInstance 被 JVM 拦下：V5 盾牌弹开
+  const revealAt = [base, base + 2, base + 4, base + 6, Infinity, base + 10, jvmF];
+  // 炮弹回放三步游标（ctor → setAccessible → newInstance），拦截点（JVM）波结束
+  const waves: Wave[] = [{ starts: [ctorF, againF, directF], lines: [1, 2, 3], end: jvmF }];
+  const shield = popAt(directF); // newInstance 被 JVM 拦下：V5 盾牌弹开
   const finaleBadges = ["防反射", "防序列化", "代码最短"];
-  const finaleAt = [0.814, 0.84, 0.872];
+  const finaleAt = [atWord("防反射", 0.814), atWord("防序列化", 0.84), atWord("代码最短", 0.872)];
 
   return (
     <AbsoluteFill style={{ padding: "108px 90px 150px" }}>
@@ -344,9 +358,9 @@ export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             lines={C7}
             revealAt={revealAt}
             fontSize={21}
-            activeLine={waveActive(waves, at, frame)}
+            activeLine={waveActive(waves, frame)}
           />
-          <TargetTag v5={true} opacity={fade(0.032, 8)} />
+          <TargetTag v5={true} opacity={fadeAt(targetF, 8)} />
         </div>
 
         {/* 右：终端实录（前四行承接 2.5b 压暗定格，V5 波红字落地） */}
@@ -367,16 +381,16 @@ export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             {
               text: "攻击 V5 枚举: java.lang.IllegalArgumentException:",
               kind: "hot",
-              opacity: fade(0.244),
+              opacity: fadeAt(jvmF),
               link: true,
             },
             {
               text: "            Cannot reflectively create enum objects",
               kind: "hot",
-              opacity: fade(0.404),
+              opacity: fadeAt(textF),
               link: true,
             },
-            { text: "← JVM 在语言层面焊死了这扇门", kind: "out", opacity: fade(0.635) },
+            { text: "← JVM 在语言层面焊死了这扇门", kind: "out", opacity: fadeAt(atWord("焊死", 0.635)) },
           ]}
         />
       </div>
@@ -392,7 +406,7 @@ export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
           borderRadius: 12,
           padding: "12px 24px",
           backgroundColor: theme.deepBg,
-          opacity: fade(0.404, 10),
+          opacity: fadeAt(textF, 10),
         }}
       >
         <span style={{ fontSize: 26, color: theme.danger }}>✖</span>
@@ -404,7 +418,7 @@ export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
 
       {/* 下：徽标墙（V1–V4 承接失守态）＋ 压轴三徽章 */}
       <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-        <BadgeWall arrowOpacity={fade(0.032)} dead={true} smash={0} shield={shield} />
+        <BadgeWall arrowOpacity={fadeAt(targetF)} dead={true} smash={0} shield={shield} />
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginLeft: 24 }}>
           {finaleBadges.map((b, i) => (
             <span
@@ -416,7 +430,7 @@ export const Scene25cShield: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
                 borderRadius: 999,
                 padding: "5px 18px",
                 textAlign: "center",
-                opacity: pop(finaleAt[i]),
+                opacity: popAt(finaleAt[i]),
                 backgroundColor: alpha(theme.ok, 0.08),
               }}
             >

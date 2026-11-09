@@ -92,7 +92,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），跑 `npm run lint:subs`（字幕文本规范，SOP §4.1：禁破折号「——」等），样片期重跑 `python tools/tts.py EPxx`（秒级）；若 qwen 已终配，改词即触发 SOP §4.4 返工链（qwen 重配 + 重对齐 + 重渲）；
 3. **QA 铁律：先 still 后 render，出片后必自查**。改动先渲单帧检查；全片渲染前有联系表记录；**出片 ≠ 完成**：每镜抽首/中/尾 3 帧拼联系表 + 头中尾抽听（有声/同步），发现即修即重渲复验，问题清零才勾脚本附录 D（SOP §8）；
 4. **音频槽位**：时长与逐句时间戳永远由音频驱动（align.json 是唯一时钟）；禁止在组件里写死场景秒数；换音频后必须重跑 tts.py（或 whisper 对齐）再渲染；
-5. **动画锚点一律挂 atWord 实测词位，禁止等间隔拍脑袋**：`useAnchors()` 的 `atWord("关键词")` 按 align.json 词级时间戳精确定位（三级降级：词级→chunk 内插→旧锚兜底，见 `src/scene-kit.ts`）（教训：字符占比估算曾致 2.4 整镜动画早出 14–20s、3.2 决策树与 5.1 警告卡错位最高 9 秒）；
+5. **动画锚点一律挂 atWord 实测词位，禁止等间隔拍脑袋**：`useAnchors()` 的 `atWord("关键词")` 按 align.json 词级时间戳精确定位（三级降级：词级→chunk 内插→旧锚兜底，见 `src/scene-kit.ts`）（教训：字符占比估算曾致 2.4 整镜动画早出 14–20s、3.2 决策树与 5.1 警告卡错位最高 9 秒）；非词级命中（chunk/无对齐兜底）会打 console.warn，**still/render 需加 `--log=verbose` 才在终端可见**（默认级别不转发页面 console），兜底警告 = 潜在漂移点，按选词纪律换词消除；
 6. `out/` 不进 git；实际使用的 `public/audio/EPxx/*.mp3` 与 `align.json` 必须和代码、台词同步提交，保证跨机器可复现。
 
 ## 现状与全量化待办（PoC → 正片引擎）

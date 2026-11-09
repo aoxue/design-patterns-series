@@ -83,9 +83,13 @@ export const useAnchors = (leadFrames: number, audioFrames: number) => {
 
   /**
    * 关键词 → 实测帧号（v4.1 锚点实测化主力 API）。三级命中：
-   * ① 词级精确命中（words 拼串后子串搜索，命中词的 s 即答案）；
+   * ① 词级精确命中（words 拼串后子串搜索，命中词的 s 即答案）：健康态，不打日志；
    * ② chunk 兜底：字幕原文含关键词 → 在该 chunk 内按字位内插（chunk 仅 2–5s，误差远小于全镜等分）；
-   * ③ 无对齐数据 → 退回 at(fallback)（调用方传旧字符占比锚点即保底旧行为）。
+   * ③ 无对齐数据（或关键词连 chunk 原文都不含）→ 退回 at(fallback)（调用方传旧字符占比锚点即保底旧行为）。
+   * ②③ 属兜底命中 = 潜在漂移点（不随换配音的词位重排）：打 console.warn 审计。
+   * 查看法：remotion still / render 需加 --log=verbose 才会把页面 console 转发到终端
+   * （默认日志级别会吞掉），动画师写完锚点跑 still --log=verbose，出现警告即该处
+   * 未词级命中，按选词纪律换词；Studio 预览（npm run dev）可直接看浏览器控制台。
    * 注意：whisper 转写有同音误差（饿汉→恶焊），关键词优先选字幕原文独有片段；
    * 「不要」这类会被「要不要」包含的短词，加标点（「不要，」）或换长词规避。
    * occ：第几次出现（默认第一次）。
@@ -120,13 +124,21 @@ export const useAnchors = (leadFrames: number, audioFrames: number) => {
         if (off >= 0) {
           if (n === occ) {
             const t = c.s + (off / c.text.length) * (c.e - c.s);
-            return leadFrames + t * fps;
+            const f = leadFrames + t * fps;
+            // 审计：词级未命中（关键词与转写不符或 occ 越界），落 chunk 内插 = 潜在漂移点
+            console.warn(
+              `[atWord] chunk-fallback «${kw}» occ=${occ} → frame ${Math.round(f)}`
+            );
+            return f;
           }
           n++;
         }
       }
     }
-    return at(fallback);
+    const f = at(fallback);
+    // 审计：连 chunk 原文都不含该关键词（或全镜无对齐数据），退回占比兜底 = 潜在漂移点
+    console.warn(`[atWord] no-align-fallback «${kw}» occ=${occ} → frame ${Math.round(f)}`);
+    return f;
   };
 
   /** 进度 p 处淡入（约 0.5 秒） */

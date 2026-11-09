@@ -31,19 +31,32 @@ const STEPS = [
 ];
 
 export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
-  const { frame, at, fade, pop, seen } = useAnchors(leadFrames, audioFrames);
+  const { frame, atWord, fadeAt, popAt, seenAt } = useAnchors(leadFrames, audioFrames);
   const palette = usePalette();
 
-  // 字位锚点（subtitle 327 字）：volatile 0.083 / 三步 0.300·0.336·0.388 /
-  // 调换顺序 0.456（0.471 交换完成）/ 非空 0.630 / 拿走 0.639 / volatile 作用 0.783 / 截图 0.954
-  const stepAt = [0.3, 0.336, 0.388];
-  const boardIn = fade(0.284, 12);
+  // 词位帧锚（fallback = 旧字符占比）。已避开 whisper 同音误差区：
+  // volatile→Volato、非空→飞空、后建→后键，关键词均选转写实词
+  const pulse1F = atWord("前面那个", 0.083); // 「instance 前面那个 volatile」引出灵魂词
+  const boardF = atWord("三步", 0.284); // A2 面板随「是三步」入场
+  const badgeF = atWord("动手脚", 0.168); // ⚠ JVM 真的会动手脚
+  // 三步积木各等自己的词；「初始化」「指向」全镜各两次，occ 0 = 「三步」里那次
+  const stepAt = [
+    atWord("分配内存", 0.3),
+    atWord("初始化", 0.336),
+    atWord("指向", 0.388),
+  ];
+  const t2WaitF = atWord("多线程", 0.511); // 左面板 T2 等待行（单线程/多线程对比句）
+  const boomF = atWord("高高兴兴", 0.63); // 线程 B 拿走半成品：右面板爆炸闪红
+  const weldF = atWord("作用", 0.783); // 「volatile 的作用一句话」：焊死回位 + 面板转绿
+  const shotF = atWord("截下来", 0.954); // 「把这张时间轴图截下来」截图提示
+
+  const boardIn = fadeAt(boardF, 12);
 
   // ②③ 积木交换度：0=正常序 →「调换顺序：先指、后建」→ 1=重排序；
-  // 讲到「volatile 的作用一句话」焊死回位
+  // 讲到「volatile 的作用一句话」焊死回位，「禁止这个重排」收口
   const swap = interpolate(
     frame,
-    [at(0.456), at(0.471), at(0.783), at(0.8)],
+    [atWord("调换顺序", 0.456), atWord("先指", 0.471), weldF, atWord("禁止", 0.8)],
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) }
   );
@@ -51,11 +64,11 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const welded = seen(0.783); // 焊死后：面板转绿 + 锁标签
-  // 线程 B 一查「非空！」：右面板爆炸闪红 12 帧脉冲
-  const boomT = frame - at(0.63);
+  const welded = seenAt(weldF); // 焊死后：面板转绿 + 锁标签
+  // 线程 B 一查「非空！」：右面板爆炸闪红 12 帧脉冲（与 T2 拿走行同帧锁死）
+  const boomT = frame - boomF;
   const boom = boomT > 0 && boomT < 14 ? 0.35 * Math.abs(Math.sin(boomT / 2.2)) : 0;
-  const shotTip = pop(0.954); // 「把这张时间轴图截下来」截图提示
+  const shotTip = popAt(shotF); // 截图提示
 
   return (
     <AbsoluteFill style={{ padding: "104px 120px 150px" }}>
@@ -71,7 +84,7 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
             border: `1px solid ${theme.warn}`,
             borderRadius: 999,
             padding: "3px 16px",
-            opacity: fade(0.168),
+            opacity: fadeAt(badgeF, 12),
           }}
         >
           ⚠ JVM 真的会动手脚
@@ -86,8 +99,8 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
           revealAt={[0]}
           fontSize={24}
           pulseWindows={[
-            [at(0.083) - 6, at(0.284)],
-            [at(0.783), at(0.832) + 24],
+            [pulse1F - 6, boardF],
+            [weldF, atWord("重排", 0.832) + 24],
           ]}
         />
       </div>
@@ -115,7 +128,7 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
             border: `2px solid ${palette.primaryBright}`,
             borderRadius: 16,
             boxShadow: `0 0 34px ${alpha(palette.primaryBright, 0.1 + shotTip * 0.22)}`,
-            opacity: fade(0.954, 12),
+            opacity: fadeAt(shotF, 12),
             pointerEvents: "none",
           }}
         />
@@ -132,7 +145,7 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
         >
           <div style={{ fontSize: 26, fontWeight: 700, color: theme.ok, marginBottom: 12 }}>正常顺序</div>
           {STEPS.map((s, i) => (
-            <StepRow key={s.n} n={s.n} t={s.t} opacity={fade(stepAt[i])} />
+            <StepRow key={s.n} n={s.n} t={s.t} opacity={fadeAt(stepAt[i])} />
           ))}
           <div
             style={{
@@ -140,7 +153,7 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
               fontFamily: theme.font.mono,
               color: theme.textMuted,
               marginTop: 10,
-              opacity: fade(0.511),
+              opacity: fadeAt(t2WaitF),
             }}
           >
             T2 看到 null → 等待
@@ -171,7 +184,7 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
                   border: `1px solid ${theme.ok}`,
                   borderRadius: 999,
                   padding: "2px 12px",
-                  opacity: fade(0.783),
+                  opacity: fadeAt(weldF),
                 }}
               >
                 🔒 volatile 焊死：禁止重排
@@ -193,7 +206,7 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
                   transform: `translateY(${dy}px)`,
                 }}
               >
-                <StepChip n={s.n} t={s.t} warn={i === 2 && early > 0.5} opacity={fade(stepAt[i])} />
+                <StepChip n={s.n} t={s.t} warn={i === 2 && early > 0.5} opacity={fadeAt(stepAt[i])} />
                 {i === 2 && (
                   <span style={{ fontSize: 24, fontWeight: 700, color: theme.warn, opacity: early }}>← 提前！</span>
                 )}
@@ -206,7 +219,7 @@ export const Scene23bReorder: FC<SceneProps> = ({ leadFrames, audioFrames }) => 
               fontFamily: theme.font.mono,
               color: theme.danger,
               marginTop: 10,
-              opacity: fade(0.639),
+              opacity: fadeAt(atWord("高高兴兴", 0.639)),
             }}
           >
             T2 看到"非空" → 直接拿走 → 半成品对象 → <span style={{ fontWeight: 700 }}>NPE 💥</span>
