@@ -1,6 +1,6 @@
 /**
  * 色彩体系 = 中性 token（theme，全系列恒定）+ 分类色板（PALETTES，按 GoF 分类切换）。
- * 中性 token：功能色（danger/warn/ok/diff）、代码底、字体等，26 期色值不变；
+ * 中性 token：功能色（danger/warn/ok/diff）、代码底、字体等，全系列色值不变；
  * 分类色板：画面底色与主色 8 个 token，组件经 usePalette() 取用（Episode 按期注入），
  * 禁止绕过 Provider 直连 PALETTES。十六进制字面量只允许出现在本文件（lint:colors 强制）。
  */

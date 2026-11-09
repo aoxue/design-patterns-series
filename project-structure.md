@@ -75,7 +75,7 @@ video/
 │   └── voice/voiceprint.wav  全系列统一声纹参考，不可再生资产，只增不改不覆盖
 │
 ├── tools/                    配音 / 混音 / QA 工具链（命令与用途见 video/README.md「命令」节）
-│   ├── tts.py                样片期 edge-tts 快速配音（改词秒级重跑，随产 align.json）
+│   ├── tts.py                按期生成 edge-tts 样片配音和 align.json
 │   ├── tts_qwen.py           qwen 声纹终配（定稿后一次，同名覆盖样片轨即终版发布音轨）
 │   ├── whisper_align.py      whisper 重算 align.json（qwen 配音统一走此路）
 │   ├── mix_episode_bgm.py    按 EPxx.bgm.json 生成各期独立音乐轨 / 配乐成片

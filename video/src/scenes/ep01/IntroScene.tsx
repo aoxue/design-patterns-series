@@ -70,7 +70,7 @@ export const IntroScene: FC<SceneProps> = ({ leadFrames, audioFrames }) => {
             opacity: fadeAt(atWord("工程现场", 0.4)),
           }}
         >
-          {["23 个 GoF 模式", "1 个真实电商系统", "26 期连载"].map((t) => (
+          {["23 个 GoF 模式", "1 个真实电商系统", "25 期连载"].map((t) => (
             <span
               key={t}
               style={{

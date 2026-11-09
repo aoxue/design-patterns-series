@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /** 字幕文本规范自查（SOP §4「字幕文本规范」的机制化，2026-11-03 破折号教训落档）。
- *  扫描 public/episodes/*.json 的 tts + subtitle 字段，拦截不符合行业规范的文本：
+ *  检查 public/episodes/EPxx.json 的 tts 与 subtitle 字段：
  *    1. 禁破折号「——/—」——书面连接词不上字幕（列举用「：」、轻转折用「，」、另起用「。」）
  *    2. 省略号必须「……」——禁「...」「。。。」和单个「…」
  *    3. 禁半角 , ; ! ? 混入（时间戳 00:01 的冒号豁免）
@@ -27,8 +27,8 @@ const RULES = [
 // 半角标点豁免：时间戳 00:01 形态的冒号不属于台词标点
 const EXEMPT = (text) => text.replace(/\d+:\d+/g, "");
 
-// 排除 .segs.json（配音段定义，对象结构非镜数组，2026-11-05 编导同步时发现扫描即崩）
-const files = (await readdir(DIR)).filter((f) => f.endsWith(".json") && !f.endsWith(".segs.json")).sort();
+// 只读镜头台词文件。同目录另有配音段、BGM 等配置。
+const files = (await readdir(DIR)).filter((f) => /^EP\d{2}\.json$/.test(f)).sort();
 let errors = 0;
 for (const file of files) {
   const shots = JSON.parse(await readFile(path.join(DIR, file), "utf8"));

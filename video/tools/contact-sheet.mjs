@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-/** 成片自查联系表生成器（SOP §8「成片自查」的工具化）。
+/** 渲染前的合成联系表生成器（SOP §8）。
  *  每镜抽首/中/尾 3 帧自动渲染并拼成一张表；帧自带镜号角标（右上角 chrome）。
  *  帧区间来自 TimelineProbe 合成（音频实测驱动，与正片同源）。
  *
  *  用法：npm run sheet
  *  可选：node tools/contact-sheet.mjs --comp EP01 --cols 3 --per-shot 3 --out out/qa
  */
-import { mkdir, readdir } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -37,16 +37,10 @@ if (!Array.isArray(timeline) || timeline.length === 0) {
 }
 
 // 音频缺失预警：缺音频会退化为估算时长——镜内取样仍有效，但绝对帧位与真实成片有漂移
-const audioDirs = await readdir(path.join(ROOT, "public/audio"), { withFileTypes: true })
-  .then((xs) => xs.filter((x) => x.isDirectory()).map((x) => x.name))
-  .catch(() => []);
-let missing = 0;
-for (const it of timeline) {
-  const found = audioDirs.some((d) => existsSync(path.join(ROOT, "public/audio", d, it.audio)));
-  if (!found) missing++;
-}
+const audioDir = path.join(ROOT, "public/audio", COMP);
+const missing = timeline.filter((it) => !existsSync(path.join(audioDir, it.audio))).length;
 if (missing > 0) {
-  console.warn(`⚠ ${missing}/${timeline.length} 段音频缺失（先跑 python tools/tts.py），帧位按估算时长取样`);
+  console.warn(`⚠ ${missing}/${timeline.length} 段音频缺失（样片期运行 python tools/tts.py ${COMP}），帧位按估算时长取样`);
 }
 
 // 每镜取样帧：首（音频开后 0.5s）/ 中 / 尾（结束前 0.5s）

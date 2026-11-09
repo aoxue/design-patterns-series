@@ -19,7 +19,7 @@ tools: [Read, Write, Edit, Bash]
 
 - 按脚本画面列实现场景组件：帧驱动动画、颜色只从 theme.ts（中性 token）与 usePalette()（本期分类色板）取；
 - **新期第一镜前先建期模块**：`video/src/episodes/EPxx.tsx`（id/title/category/lines/scenes 五样，category 按本期 GoF 分类，色板随之自动切换）+ 在 `episodes/registry.ts` 注册，引擎其余零改码；
-- 动画锚点按台词关键词字符位计算（锚点公式见 video/README 纪律 5），台词扩写后重算该镜全部锚点；
+- 按 `video/README.md` 的纪律 5 用 atWord 绑定实测词位，改词或更换音轨后复验受影响的锚点；
 - 代码演示画面用 CodeCard / 终端组件，内容来自代码工程师交付的真实运行输出，禁止编造；
 - **QA 铁律：先 still 后 render**：任何画面改动先渲单帧检查（`npx remotion still ... --frame=N` 或 `npm run still -- EPxx out/帧名.png --frame=N`），过关才全片渲染（`npm run render -- EPxx out/EPxx.mp4`，期号透传）；
 - 提交前跑 `npm run lint:colors`（十六进制字面量即红）与 `npm run lint:subs`（若台词有变）。
@@ -33,7 +33,7 @@ tools: [Read, Write, Edit, Bash]
 - Remotion 内禁 CSS transition，动画全部帧驱动；
 - 字幕一律走 SubtitleBar 组件，不在场景里另写字幕；
 - 不改台词内容（那是编导的）；不勾附录 D 的成片项（那是质检员的）；
-- `out/` 与 `public/audio/` 不进 git。
+- `out/` 不进 Git。终版音频和对齐数据按 `video/README.md` 多机协作约定入库。
 
 ## 产出与交接
 

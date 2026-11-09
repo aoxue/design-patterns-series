@@ -5,18 +5,17 @@
   2. align.json   逐句时间戳 sidecar（words 词级 + chunks 句级）——
                   字幕与动画锚点据此与语音逐句锁死（音频是唯一时钟）。
 
-真声替换：录同名 mp3 覆盖后，用 whisper 对齐工具重算 align.json（见 video/README 待办）。
-
 用法：
     pip install edge-tts
-    python tools/tts.py                        # 默认音色 zh-CN-XiaoxiaoNeural
-    python tools/tts.py --voice zh-CN-YunxiNeural
+    python tools/tts.py EP02                   # 默认音色 zh-CN-XiaoxiaoNeural
+    python tools/tts.py EP02 --voice zh-CN-YunxiNeural
 """
+import argparse
 import asyncio
 import json
 import re
-import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural"
@@ -147,12 +146,6 @@ def chunks_from_chartimes(shot: dict, char_at: list[tuple[float, float]]) -> lis
     return chunks_out
 
 
-def pick_voice() -> str:
-    if "--voice" in sys.argv:
-        return sys.argv[sys.argv.index("--voice") + 1]
-    return DEFAULT_VOICE
-
-
 async def synth(shot: dict, voice: str, out_dir: Path) -> dict:
     """合成一镜音频并采集词级边界 → {words, chunks}（时间均为音频内相对秒）"""
     import edge_tts
@@ -185,26 +178,39 @@ async def synth(shot: dict, voice: str, out_dir: Path) -> dict:
     return {"words": words, "chunks": chunks_out}
 
 
-async def main() -> None:
-    ep_dir = ROOT / "public" / "episodes"
+async def main(ep_file: Path, voice: str) -> None:
     audio_dir = ROOT / "public" / "audio"
-    voice = pick_voice()
-    for ep_file in sorted(ep_dir.glob("*.json")):
-        ep = ep_file.stem  # 如 EP01；音频与台词同名子目录一一对应
-        shots = json.loads(ep_file.read_text(encoding="utf-8"))
-        out_dir = audio_dir / ep
-        out_dir.mkdir(parents=True, exist_ok=True)
-        align = {"voice": voice, "shots": {}}
+    ep = ep_file.stem
+    shots = json.loads(ep_file.read_text(encoding="utf-8"))
+    out_dir = audio_dir / ep
+    audio_dir.mkdir(parents=True, exist_ok=True)
+    align = {"voice": voice, "shots": {}}
+    # 整期生成成功后才覆盖音频槽位，避免远程合成中断时混用新旧配音和时间戳。
+    with TemporaryDirectory(dir=audio_dir) as tmp_dir:
+        staging = Path(tmp_dir)
         for shot in shots:
-            align["shots"][shot["id"]] = await synth(shot, voice, out_dir)
+            align["shots"][shot["id"]] = await synth(shot, voice, staging)
             n = len(align["shots"][shot["id"]]["chunks"])
             print(f"OK  {ep}/{shot['file']}  chunks={n}")
-        (out_dir / "align.json").write_text(
+        (staging / "align.json").write_text(
             json.dumps(align, ensure_ascii=False, indent=1), encoding="utf-8"
         )
-        print(f"align → public/audio/{ep}/align.json")
-    print(f"done ({voice}) -> public/audio/<EPxx>/")
+        out_dir.mkdir(exist_ok=True)
+        for shot in shots:
+            filename = shot["file"]
+            (staging / filename).replace(out_dir / filename)
+        (staging / "align.json").replace(out_dir / "align.json")
+    print(f"done ({voice}) → public/audio/{ep}/")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="为指定期生成 edge-tts 样片配音")
+    parser.add_argument("episode", help="期号，如 EP02")
+    parser.add_argument("--voice", default=DEFAULT_VOICE, help="edge-tts 音色")
+    args = parser.parse_args()
+    if not re.fullmatch(r"EP\d{2}", args.episode):
+        parser.error(f"期号格式错误：{args.episode}")
+    ep_file = ROOT / "public" / "episodes" / f"{args.episode}.json"
+    if not ep_file.is_file():
+        parser.error(f"找不到台词文件：{ep_file}")
+    asyncio.run(main(ep_file, args.voice))

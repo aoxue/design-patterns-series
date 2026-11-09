@@ -194,7 +194,7 @@ export const Episode: FC<{ episodeId: string; timeline: TimelineItem[] | null }>
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
-          <span>码上购 · 设计模式 26 讲</span>
+          <span>码上购 · 设计模式 25 期</span>
         </div>
         <span style={{ fontFamily: theme.font.mono }}>
           {/* 拼成单一文本节点：多个 JSX 子表达式会在文本节点边界打断字符整形（kerning），观感与旧版有细差 */}

@@ -127,7 +127,7 @@ try {
     )
   ).shots ?? {};
 } catch {
-  console.warn("⚠ 无 align.json，对照表用字数估算（先跑 python tools/tts.py）");
+  console.warn(`⚠ 无 align.json，对照表用字数估算（样片期运行 python tools/tts.py ${COMP}）`);
 }
 
 const comp = await selectComposition({ serveUrl, id: COMP, inputProps: { timeline } });
