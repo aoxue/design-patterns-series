@@ -72,9 +72,11 @@
 - **画面**：复用 `video/src/scenes/ep01/IntroScene.tsx`（迁期时参数化 EP 号与标题），台词三句对三段动画，末尾渐暗接钩子黑场。
 - 引导镜同样有 tts/subtitle 双字段与音频槽位（含在配音分段的首段）。
 
-### 4.3 qwen 配音工作法（一段一条，EP01 全片实战定稿）
+### 4.3 配音两阶段与 qwen 终配工作法（EP01 全片实战定稿）
 
-配音主力为 `video/tools/tts_qwen.py`（阿里 qwen-audio-3.1-tts-next + 导演声纹克隆），模型硬特性与坑清单见 `video/README.md`。编导职责与写作纪律：
+**样片期用 edge-tts，qwen 只在定稿后用一次**（EP01 教训：qwen 逐段生成 + 质检重掷成本高，迭代期每改一词即重配一轮）：画面开发期跑 `python3 tools/tts.py`（edge-tts，秒级、随产 align.json）驱动样片，改词零成本；台词与画面全定稿后跑 `python3 tools/tts_qwen.py` 一次性终配（同名覆盖槽位）+ `python3 tools/whisper_align.py` 重算，atWord 锚点自动落新时间轴，随后逐镜 still 抽查节奏微调（qwen 与 edge-tts 语速节奏不同）再全片重渲。
+
+qwen 终配（阿里 qwen-audio-3.1-tts-next + 导演声纹克隆）模型硬特性与坑清单见 `video/README.md`。编导职责与写作纪律：
 
 - **交付物**：台词同步 `EPxx.json` 时一并产出 `EPxx.segs.json`（段划分 + 每段表演指令壳），两者同目录。
 - **分段原则**：每段 ≤470 字（输出 120s 上限）；段以悬念/自然收尾点结束（长 prompt 尾部整镜会被模型吞掉，重要镜别吊段尾）；叙事边界优先（SOP 六段结构内切）。
@@ -127,10 +129,11 @@
 分镜脚本（内容事实源）
    ↓ 台词定稿后同步（含 0.1 引导镜与段定义）
 video/public/episodes/EPxx.json + EPxx.segs.json（制作副本，每期一文件）
-   ↓ python3 tools/tts_qwen.py EPxx（qwen 声纹配音：分段生成+质检+切镜）
-public/audio/EPxx/*.mp3（音频槽位；qwen 声纹配音即终版发布音轨）
-   ↓ python3 tools/whisper_align.py EPxx（逐句对齐重算）
-场景组件动画（src/scenes，帧驱动）→ 单帧 QA → 全片渲染 → out/*.mp4
+   ↓ 样片期：python3 tools/tts.py EPxx（edge-tts 快速配音，随产 align.json；改词秒级重跑）
+场景组件动画（src/scenes，帧驱动，锚点挂 atWord 词位）→ 样片迭代至台词与画面定稿
+   ↓ 终配：python3 tools/tts_qwen.py EPxx（qwen 声纹配音同名覆盖，即终版发布音轨）
+public/audio/EPxx/*.mp3 → python3 tools/whisper_align.py EPxx（逐句对齐重算，锚点自动重排）
+   ↓ 逐镜 still 抽查节奏微调 → 全片渲染 → out/*.mp4
 ```
 
 关键规则：

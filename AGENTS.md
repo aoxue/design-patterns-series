@@ -50,7 +50,7 @@
 ```
 ① 写脚本    episodes 详案 → scripts/EPxx 分镜脚本（内容唯一事实源）
 ② 进入制作  台词同步 → video/public/episodes/EPxx.json（制作副本，每期一文件）
-③ 音频槽位  qwen 声纹配音即终版音轨（tools/tts_qwen.py）+ whisper 逐句时间戳（tools/whisper_align.py 产出 align.json；时长与字幕/动画锚点全部自动重排，禁手写秒数）
+③ 音频槽位  两阶段配音：样片期 edge-tts 快速配音驱动画面开发（tools/tts.py，改词秒级重跑，align 随产）→ 台词与画面定稿后 qwen 声纹配音一次性终配（tools/tts_qwen.py 同名覆盖，即终版音轨）+ whisper 重算时间戳（tools/whisper_align.py 产出 align.json；时长与字幕/动画锚点全部自动重排，禁手写秒数；终配后逐镜 still 抽查节奏微调）
 ④ 画面组件  video/src/scenes/ 新镜新组件，颜色只从 theme.ts 取
 ⑤ QA 铁律   先 still 单帧检查 → 过关才全片 render（SOP §7 检查项）
 ⑥ 质量门    SOP §7 全过 + 脚本附录 D 全勾 → README §4 流转「已存稿」

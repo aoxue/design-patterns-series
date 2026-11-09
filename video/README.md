@@ -8,7 +8,7 @@
 ```
 public/episodes/EPxx.json  台词制作副本（每期一文件；内容事实源是 scripts/ 分镜脚本）：tts 口播读音稿 + subtitle 字幕文本（与脚本逐字一致，双字段分工见 SOP §4.1）+ leadSec/tailSec 节奏参数
 public/episodes/EPxx.segs.json  配音段定义（编导交付物，随台词同步产出）：段划分（≤470 字/段）+ 每段表演指令壳，{镜id} 占位符运行时从 EPxx.json 注入台词（写法见 SOP §4.1）
-public/audio/EPxx/*.mp3    音频槽位（每期一目录）：主力 = qwen 声纹配音（tools/tts_qwen.py，一段一条 + 自动质检切镜），即终版发布音轨；tts.py（edge-tts）降级为无 key 环境快速预览
+public/audio/EPxx/*.mp3    音频槽位（每期一目录，配音两阶段 SOP §4.3）：样片期 = tts.py（edge-tts 快速配音，画面开发期主力）；定稿后 = tts_qwen.py（qwen 声纹配音一段一条 + 自动质检切镜，同名覆盖样片轨，即终版发布音轨）
 public/audio/EPxx/align.json  逐句时间戳：**音频是唯一时钟**，字幕选句与场景动画锚点（AnchorCtx）都按它走；qwen 配音与真人原声统一由 tools/whisper_align.py 重算
 public/audio/EP01/bgm.mp3   独立音乐轨：按口播时钟预制分段音量、口播避让和淡入淡出，不含人声；随 Git 管理
 src/data.ts                纯函数层：字幕切分（按句读断句、字数权重分摊）、audioPath/computeTimeline（均接期参数，无全局期号）
@@ -39,13 +39,13 @@ pip install requests edge-tts faster-whisper "av==13.1.0"   # Python 3；av 固�
 cp .env.example .env                                 # 再填入 DASHSCOPE_API_KEY（.env 已 gitignore；qwen TTS 用）
 
 # 日常
-python tools/tts_qwen.py EP01                        # 主力配音：qwen 声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成，现行段留档先备份到 out/segs/EPxx/bak-时间戳/；--split-only 只切镜）
+python tools/tts.py EP01                             # 样片配音（edge-tts，画面开发期主力）：快速生成 + 随产 align.json，改词秒级重跑
+python tools/tts_qwen.py EP01                        # qwen 终配（定稿后一次，同名覆盖样片轨）：声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成，现行段留档先备份到 out/segs/EPxx/bak-时间戳/；--split-only 只切镜）
 python tools/whisper_align.py EP01                   # 对齐重算 align.json（qwen 配音统一走此路；--check 只读对比偏差；--model 可调，默认 small）
 python tools/whisper_align.py EP01 --rechunk         # 仅修断句时复用现有词级时间戳；音频与台词须保持不变
 python tools/mix_episode_bgm.py EP01 --stem-only     # 按 EP01.bgm.json 重建音乐轨（需 numpy、ffmpeg），不依赖成片
 python tools/mix_episode_bgm.py EP01                 # 重建音乐轨并给 out/EP01-with-notes.mp4 混音，输出 out/EP01-with-bgm-notes.mp4
-python tools/tts.py                                  # 降级：edge-tts 快速预览（无 key 环境可用，随音频产出同构 align.json）
-python tools/record_script.py EP01                   # 导出导演录音稿（tts 口播读音稿按镜分段，一镜一条录音工作法；--out 可指定位置）
+python tools/record_script.py EP01                   # 留档：导演录音稿导出（真声路径已移出流程，工具保留备查）
 # 国内网络首次下载 whisper 模型：前面加 HF_ENDPOINT=https://hf-mirror.com
 npm run lint:colors                                  # 颜色纪律检查（提交前必跑，违规即红）
 npm run sheet                                        # 成片自查联系表：每镜首/中/尾 3 帧（SOP §8）
@@ -85,7 +85,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 ## Agent 工作纪律（在本工程内改东西时）
 
 1. **改画面**：只改 `src/scenes/` 对应镜的组件；颜色只从 `theme.ts` 取，由 `npm run lint:colors` **机制强制**（src 内出现十六进制字面量即报错），提交前必跑；
-2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），跑 `npm run lint:subs`（字幕文本规范，SOP §4.1：禁破折号「——」等），然后重跑 `python tools/tts_qwen.py EPxx`（配音已生成后改词即触发 SOP §4.4 返工链）；
+2. **改台词**：改 `public/episodes/EPxx.json`（`tts` 与 `subtitle` 同步改），跑 `npm run lint:subs`（字幕文本规范，SOP §4.1：禁破折号「——」等），样片期重跑 `python tools/tts.py EPxx`（秒级）；若 qwen 已终配，改词即触发 SOP §4.4 返工链（qwen 重配 + 重对齐 + 重渲）；
 3. **QA 铁律：先 still 后 render，出片后必自查**。改动先渲单帧检查；全片渲染前有联系表记录；**出片 ≠ 完成**：每镜抽首/中/尾 3 帧拼联系表 + 头中尾抽听（有声/同步），发现即修即重渲复验，问题清零才勾脚本附录 D（SOP §8）；
 4. **音频槽位**：时长与逐句时间戳永远由音频驱动（align.json 是唯一时钟）；禁止在组件里写死场景秒数；换音频后必须重跑 tts.py（或 whisper 对齐）再渲染；
 5. **动画锚点一律挂 atWord 实测词位，禁止等间隔拍脑袋**：`useAnchors()` 的 `atWord("关键词")` 按 align.json 词级时间戳精确定位（三级降级：词级→chunk 内插→旧锚兜底，见 `src/scene-kit.ts`）（教训：字符占比估算曾致 2.4 整镜动画早出 14–20s、3.2 决策树与 5.1 警告卡错位最高 9 秒）；
