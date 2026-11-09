@@ -29,21 +29,23 @@
 
 - **梯队**：创建型（蓝）
 - **业务线**：`payment` 支付
-- **痛点场景**：`PaymentService` 里 `switch (channelType)` case 支付宝/微信/银联，每加渠道要改创建、退款、查询三处，漏一处就是线上事故。
+- **冷开场**：「云闪付能扣款，却退不了款。支付上线的时候，我们漏改了退款里的那个 `switch`。」
+- **痛点场景**：支付宝和微信已上线。支付、退款、查询各自按渠道选择并创建网关。接云闪付只改到了支付入口，退款重现「渠道不支持」。
 - **内容主线**：
-  1. 简单工厂（先给，能解决眼前问题）；
-  2. 指出每加产品要改工厂类 → 违反开闭原则；
-  3. 升级工厂方法：一渠道一工厂（`PaymentChannelFactory` 体系）。
-  4. 讲清三者边界：简单工厂 / 工厂方法 / 抽象工厂（为 EP19 埋线）。
-- **关键代码点**：`switch` 事故版 → 工厂方法版 diff；新增「云闪付」渠道时两种代码的改动对比（本期戏剧冲突点）。
-- **框架影子**：`LoggerFactory.getLogger()`、`Calendar.getInstance()`、Spring `BeanFactory`（名字都没藏着）、JDBC `DriverManager`。
-- **别用场景**：实现只有一个且预见不到扩展，直接 `new`，别为设计感加层。
-- **金句（候选）**：「开闭原则：改代码是风险，加代码是安全。」
-- **互链**：预告 EP03：「工厂造出策略，if-else 的丧钟」（工厂负责造，策略负责换）。
+  1. 复现扣款成功、退款失败。简单工厂先收拢重复的创建分支，点明扩渠道时仍需修改这处集中分支。
+  2. 抽象 `PaymentWorkflow` 持有共同的支付、退款、查询流程，通过 `createGateway()` 获取网关。各渠道子类覆写创建方法。
+  3. 用入口已有的注册或注入边界接入云闪付。先交代创建由谁决定，再交代入口怎样找到该渠道，两处职责分开画。
+- **上屏验收**：Java 17 演示用同一组入口验证支付宝、微信与云闪付的扣款、退款和查询。用实际 diff 核对新增实现与注册的改动，说明「一行老代码不改」指接入时已有支付流程和渠道实现无需修改，新增注册或配置应如实上屏。
+- **框架影子**
+  - JDK 的 `AbstractExecutorService.submit()` 使用可由子类覆写的 `newTaskFor()`。[JDK 17 API](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/AbstractExecutorService.html)
+  - Spring 的 `AbstractFactoryBean` 在创建对象时调用子类实现的 `createInstance()`。[Spring 源码](https://github.com/spring-projects/spring-framework/blob/main/spring-beans/src/main/java/org/springframework/beans/factory/config/AbstractFactoryBean.java)
+- **别用场景**：渠道固定、网关构造简单时，用直接构造或简单工厂即可。若各渠道只共享创建接口，先评估组合和注册表的成本。
+- **金句（候选）**：「支付流程写一遍，网关交给各渠道来造。」
+- **互链**：EP01 已预告云闪付接入。EP03 转到同一促销流程内切换算价算法。EP19 回来讲同一渠道下成组创建的扣款、退款和对账组件。
 
 ---
 
-## EP03 策略 Strategy ·「不是所有 if-else 都该被消灭」
+## EP03 策略 Strategy ·「前 100 名半价，为什么要重测所有优惠？」
 
 - **梯队**：行为型（橙）
 - **业务线**：`promo` 促销计算
@@ -52,35 +54,37 @@
   1. if-else 版本的问题演示（改一处，全量回归）；
   2. `DiscountStrategy` 接口 + 各促销一个实现类；
   3. **Spring 注入 `Map<String, DiscountStrategy>` 自动路由**（Java 独有优雅，本期高光）；
-  4. 与 EP02 互链：策略怎么选？用工厂/Map 路由，系列互链第一次示范。
+  4. 回看 EP02 的网关创建，再展示统一算价入口如何替换算法。名额以已给出的资格结果入参，库存与并发扣减留在算价演示之外。
 - **关键代码点**：`PromoService.calculate()` 重构 diff；`Map` 注入版路由代码；新增促销类型 = 新增一个类 + 一行注册。
-- **框架影子**：`Comparator`、线程池 `RejectedExecutionHandler` 四个预置策略、Spring `Resource`。
+- **框架影子**：`Comparator` 比较规则、线程池 `RejectedExecutionHandler` 拒绝策略。
 - **别用场景**：两三个稳定分支 if-else 更直白；策略超过二十个该考虑规则引擎，不是继续加类。
 - **金句（候选）**：「if-else 不是敌人，变化才是。」
-- **互链**：回顾 EP02 工厂；预告 EP04：「你每天都在用下一个模式，只是不知道名字」。
+- **互链**：回顾 EP02 的创建决策。预告 EP04 的报表分页 bug，引出固定流程和可变步骤。
 
 ---
 
-## EP04 模板方法 Template Method ·「Spring 里最被低估的模式」
+## EP04 模板方法 Template Method ·「Excel 分页修好了，PDF 怎么还在漏数据？」
 
 - **梯队**：行为型（橙）
 - **业务线**：`report` 报表导出
 - **痛点场景**：导出报表 Excel/PDF/CSV 三段代码 90% 相同，都是 copy 的：有人修了 Excel 的分页 bug，PDF 还带着。
 - **内容主线**：
   1. copy-paste 分叉的演化过程（三段代码逐渐长歪）；
-  2. 抽象类定骨架：查数据 → 写表头 → 写行 → 写尾 → 上传；
+  2. 抽象类固定查数分页和上传步骤，子类实现各自的表头、行和文件收尾格式；
   3. 子类只填空 + hook 钩子留扩展点（`beforeExport()` 空方法）；
   4. 「父类持流程、子类填细节」的控制反转。
 - **关键代码点**：`AbstractReportExporter` 骨架 + 三个子类 diff；hook 方法的默认实现与覆写。
-- **框架影子**（本期最豪华）：`JdbcTemplate`、AQS 的 `tryAcquire()` 就是钩子、`HttpServlet.service()` 分发 doGet/doPost、`AbstractList`。
+- **框架影子**
+  - `InputStream.read(byte[], int, int)` 的默认流程调用子类提供的单字节 `read()`。[JDK 17 API](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/InputStream.html#read(byte%5B%5D,int,int))
+  - `AbstractQueuedSynchronizer.acquire()` 管理尝试与排队流程，子类定义 `tryAcquire()` 的获取条件。[JDK 17 API](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/locks/AbstractQueuedSynchronizer.html#acquire(int))
 - **别用场景**：流程只有一种实现别抽父类；顺带提「组合优于继承」，父类控制权太强会变继承地狱。
 - **金句（候选）**：「你每天都在用模板方法，只是没人告诉你它的名字。」
-- **互链**：预告 EP05：「订单下成功了，然后呢？」
+- **互链**：预告 EP05 的短信超时事故。EP08 回到报表导出，在输出边界叠加压缩和校验能力。
 - **时长**：10 分钟（框架影子素材多）。
 
 ---
 
-## EP05 观察者 Observer ·「下单之后，发生了什么」
+## EP05 观察者 Observer ·「短信服务挂了，订单为什么也下不了？」
 
 - **梯队**：行为型（橙）
 - **业务线**：`order` + `notify`
@@ -88,21 +92,23 @@
 - **内容主线**：
   1. 强耦合版的脆弱性演示（短信超时 → 下单失败）；
   2. 手写 `EventListener` 版（懂原理）；
-  3. Spring `ApplicationEventPublisher` + `@EventListener` + `@Async` + `@TransactionalEventListener`（会实战）；
-  4. 点破 MQ 就是观察者的分布式形态（为 EP21 中介者埋线：观察者解耦「广播」，中介者解耦「互聊」）。
-- **关键代码点**：`OrderCreatedEvent`；手写版监听器注册表；Spring 注解版 diff；`@Async` 前后对比（短信挂了订单照样成）。
-- **框架影子**：Spring 事件体系、Guava EventBus、MQ 发布订阅。
+  3. 用 Spring 事件说明发布与订阅。对比同步监听和提交后异步通知，解释通知超时为何需要单独的执行边界。
+  4. EP21 再讲具有先后约束的售后动作，由谁决定何时退款、何时补库存。
+- **关键代码点**：`OrderCreatedEvent`、手写监听器、Spring 事件对照。分别验证有无通知订阅时的下单结果，以及短信超时是否影响订单提交。
+- **框架影子**
+  - Spring 的 `ApplicationEventPublisher` 与 `ApplicationListener`。用默认同步行为说明监听机制与执行边界的区别。[Spring 事件文档](https://docs.spring.io/spring/reference/6.2/core/beans/context-introduction.html)
+  - JDK 的 `PropertyChangeSupport` 注册属性变化监听者，并在变更时通知订阅方。[JDK 17 API](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/beans/PropertyChangeSupport.html)
 - **别用场景**：强一致、顺序敏感、要拿返回值的逻辑别发事件；事件链路是 debug 地狱，必须打 trace。
 - **金句（候选）**：「订单服务不该知道短信服务的存在。」
-- **互链**：回顾 EP03（事件里带策略）；预告 EP06：「12 个参数的构造函数见过吗」。
+- **互链**：预告 EP06 两个订单字段填反的事故。EP21 回看订阅者自主响应与集中协调的边界。
 
 ---
 
-## EP06 建造者 Builder ·「12 个参数的构造函数是事故现场」
+## EP06 建造者 Builder ·「发票抬头填进了备注，订单居然还能建」
 
 - **梯队**：创建型（蓝）
 - **业务线**：`order` 订单对象构造
-- **痛点场景**：`new Order(1L, null, null, false, true, null, ...)`：8 个 null 里哪个是发票类型？新人猜错一个就是资损。
+- **痛点场景**：构造器有多个相邻的可选字段。调用方把备注与发票抬头传反，两项都是字符串，编译通过，最终生成错误的发票信息。
 - **内容主线**：
   1. telescoping constructor（重载地狱）的病；
   2. setter 模式的病（造出「改了一半的对象」，线程不安全）；
@@ -112,12 +118,12 @@
 - **框架影子**：`StringBuilder`、OkHttp `Request.Builder`、`Stream.Collector`。
 - **别用场景**：2–4 个字段直接构造函数或 record；Builder 是给复杂对象的重武器。
 - **金句（候选）**：「null 传到第几个参数，事故就埋在第几行。」
-- **互链**：收官预告 EP07：「你的订单为什么改不动？下期，AOP 的心脏：代理模式」（衔接第二梯队）。
+- **互链**：收官预告 EP07 的事务回滚事故，衔接第二梯队。EP07 演示按 Spring 代理模式复现同类调用绕开代理。[Spring 代理文档](https://docs.spring.io/spring-framework/reference/6.2/core/aop/proxying.html)
 
 ---
 
 ## 第一梯队共性备忘
 
-- EP01–06 是系列门面，**质量优先于速度**，六期全部按 10 分钟满配制作；
+- EP01–EP06 每期集中讲清一个主要变化点。样片片长与定制动效按 SOP 评估；
 - 每期发布后 48 小时记录数据（完播/互动/涨粉）到 operations.md 的复盘表，W6 做 go/no-go；
 - 「码上购」代码库从 EP01 开始建（建议真建一个可编译的 Maven 项目，脚本演示 + 存档两用）。
