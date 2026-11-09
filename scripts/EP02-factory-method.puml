@@ -1,0 +1,43 @@
+@startuml EP02-factory-method
+' 对应镜 3.1–3.2。先画抽象流程、支付宝流程、网关接口与支付宝网关，再展开微信和云闪付。
+' 渠道路由在正片另画，类图仅保留工厂方法参与角色。
+skinparam backgroundColor #FFFFFF
+skinparam class {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    ArrowColor #1565C0
+}
+skinparam stereotypeBackgroundColor #BBDEFB
+
+abstract class PaymentWorkflow <<Creator>> {
+    ~ pay(orderId : String) : String
+    ~ refund(orderId : String) : String
+    ~ query(orderId : String) : String
+    # {abstract} createGateway() : PaymentGateway
+}
+class AlipayWorkflow <<ConcreteCreator>>
+class WeChatWorkflow <<ConcreteCreator>>
+class UnionPayWorkflow <<ConcreteCreator>>
+
+interface PaymentGateway <<Product>> {
+    + pay(orderId : String) : String
+    + refund(orderId : String) : String
+    + query(orderId : String) : String
+}
+abstract class SimulatedPaymentGateway <<本地模拟>>
+class AlipayGateway <<ConcreteProduct>>
+class WeChatGateway <<ConcreteProduct>>
+class UnionPayGateway <<ConcreteProduct>>
+
+PaymentWorkflow ..> PaymentGateway : 使用网关接口
+PaymentWorkflow <|-- AlipayWorkflow
+PaymentWorkflow <|-- WeChatWorkflow
+PaymentWorkflow <|-- UnionPayWorkflow
+PaymentGateway <|.. SimulatedPaymentGateway
+SimulatedPaymentGateway <|-- AlipayGateway
+SimulatedPaymentGateway <|-- WeChatGateway
+SimulatedPaymentGateway <|-- UnionPayGateway
+AlipayWorkflow ..> AlipayGateway : 创建
+WeChatWorkflow ..> WeChatGateway : 创建
+UnionPayWorkflow ..> UnionPayGateway : 创建
+@enduml
