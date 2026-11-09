@@ -21,7 +21,7 @@ class EpisodeBgmTest(unittest.TestCase):
             self.assertNotIn("TimelineProbe-EP01", call.call_args.args[0][-2])
 
     def test_other_episode_with_and_without_notes(self):
-        music = mixer.ROOT / "assets/bgm/EP01-preview.mp3"
+        music = mixer.ROOT / "assets/bgm/lofi-series-a.mp3"
         for notes_frames in (0, 60):
             with self.subTest(notes_frames=notes_frames), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
