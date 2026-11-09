@@ -62,12 +62,15 @@ test("Python、渲染 TS、同步检查 JS 三处输出逐条一致", () => {
   const extracted = source.slice(source.indexOf("const TOKEN ="), source.indexOf("/** 台词进度"));
   const sandbox = {};
   vm.runInNewContext(extracted + "\nglobalThis.split = splitSubtitles;", sandbox);
-  const result = spawnSync("python3", ["-c", `
+  // Windows 无 python3 命令别名（spawnSync 报 ENOENT / 9009），回退 python
+  const invoke = (command) => spawnSync(command, ["-c", `
 import json, sys
 sys.path.insert(0, 'tools')
 from tts import split_subtitles
 print(json.dumps([split_subtitles(t) for t in json.load(sys.stdin)], ensure_ascii=False))
 `], { cwd: ROOT, input: JSON.stringify(texts), encoding: "utf8" });
+  let result = invoke("python3");
+  if (result.error || result.status === 9009) result = invoke("python");
   assert.equal(result.status, 0, result.stderr);
   const python = JSON.parse(result.stdout);
   texts.forEach((text, i) => {

@@ -10,7 +10,8 @@ public/episodes/EPxx.json  台词制作副本（每期一文件；内容事实�
 public/episodes/EPxx.segs.json  配音段定义（编导交付物，随台词同步产出）：段划分（≤470 字/段）+ 每段表演指令壳，{镜id} 占位符运行时从 EPxx.json 注入台词（写法见 SOP §4.1）
 public/audio/EPxx/*.mp3    音频槽位（每期一目录，配音两阶段 SOP §4.3）：样片期 = tts.py（edge-tts 快速配音，画面开发期主力）；定稿后 = tts_qwen.py（qwen 声纹配音一段一条 + 自动质检切镜，同名覆盖样片轨，即终版发布音轨）
 public/audio/EPxx/align.json  逐句时间戳：**音频是唯一时钟**，字幕选句与场景动画锚点（AnchorCtx）都按它走；qwen 配音与真人原声统一由 tools/whisper_align.py 重算
-public/audio/EP01/bgm.mp3   独立音乐轨：按口播时钟预制分段音量、口播避让和淡入淡出，不含人声；随 Git 管理
+assets/bgm/*.mp3           BGM 素材库（喂给混音脚本的原料）：系列级底乐不带期号（如 lofi-series-a.mp3，a/b/… 留给变奏），期专属变奏才加 EPxx- 前缀；lo-fi 轻电子、禁带人声曲目
+public/audio/EPxx/bgm.mp3  独立音乐轨（成品）：素材经 EPxx.bgm.json + mix_episode_bgm.py 按口播时钟预制循环、分段音量、口播避让和淡入淡出，不含人声；随 Git 管理
 src/data.ts                纯函数层：字幕切分（按句读断句、字数权重分摊）、audioPath/computeTimeline（均接期参数，无全局期号）
 src/Episode.tsx            通用调度器：按 episodeId 查注册表 → calculateMetadata 实测音频时长铺时间轴 + 全局字幕条 + PaletteCtx 注入色板
 src/scene-kit.ts           SceneProps（frames/leadFrames/audioFrames）+ useAnchors + usePalette：动画锚点按台词进度 0–1 定义，换配音自动适配
@@ -43,8 +44,10 @@ python tools/tts.py EP01                             # 样片配音（edge-tts�
 python tools/tts_qwen.py EP01                        # qwen 终配（定稿后一次，同名覆盖样片轨）：声纹分段生成 + 质检重掷 + 切镜回槽位（--force 全部重生成，现行段留档先备份到 out/segs/EPxx/bak-时间戳/；--split-only 只切镜）
 python tools/whisper_align.py EP01                   # 对齐重算 align.json（qwen 配音统一走此路；--check 只读对比偏差；--model 可调，默认 small）
 python tools/whisper_align.py EP01 --rechunk         # 仅修断句时复用现有词级时间戳；音频与台词须保持不变
-python tools/mix_episode_bgm.py EP01 --stem-only     # 按 EP01.bgm.json 重建音乐轨（需 numpy、ffmpeg），不依赖成片
+python tools/mix_episode_bgm.py EP01 --stem-only     # 按 EP01.bgm.json 重建音乐轨（需 numpy 与完整版 ffmpeg：Remotion 自带裁剪版缺裸 PCM 输出跑不了），不依赖成片
 python tools/mix_episode_bgm.py EP01                 # 重建音乐轨并给 out/EP01-with-notes.mp4 混音，输出 out/EP01-with-bgm-notes.mp4
+python tools/test_mix_episode_bgm.py                 # 回归：混音脚本跨期复用（不同期号 / 有无笔记卡），改 mix_episode_bgm.py 后必跑；依赖同上（完整版 ffmpeg）
+node --test tools/test-subtitles.mjs                 # 回归：字幕切分三处实现（data.ts / tts.py / sync-check.mjs）逐条一致 + 全量无丢字，改任一处切分逻辑后必跑
 python tools/record_script.py EP01                   # 留档：导演录音稿导出（真声路径已移出流程，工具保留备查）
 # 国内网络首次下载 whisper 模型：前面加 HF_ENDPOINT=https://hf-mirror.com
 npm run lint:colors                                  # 颜色纪律检查（提交前必跑，违规即红）
@@ -79,6 +82,7 @@ npm run render -- EP01 out/EP01.mp4                  # 渲染成片（期号透�
 
 - 渲染输入 `public/audio/EPxx/*.mp3` 与 `align.json` 随 Git 管理：新电脑同步对应提交并安装 npm 依赖后即可渲染，不要为复现成片重新生成配音；成片与试音备份仍不入库。
 - 声纹参考 `assets/voice/voiceprint.wav` 是全系列音色的不可再生资产，只增不改不覆盖；
+- BGM 素材 `assets/bgm/` 同为唯一副本：底乐由一次性样片工具原创合成，该工具完成 A/B 决策使命后已移除（git 历史可溯），素材只增不改不覆盖；
 - edge-tts 降级预览全平台统一音色，换机器不影响听感一致；
 - 历史：`tools/tts.ps1`（Windows 专属语音）与真声母带入库流程已移除（qwen 配音即终版），PoC 阶段产物可在 git 历史找回。
 
