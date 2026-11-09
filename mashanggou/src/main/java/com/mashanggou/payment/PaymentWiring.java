@@ -10,6 +10,7 @@ final class PaymentWiring {
         var workflows = new HashMap<String, PaymentWorkflow>();
         workflows.put("alipay", new AlipayWorkflow());
         workflows.put("wechat", new WeChatWorkflow());
+        workflows.put("unionpay", new UnionPayWorkflow());
         return new PaymentEntry(workflows);
     }
 }
